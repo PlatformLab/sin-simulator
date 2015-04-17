@@ -1,7 +1,7 @@
 OBJS = sin.o
 CC = g++
 	DEBUG = -g
-	CFLAGS = -Wall -c $(DEBUG) -std=c++11 
+	CFLAGS = -Wall -c $(DEBUG) -std=c++11
 LFLAGS = -Wall $(DEBUG)
 
 sin : $(OBJS)

@@ -6,15 +6,14 @@
 
 using namespace std;
 
+struct user {
+    string name;
+    int flow_size;
+};
+
 struct slot {
     int cost;
     string owner;
-};
-
-string comcast{"comcast"};
-
-struct flow {
-    size_t num_packets;
 };
 
 static std::vector<slot> order_book(10, {1, "comcast"});
@@ -28,6 +27,27 @@ public:
     }
 };
 
+priority_queue<size_t> get_positions(struct user user)
+{
+    priority_queue<size_t> ret;
+    for (int i = 0; i < order_book.size(); i++)
+    {
+        if (order_book.at(i).owner == user.name) {
+            ret.push(i);
+        }
+    }
+    return ret;
+}
+
+void make_bid(struct user user)
+{
+    priority_queue<size_t> positions = get_positions(user);
+    int unassigned_packets = user.flow_size - positions.size();
+
+
+}
+
+/*
 void make_bids(string user, struct flow flow)
 {
     priority_queue<pair<struct slot, size_t>, vector<pair<struct slot, size_t>>, Compare> tentative_order;
@@ -81,12 +101,15 @@ void make_bids(string user, struct flow flow)
     cout << total_cost << " " << cost << endl;
     assert( total_cost == cost);
 }
+*/
 
 int main(){
-    struct flow a{3};
-    struct flow b{4};
+    struct user greg{"greg", 3, priority_queue<size_t>()};
+    struct user keith{"keith", 4, priority_queue<size_t>()};
+    /*
     make_bids("greg", a);
     make_bids("keith", b);
+    */
 
     std::cout << "hello world" << std::endl;
     return 1;

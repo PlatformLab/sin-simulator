@@ -9,6 +9,7 @@ using namespace std;
 struct user {
     string name;
     int flow_size;
+    int money;
 };
 
 struct slot {
@@ -104,8 +105,8 @@ void make_bids(string user, struct flow flow)
 */
 
 int main(){
-    struct user greg{"greg", 3, priority_queue<size_t>()};
-    struct user keith{"keith", 4, priority_queue<size_t>()};
+    struct user greg{"greg", 3, 100};
+    struct user keith{"keith", 4, 100};
     /*
     make_bids("greg", a);
     make_bids("keith", b);

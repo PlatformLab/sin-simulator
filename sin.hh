@@ -39,17 +39,13 @@ bool buy_best_slot(struct user &user)
     for (int i = 0; (size_t) i < order_book.size(); i++)
     {
         auto &slot_i = order_book.at(i);
-        int flow_completion_time = max(i, user.cur_completion_time);
+        int flow_completion_time = i; //max(i, user.cur_completion_time);
         if (slot_i.owner->name != user.name) {
             int slot_i_utility = -flow_completion_time - slot_i.cost;
-            cout << "i " << i << " utility " << slot_i_utility << endl;
             if (slot_i_utility > best_slot_utility) {
                 best_slot_utility = slot_i_utility;
                 best_slot_idx = i;
             }
-        } else {
-            cout << "couldnt buy slot " << i << ": already owned" << endl;
-
         }
     }
     if (best_slot_idx != -1) {
@@ -61,34 +57,56 @@ bool buy_best_slot(struct user &user)
         std::cout << "bought slot " << best_slot_idx << " for " << order_book.at(best_slot_idx).cost << endl;
         order_book.at(best_slot_idx).cost++; // charge more for it
 
-        user.cur_completion_time = max(user.cur_completion_time, best_slot_idx);
-        std::cout << "completion time now " << user.cur_completion_time << endl;
+        //user.cur_completion_time = max(user.cur_completion_time, best_slot_idx);
+        //std::cout << "completion time now " << user.cur_completion_time << endl;
         return true;
     } 
     // couldnt buy
     return false;
 }
 
-void make_bids(struct user &user)
+void make_bids(struct user &user, int num_slots)
 {
     int start_money = user.money;
-    std::cout << "making bids for " << user.name << endl;
-    for (int i = user.flow_size; i > 0; i--)
+    std::cout << "making " << num_slots << " slot purchases for " << user.name << endl;
+    for (int i = num_slots; i > 0; i--)
     {
         bool success = buy_best_slot(user);
         assert(success);
     }
 
-    std::cout << user.name << " finished bidding, spent " << start_money-user.money <<
-        " and flow finishes at time " << user.cur_completion_time << endl;
+    std::cout << user.name << " finished bidding this round, spent " << start_money-user.money;
+        //" and flow finishes at time " << user.cur_completion_time << endl;
+        cout << endl;
         print_order_book();
 }
 
 int main(){
     struct user gregs{"gregs", 3, -11111, 100};
     struct user keith{"keith", 4, -11111, 100};
-    make_bids(gregs);
-    make_bids(keith);
+
+    int keith_slots = 0;
+    int gregs_slots = 0;
+    while (keith_slots != keith.flow_size || gregs_slots != gregs.flow_size) 
+    {
+        int gregs_to_buy = gregs.flow_size - gregs_slots; 
+        int keith_to_buy = keith.flow_size - keith_slots; 
+
+        if (gregs_to_buy)
+            make_bids(gregs, gregs_to_buy);
+        else if (keith_to_buy)
+            make_bids(keith, keith_to_buy);
+
+        keith_slots = 0;
+        gregs_slots = 0;
+        for (auto &slot : order_book)
+        {
+            if (slot.owner->name == "gregs")
+                gregs_slots++;
+            else if (slot.owner->name == "keith")
+                keith_slots++;
+        }
+    }
 
     return 1;
 }

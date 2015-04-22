@@ -8,7 +8,6 @@ using namespace std;
 struct user {
     string name;
     int flow_size;
-    int cur_completion_time;
     int money;
 };
 
@@ -17,7 +16,7 @@ struct slot {
     user* owner;
 };
 
-static struct user comcast{"ccast", -1, -1, 0};
+static struct user comcast{"ccast", -1, 0};
 static std::vector<slot> order_book(9, {1, &comcast});
 
 void print_order_book()
@@ -56,9 +55,6 @@ bool buy_best_slot(struct user &user)
 
         std::cout << "bought slot " << best_slot_idx << " for " << order_book.at(best_slot_idx).cost << endl;
         order_book.at(best_slot_idx).cost++; // charge more for it
-
-        //user.cur_completion_time = max(user.cur_completion_time, best_slot_idx);
-        //std::cout << "completion time now " << user.cur_completion_time << endl;
         return true;
     } 
     // couldnt buy
@@ -76,15 +72,13 @@ void make_bids(struct user &user, int num_slots)
         assert(success);
     }
 
-    std::cout << user.name << " finished bidding this round, spent " << start_money-user.money;
-        //" and flow finishes at time " << user.cur_completion_time << endl;
-        cout << endl;
+    std::cout << user.name << " finished bidding this round, spent " << start_money-user.money << endl;
         print_order_book();
 }
 
 int main(){
-    struct user gregs{"gregs", 3, -11111, 100};
-    struct user keith{"keith", 4, -11111, 100};
+    struct user gregs{"gregs", 3, 100};
+    struct user keith{"keith", 4, 100};
 
     int keith_slots = 0;
     int gregs_slots = 0;

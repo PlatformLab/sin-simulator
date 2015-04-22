@@ -69,6 +69,7 @@ void make_bids(struct user &user, int num_slots)
 {
     int start_money = user.money;
     std::cout << "making " << num_slots << " slot purchases for " << user.name << endl;
+    
     for (int i = num_slots; i > 0; i--)
     {
         bool success = buy_best_slot(user);
@@ -94,9 +95,10 @@ int main(){
 
         if (gregs_to_buy)
             make_bids(gregs, gregs_to_buy);
-        else if (keith_to_buy)
+        if (keith_to_buy)
             make_bids(keith, keith_to_buy);
 
+        // tally slot ownership
         keith_slots = 0;
         gregs_slots = 0;
         for (auto &slot : order_book)

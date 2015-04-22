@@ -9,6 +9,12 @@ struct user {
     string name;
     int flow_size;
     int money;
+    vector<int> sell_prices;
+
+    inline bool owns(struct slot & slot)
+    {
+        return slot.owner->name == user.name;
+    }
 };
 
 struct slot {
@@ -16,8 +22,8 @@ struct slot {
     user* owner;
 };
 
-static struct user comcast{"ccast", -1, 0};
-static std::vector<slot> order_book(9, {1, &comcast});
+static struct user comcast{"ccast", -1, 0, vector<int>(9, 1)};
+static vector<slot> order_book(9, {1, &comcast});
 
 void print_order_book()
 {
@@ -25,9 +31,42 @@ void print_order_book()
     cout << "[";
     for (auto &slot : order_book)
     {
-        cout << i++ << ":" << slot.owner->name << "$" << slot.cost << " | "; 
+        cout << i++ << ":" << slot.owner->name << /*"$" << slot.cost << */" | "; 
     }
     cout << "]" << endl;
+}
+
+bool price_slot(struct user &user, size_t idx_to_sell)
+{
+    auto &slot_i = order_book.at(idx_to_sell);
+    assert(user.owns(slot_i));
+    assert(idx_to_sell < order_book.size());
+
+    size_t flow_completion_time_if_sold = 0;
+    size_t flow_completion_time = 0;
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        if (user.owns(order_book.at(i)))
+            flow_completion_time = i;
+
+        if (i != idx_to_sell && user.owns(order_book.at(i)))
+            flow_completion_time_if_sold = i;
+    }
+
+    int best_move_utility = -1111111;
+    int best_move_idx -1;
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        auto &slot_i = order_book.at(i);
+        if (not user.owns(slot_i)) {
+            int slot_utility = - max(i, flow_completion_time_if_sold) - slot_i.cost;
+            if (slot_utility > best_move_utility) {
+                best_move_utility = slot_utility;
+                best_move_idx = i;
+            }
+        }
+    }
+    int slot_to_sell_value = 
 }
 
 bool buy_best_slot(struct user &user)

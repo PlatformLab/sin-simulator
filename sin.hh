@@ -32,7 +32,7 @@ void print_order_book()
     cout << "[";
     for (auto &slot : order_book)
     {
-        cout << i++ << ":" << slot.owner->name << /*"$" << slot.cost << */" | "; 
+        cout << i++ << ":" << slot.owner->name << "$" << slot.cost << " | "; 
     }
     cout << "]" << endl;
 }
@@ -67,18 +67,16 @@ void price_slot(struct user &user, size_t idx_to_sell)
             int cost_delta = slot_i.cost;
             int utility_delta = value_delta - cost_delta;
 
-            cout << "slot " << i << " with utility delta" << utility_delta << endl;
             if (utility_delta > best_move_utility_delta) {
                 best_move_utility_delta = utility_delta;
                 best_move_idx = i;
             }
-        } else 
-            cout << "slot " << i << " owned by user " << user.name << endl;;
+        } 
     }
     assert(best_move_idx != -1);
     assert(best_move_utility_delta <= 0);
     slot_to_sell.cost = -best_move_utility_delta + 1;
-    cout << "pricing slot " << idx_to_sell << " at $" << slot_to_sell.cost << endl;
+    cout << user.name << " priced slot " << idx_to_sell << " at $" << slot_to_sell.cost << endl;
 }
 
 bool buy_best_slot(struct user &user)
@@ -86,11 +84,19 @@ bool buy_best_slot(struct user &user)
     int best_slot_idx = -1;
     int best_slot_utility = -11111;
 
-    for (int i = 0; (size_t) i < order_book.size(); i++)
+    size_t max_flow_completion_time = 0;
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        if (user.owns(order_book.at(i))) {
+            max_flow_completion_time = i;
+        }
+    }
+
+    for (size_t i = 0; i < order_book.size(); i++)
     {
         auto &slot_i = order_book.at(i);
-        int flow_completion_time = i;
-        if (slot_i.owner->name != user.name) {
+        int flow_completion_time = max(i, max_flow_completion_time);
+        if (not user.owns(order_book.at(i))) {
             int slot_i_utility = -flow_completion_time - slot_i.cost;
             if (slot_i_utility > best_slot_utility) {
                 best_slot_utility = slot_i_utility;
@@ -105,7 +111,6 @@ bool buy_best_slot(struct user &user)
         order_book.at(best_slot_idx).owner = &user;
 
         cout << user.name << " bought slot " << best_slot_idx << " for " << order_book.at(best_slot_idx).cost << endl;
-        print_order_book();
         return true;
     } 
     // couldnt buy
@@ -135,10 +140,12 @@ int main(){
         if (gregs.flow_size > gregs_slots) {
             buy_best_slot(gregs);
             price_all_slots();
+            print_order_book();
         }
         if (keith.flow_size > keith_slots) {
             buy_best_slot(keith);
             price_all_slots();
+            print_order_book();
         }
         // tally slot ownership and price slots
         keith_slots = 0;

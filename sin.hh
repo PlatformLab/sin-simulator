@@ -5,24 +5,25 @@
 
 using namespace std;
 
-struct user {
-    string name;
-    int flow_size;
-    int money;
-    vector<int> sell_prices;
-
-    bool owns(struct slot & slot)
-    {
-        return (slot.owner->name == user.name);
-    };
-};
+struct user;
 
 struct slot {
     int cost;
     user* owner;
 };
 
-static struct user comcast{"ccast", -1, 0, vector<int>(9, 1)};
+struct user {
+    string name;
+    int flow_size;
+    int money;
+
+    bool owns(struct slot & slot)
+    {
+        return (slot.owner->name == name);
+    }
+};
+
+static struct user comcast{"ccast", -1, 0};
 static vector<slot> order_book(9, {1, &comcast});
 
 void print_order_book()
@@ -54,7 +55,7 @@ void price_slot(struct user &user, size_t idx_to_sell)
     }
 
     int best_move_utility_delta = -1111111;
-    int best_move_idx -1;
+    int best_move_idx = -1;
     for (size_t i = 0; i < order_book.size(); i++)
     {
         auto &slot_i = order_book.at(i);
@@ -66,15 +67,18 @@ void price_slot(struct user &user, size_t idx_to_sell)
             int cost_delta = slot_i.cost;
             int utility_delta = value_delta - cost_delta;
 
+            cout << "slot " << i << " with utility delta" << utility_delta << endl;
             if (utility_delta > best_move_utility_delta) {
                 best_move_utility_delta = utility_delta;
                 best_move_idx = i;
             }
-        }
+        } else 
+            cout << "slot " << i << " owned by user " << user.name << endl;;
     }
-    assert (best_move_idx != -1);
-    assert( best_move_utility_delta <= 0);
-    slot_to_sell.cost = -best_move_utility_delta + 1
+    assert(best_move_idx != -1);
+    assert(best_move_utility_delta <= 0);
+    slot_to_sell.cost = -best_move_utility_delta + 1;
+    cout << "pricing slot " << idx_to_sell << " at $" << slot_to_sell.cost << endl;
 }
 
 bool buy_best_slot(struct user &user)
@@ -109,24 +113,39 @@ bool buy_best_slot(struct user &user)
     return false;
 }
 
+void price_all_slots()
+{
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        auto &slot = order_book.at(i);
+        if (slot.owner->name != "ccast")
+            price_slot(*slot.owner, i);
+    }
+}
+
 int main(){
     struct user gregs{"gregs", 3, 100};
     struct user keith{"keith", 4, 100};
 
     int keith_slots = 0;
     int gregs_slots = 0;
+
     while (keith_slots != keith.flow_size || gregs_slots != gregs.flow_size) 
     {
-        if (gregs.flow_size > gregs_slots)
+        if (gregs.flow_size > gregs_slots) {
             buy_best_slot(gregs);
-        if (keith.flow_size > keith_slots)
+            price_all_slots();
+        }
+        if (keith.flow_size > keith_slots) {
             buy_best_slot(keith);
-
-        // tally slot ownership
+            price_all_slots();
+        }
+        // tally slot ownership and price slots
         keith_slots = 0;
         gregs_slots = 0;
-        for (auto &slot : order_book)
+        for (size_t i = 0; i < order_book.size(); i++)
         {
+            auto &slot = order_book.at(i);
             if (slot.owner->name == "gregs")
                 gregs_slots++;
             else if (slot.owner->name == "keith")

@@ -7,7 +7,7 @@ LFLAGS = -Wall $(DEBUG)
 sin : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o sin
 
-sin.o : sin.hh
+sin.o : sin.hh sin.cc
 	$(CC) $(CFLAGS) sin.cc
 
 clean:

@@ -83,8 +83,8 @@ void price_slot(struct user &user, size_t idx_to_sell)
     }
     assert(best_move_idx != -1);
     slot_to_sell.cost = -best_move_utility_delta + 1;
-    cout << user.name << " priced slot " << idx_to_sell << " at $" << slot_to_sell.cost << endl;
-    cout << "slot " << idx_to_sell << " should move to " << best_move_idx << " if bought" << endl;
+    cout << user.name << " priced slot " << idx_to_sell << " at $" << slot_to_sell.cost;
+    cout << " (should move to slot " << best_move_idx << " if bought)" << endl;
     //assert(best_move_utility_delta <= 0);
 }
 

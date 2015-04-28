@@ -27,7 +27,7 @@ bool buy_best_slot(struct user &user);
 void price_slot(struct user &user, size_t idx_to_sell);
 void price_all_slots()
 {
-    for (size_t i = 0; i < order_book.size(); i++)
+    for (int i = (order_book.size()-1); i >= 0; i--)
     {
         auto &slot = order_book.at(i);
         if (slot.owner->name != "ccast")

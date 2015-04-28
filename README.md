@@ -1,1 +1,2 @@
 # sin
+Self Incentivising Networks

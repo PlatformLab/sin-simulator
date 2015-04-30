@@ -20,7 +20,8 @@ struct Slot {
 
     Slot(uint64_t time, uint32_t base_price) 
         : time(time),
-        current_offer(base_price)
+        current_offer(base_price),
+        packet(NULL)
         {}
 
     //private:

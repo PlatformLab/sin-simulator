@@ -39,9 +39,11 @@ void Market::advance_time()
     } else {
         cout << "no packet to send at time " << cur_time << endl;
     }
+
+    // delete front slot
     order_book.pop();
-    //struct slot to_add{
-    //order_book.emplace_back();
+
+    // add new slot to back
     order_book.emplace(cur_time+order_book_size, default_slot_price);
 
     cur_time++;

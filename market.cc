@@ -1,5 +1,7 @@
 #include "market.hh"
 
+using namespace std;
+
 void Market::add_bid(struct User* user, uint32_t slot_time, uint32_t price)
 {
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <queue>
+#include <deque>
 #include <vector>
 #include <cassert>
 
@@ -21,18 +21,18 @@ struct Slot {
     Slot(uint64_t time, uint32_t base_price) 
         : time(time),
         current_offer(base_price),
-        packet(NULL)
+        packet("")
         {}
 
     //private:
-    std::vector<struct Bid> bids;
-    std::string* packet;
+    std::deque<struct Bid> bids;
+    std::string packet;
 };
 
 
 class Market {
     private:
-    std::queue<struct Slot> order_book;
+    std::deque<struct Slot> order_book;
     const uint32_t order_book_size;
     uint64_t cur_time;
     const uint32_t default_slot_price;
@@ -40,15 +40,16 @@ class Market {
     public:
     Market(uint32_t num_future_slots, uint32_t default_slot_price);
 
-    void add_bid(struct User* user, uint64_t slot_time, uint32_t price);
+    bool add_bid(struct User* user, uint64_t slot_time, uint32_t price);
 
-    bool delete_bid(struct User* user, uint64_t slot_time);
+    // delete all bids made by a user for time slot_time, returns true if one or more bids deleted
+    bool delete_bids(struct User* user, uint64_t slot_time);
 
-    void add_offer(struct User* user, uint64_t slot_time, uint32_t price);
+    bool add_offer(struct User* user, uint64_t slot_time, uint32_t price);
 
-    void add_packet(struct User* user, uint64_t slot_time, std::string* packet);
+    bool add_packet(struct User* user, uint64_t slot_time, std::string packet);
 
     void advance_time();
 
-    std::queue<struct Slot> get_order_book();
+    std::deque<struct Slot> get_order_book();
 };

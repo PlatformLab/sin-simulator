@@ -88,6 +88,58 @@ void price_slot(struct user &user, size_t idx_to_sell)
     //assert(best_move_utility_delta <= 0);
 }
 
+void price_slot_pair(size_t first_idx)
+{
+    struct slot& slot_a = order_book.at(first_idx);
+    struct slot& slot_b = order_book.at(first_idx+1);
+    if (slot_a.owner->name != slot_b.owner->name) {
+        slot_a.twos_cost = -1;
+        slot_b.twos_cost = -1;
+    }
+    struct user& user = *slot_a.owner;
+
+    size_t flow_completion_time_if_sold = 0;
+    size_t old_flow_completion_time = 0;
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        if (user.owns(order_book.at(i)))
+            old_flow_completion_time = i;
+
+        if (i != first_idx && i != first_idx+1 && user.owns(order_book.at(i)))
+            flow_completion_time_if_sold = i;
+    }
+
+    int best_move_utility_delta = -1111111;
+    int best_move_idx = -1;
+    for (size_t i = 0; i < order_book.size()-1; i = i+2)
+    {
+        auto &slot_i = order_book.at(i);
+        if (slot_i.twos_cost > 0 and not user.owns(slot_i)) {
+            int old_value = -old_flow_completion_time;
+            int new_value = -max(i+1, flow_completion_time_if_sold);
+            int value_delta = new_value - old_value;
+
+            int cost_delta = slot_i.twos_cost;
+            int utility_delta = value_delta - cost_delta;
+
+            if (utility_delta > best_move_utility_delta) {
+                best_move_utility_delta = utility_delta;
+                best_move_idx = i;
+            }
+        } 
+    }
+
+    if (best_move_idx != -1)
+    {
+        slot_a.twos_cost = slot_b.twos_cost = -best_move_utility_delta + 1;
+        cout << user.name << " priced slot pair (" << first_idx << ", " << first_idx+1 << ") at $" << slot_a.twos_cost;
+        cout << " (should move to slot pair starting at " << best_move_idx << " if bought)" << endl;
+        //assert(best_move_utility_delta <= 0);
+    } else {
+        order_book.at(first_idx).twos_cost = order_book.at(first_idx+1).twos_cost = -1;
+    }
+}
+
 int main(){
     struct user gregs{"gregs", 3, 100};
     struct user keith{"keith", 4, 100};

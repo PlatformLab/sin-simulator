@@ -13,7 +13,7 @@ struct BidOffer {
     std::string owner;
 };
 
-void filter_user_bidoffers(std::string &user_name, std::deque<struct BidOffer> &from)
+inline void filter_user_bidoffers(std::string &user_name, std::deque<struct BidOffer> &from)
 {
     auto name_matches = [&user_name](struct BidOffer x){return x.owner == user_name;}; 
     std::remove_if(from.begin(),from.end(), name_matches );
@@ -36,19 +36,19 @@ struct Slot {
 
 class Market {
     private:
-    std::deque<struct Slot> order_book; //ordered my most recent time first
+        std::deque<struct Slot> order_book; //ordered my most recent time first
 
     public:
-    Market(uint32_t num_future_slots);
+        Market(uint32_t num_future_slots);
 
-    const std::deque<struct Slot> &get_order_book() { return order_book; }
+        const std::deque<struct Slot> &get_order_book() { return order_book; }
 
-    void advance_time();
-    void match_bids_and_orders();
+        void advance_time();
+        void match_bids_and_orders();
 
-    void print_order_book();
+        void print_order_book();
 
-    // owner only create slot
+        // owner only create slot
 };
 
 #endif /* MARKET */

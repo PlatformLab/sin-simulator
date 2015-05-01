@@ -11,7 +11,7 @@ int main(){
     cout << "hello world" << endl;
     Market mkt(10);
     std::vector<AbstractUser*> users;
-//    users.emplace_back(new NoopUser());
+    users.emplace_back(new NoopUser());
 
     time_t last_time = 0;
     time_t cur_time = time(nullptr);
@@ -23,7 +23,7 @@ int main(){
             mkt.advance_time();
             last_time = cur_time;
             mkt.print_order_book();
-        //} else {
+
             for (AbstractUser *u : users) {
                 u->take_actions(mkt);
             }

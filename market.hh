@@ -25,6 +25,8 @@ struct Slot {
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
 
+    Slot(uint64_t time) : time(time) {}
+
     void add_bid(struct BidOffer bid) { bids.emplace_back(bid); }
     void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
 
@@ -45,6 +47,7 @@ class Market {
         void print_order_book();
 
         // owner only create slot
+        void owner_add_slot(uint64_t slot_time) { order_book.emplace_back(slot_time); };
 };
 
 #endif /* MARKET */

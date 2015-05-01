@@ -22,7 +22,7 @@ int main(){
 
     for (time_t slot_time = 1; slot_time <= market_time_window; slot_time++) {
         mkt.owner_add_slot("comcast", slot_time);
-        mkt.get_order_book().back().add_offer({10, "comcast"});
+        mkt.get_order_book().back().add_offer({1, "comcast"});
     }
 
     time_t last_time = 0;
@@ -35,7 +35,7 @@ int main(){
 
             mkt.advance_time();
             mkt.owner_add_slot("comcast", cur_time + market_time_window);
-            mkt.get_order_book().back().add_offer({10, "comcast"});
+            mkt.get_order_book().back().add_offer({1, "comcast"});
 
             last_time = cur_time;
             mkt.print_order_book();

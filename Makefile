@@ -7,10 +7,10 @@ LFLAGS = -Wall $(DEBUG)
 sin : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o sin
 
-market.o : market.hh market.cc
+market.o : common.hh market.hh market.cc
 	$(CC) $(CFLAGS) market.cc
 
-user.o : user.hh user.cc
+user.o : common.hh user.hh user.cc
 	$(CC) $(CFLAGS) user.cc
 
 sin.o : sin.hh sin.cc

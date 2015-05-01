@@ -19,6 +19,7 @@ int main(){
         cur_time = time(nullptr);
         // advance time if we havent already for that same time
         if (cur_time != last_time) {
+            mkt.match_bids_and_orders();
             mkt.advance_time();
             last_time = cur_time;
             mkt.print_order_book();

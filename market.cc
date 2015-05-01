@@ -30,11 +30,11 @@ void Market::match_bids_and_orders()
             continue;
         }
 
-        // get highest bid and award slot to that bidder if more than highest offer price for that slot
+        // get highest bid and award slot to that bidder if more than lowest offer price for that slot
         auto highest_bid = std::max_element(slot.bids.begin(), slot.bids.end(), compare_two_bidoffers);
-        auto highest_offer = std::max_element(slot.offers.begin(), slot.offers.end(), compare_two_bidoffers);
+        auto lowest_offer = std::min_element(slot.offers.begin(), slot.offers.end(), compare_two_bidoffers);
 
-        if (highest_bid->cost > highest_offer->cost) {
+        if (highest_bid->cost > lowest_offer->cost) {
             slot.owner = highest_bid->owner;
             slot.bids.clear();
             slot.offers.clear();
@@ -61,8 +61,11 @@ void Market::print_order_book()
         else
             cout << "null";
 
-        //TODO cost
-        //cout << ", cost: " << slot.current_offer;
+        auto lowest_offer = std::min_element(slot.offers.begin(), slot.offers.end(), compare_two_bidoffers);
+        if (lowest_offer != slot.offers.end())
+            cout << ", lowest offer: " << lowest_offer->cost;
+        else
+            cout << ", no offers: ";
     }
 
     cout << " ]" << endl;

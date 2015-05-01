@@ -1,3 +1,6 @@
+#ifndef MARKET
+#define MARKET
+
 #include <iostream>
 #include <deque>
 #include <vector>
@@ -59,3 +62,5 @@ class Market {
     void print_order_book();
     std::vector<struct Slot_view> give_order_book(struct Buyer &recipient);
 };
+
+#endif /* MARKET */

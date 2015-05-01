@@ -1,4 +1,4 @@
-OBJS = sin.o market.o user.o
+OBJS = market.o user.o sin.o 
 CC = g++
 	DEBUG = -g
 	CFLAGS = -Wall -c $(DEBUG) -std=c++11

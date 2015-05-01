@@ -9,7 +9,7 @@ using namespace std;
 int main(){
     cout << "hello world" << endl;
     Market mkt(10, 1);
-    std::vector<User*> users;
+    std::vector<AbstractUser*> users;
 
     time_t last_time = 0;
     time_t cur_time = time(nullptr);
@@ -21,7 +21,7 @@ int main(){
             last_time = cur_time;
             mkt.print_order_book();
         } else {
-            for (struct User *u : users) {
+            for (AbstractUser *u : users) {
                 string &user_name = u->get_name();
                 auto market_view = mkt.give_order_book(user_name);
 

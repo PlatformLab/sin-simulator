@@ -8,8 +8,6 @@
 #include "common.hh"
 
 class AbstractUser {
-    uint32_t money;
-    uint32_t flow_size;
     std::string name;
 
     public:

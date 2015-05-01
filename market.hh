@@ -14,7 +14,7 @@ struct BidOffer {
 
 struct Slot {
     public:
-    const uint64_t time;
+    /*const*/int64_t time;
     std::string owner; 
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;

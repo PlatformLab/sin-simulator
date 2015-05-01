@@ -1,8 +1,9 @@
 #include "market.hh"
+#include <algorithm>
 
 using namespace std;
 
-struct Slot* get_slot_at_time(deque<struct Slot> order_book, uint32_t slot_time)
+struct Slot* get_slot_at_time(deque<struct Slot> &order_book, uint32_t slot_time)
 {
 
     for (struct Slot &slot : order_book)
@@ -99,6 +100,39 @@ void Market::advance_time()
 
     cur_time++;
 }
+
+// helper used for matching bids
+static bool compare_two_bids(struct Bid &a, struct Bid &b)
+{
+    return (a.cost < b.cost);
+}
+
+void Market::match_bids_and_orders()
+{
+    for (struct Slot &slot : order_book)
+    {
+        // no bids for this slot
+        if (slot.bids.empty()) {
+            continue;
+        }
+
+        // get highest bid and award slot to that bidder if higher than current offer price for slot
+        auto highest_bid = std::max_element(slot.bids.begin(), slot.bids.end(), compare_two_bids);
+        if (highest_bid->cost > slot.current_offer) {
+            slot.owner = highest_bid->owner;
+
+            // not for sale at start
+            slot.current_offer = uint32_t(-1);
+
+            if (slot.packet != "") {
+                cout << "dropping packet at slot " << slot.time << " with contents: " << slot.packet << endl;
+            }
+
+            slot.packet = "";
+        }
+    }
+}
+
 
 std::deque<struct Slot> Market::get_order_book()
 {

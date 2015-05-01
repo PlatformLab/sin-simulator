@@ -14,7 +14,7 @@ struct Bid {
 
 struct Slot {
     public:
-    uint64_t time;
+    const uint64_t time;
     struct User* owner;
     uint32_t current_offer;
 
@@ -50,6 +50,7 @@ class Market {
     bool add_packet(struct User* user, uint64_t slot_time, std::string packet);
 
     void advance_time();
+    void match_bids_and_orders();
 
     std::deque<struct Slot> get_order_book();
 };

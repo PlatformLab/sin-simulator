@@ -1,7 +1,7 @@
 #include "sin.hh"
 #include <iostream>
 #include <cassert>
-#include "user.hh"
+#include "abstract_user.hh"
 #include "market.hh"
 
 using namespace std;
@@ -9,7 +9,7 @@ using namespace std;
 int main(){
     cout << "hello world" << endl;
     Market mkt(10, 1);
-    std::vector<User> users;
+    std::vector<User*> users;
 
     time_t last_time = 0;
     time_t cur_time = time(nullptr);
@@ -21,11 +21,11 @@ int main(){
             last_time = cur_time;
             mkt.print_order_book();
         } else {
-            for (struct User &u : users) {
-                string &user_name = u.get_name();
+            for (struct User *u : users) {
+                string &user_name = u->get_name();
                 auto market_view = mkt.give_order_book(user_name);
 
-                struct User_actions actions = u.get_actions(market_view);
+                struct User_actions actions = u->get_actions(market_view);
 
                 bool success;
                 // let user add bids

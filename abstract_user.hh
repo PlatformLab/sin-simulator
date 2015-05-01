@@ -1,5 +1,5 @@
-#ifndef USER
-#define USER
+#ifndef ABSTRACT_USER
+#define ABSTRACT_USER
 
 #include <iostream>
 #include <cassert>
@@ -17,10 +17,12 @@ class User {
         return name;
     }
     
-    struct User_actions get_actions(std::vector<struct Slot_view> &given_view)
+    virtual struct User_actions get_actions(std::vector<struct Slot_view> &given_view) = 0;
+    /*
     {
         return {};
     }
+    */
 };
 
-#endif /* USER */
+#endif /* ABSTRACT_USER */

@@ -11,7 +11,7 @@ int main(){
     cout << "hello world" << endl;
     Market mkt(10, 1);
     std::vector<AbstractUser*> users;
-    users.emplace_back(new NoopUser());
+//    users.emplace_back(new NoopUser());
 
     time_t last_time = 0;
     time_t cur_time = time(nullptr);

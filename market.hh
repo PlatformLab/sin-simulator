@@ -7,9 +7,7 @@
 #include <cassert>
 #include <memory>
 
-#include "common.hh"
-
-struct Bid {
+struct BidOffer {
     uint32_t cost;
     std::string owner;
 };
@@ -17,24 +15,9 @@ struct Bid {
 struct Slot {
     public:
     const uint64_t time;
-    std::shared_ptr<std::string> owner;
-    uint32_t current_offer;
-
-    Slot(uint64_t time, uint32_t base_price) 
-        : time(time),
-        owner(nullptr),
-        current_offer(base_price),
-        packet("")
-        {}
-
-    struct Slot_view to_slot_view(std::string &recipient)
-    {
-        return {time, current_offer, (owner && *owner == recipient)};
-    };
-
-    //private:
-    std::deque<struct Bid> bids;
-    std::string packet;
+    std::string owner; 
+    std::deque<struct BidOffer> bids;
+    std::deque<struct BidOffer> offers;
 };
 
 class Market {
@@ -46,6 +29,11 @@ class Market {
 
     public:
     Market(uint32_t num_future_slots, uint32_t default_slot_price);
+
+    const std::deque<struct Slot> &get_order_book()
+    {
+        return order_book;
+    }
 
     bool add_bid(std::string &user_name, uint64_t slot_time, uint32_t price);
 
@@ -61,7 +49,8 @@ class Market {
 
     bool empty();
     void print_order_book();
-    std::vector<struct Slot_view> give_order_book(std::string &recipient);
+
+    // owner only create slot
 };
 
 #endif /* MARKET */

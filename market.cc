@@ -162,14 +162,3 @@ void Market::print_order_book()
 
     cout << " ]" << endl;
 }
-
-std::vector<struct Slot_view> Market::give_order_book(string &recipient)
-{
-    std::vector<struct Slot_view> toRet;
-
-    for (struct Slot &slot : order_book)
-    {
-        toRet.emplace_back(slot.to_slot_view(recipient));
-    }
-    return toRet;
-}

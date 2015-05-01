@@ -25,12 +25,12 @@ Market::Market(uint32_t num_future_slots, uint32_t default_slot_price)
     }
 }
 
-bool Market::add_bid(struct User* user, uint64_t slot_time, uint32_t price)
+bool Market::add_bid(struct Buyer* buyer, uint64_t slot_time, uint32_t price)
 {
     struct Slot *slot = get_slot_at_time(order_book, slot_time);
 
     if (slot) {
-        struct Bid b = {price, user};
+        struct Bid b = {price, buyer};
         slot->bids.emplace_back(b);
         return true;
     } else {
@@ -38,16 +38,16 @@ bool Market::add_bid(struct User* user, uint64_t slot_time, uint32_t price)
     }
 }
 
-bool Market::delete_bids(struct User* user, uint64_t slot_time)
+bool Market::delete_bids(struct Buyer* buyer, uint64_t slot_time)
 {
     bool toRet = false;
 
     struct Slot *slot = get_slot_at_time(order_book, slot_time);
 
     if (slot) {
-        // clear all bids made by user in this slot
+        // clear all bids made by buyer in this slot
         for(auto it = slot->bids.begin(); it != slot->bids.end(); )
-            if (it->owner == user) {
+            if (it->owner == buyer) {
                 it = slot->bids.erase(it);
                 toRet = true;
             } else {
@@ -58,11 +58,11 @@ bool Market::delete_bids(struct User* user, uint64_t slot_time)
     return toRet;
 }
 
-bool Market::add_offer(struct User* user, uint64_t slot_time, uint32_t price)
+bool Market::add_offer(struct Buyer* buyer, uint64_t slot_time, uint32_t price)
 {
     struct Slot *slot = get_slot_at_time(order_book, slot_time);
 
-    if (slot && slot->owner == user) {
+    if (slot && slot->owner == buyer) {
         slot->current_offer = price;
         return true;
     } else {
@@ -70,11 +70,11 @@ bool Market::add_offer(struct User* user, uint64_t slot_time, uint32_t price)
     }
 }
 
-bool Market::add_packet(struct User* user, uint64_t slot_time, string packet)
+bool Market::add_packet(struct Buyer* buyer, uint64_t slot_time, string packet)
 {
     struct Slot *slot = get_slot_at_time(order_book, slot_time);
 
-    if (slot && slot->owner == user) {
+    if (slot && slot->owner == buyer) {
         slot->packet = packet;
         return true;
     } else {
@@ -133,8 +133,38 @@ void Market::match_bids_and_orders()
     }
 }
 
-
-std::deque<struct Slot> Market::get_order_book()
+bool Market::empty()
 {
-    return order_book;
+    return order_book.empty();
+}
+
+void Market::print_order_book()
+{
+    cout << "[ ";
+    for (struct Slot &slot : order_book)
+    {
+        cout << "Time:" << slot.time;
+
+        cout << ", owner:";
+        if (slot.owner)
+            cout << slot.owner->name;
+        else
+            cout << "null";
+
+        cout << ", cost: " << slot.current_offer;
+        cout << " | ";
+    }
+
+    cout << "]" << endl;
+}
+
+std::vector<struct Slot_view> Market::give_order_book(struct Buyer &recipient)
+{
+    std::vector<struct Slot_view> toRet;
+
+    for (struct Slot &slot : order_book)
+    {
+        toRet.emplace_back(slot.to_slot_view(recipient));
+    }
+    return toRet;
 }

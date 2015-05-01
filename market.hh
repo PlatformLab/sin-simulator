@@ -3,19 +3,17 @@
 #include <vector>
 #include <cassert>
 
-struct User {
-    std::string name;
-};
+#include "common.hh"
 
 struct Bid {
     uint32_t cost;
-    struct User* owner;
+    struct Buyer* owner;
 };
 
 struct Slot {
     public:
     const uint64_t time;
-    struct User* owner;
+    struct Buyer* owner;
     uint32_t current_offer;
 
     Slot(uint64_t time, uint32_t base_price) 
@@ -24,11 +22,15 @@ struct Slot {
         packet("")
         {}
 
+    struct Slot_view to_slot_view(struct Buyer &recipient)
+    {
+        return {time, current_offer, (owner && owner->name == recipient.name)};
+    };
+
     //private:
     std::deque<struct Bid> bids;
     std::string packet;
 };
-
 
 class Market {
     private:
@@ -40,17 +42,19 @@ class Market {
     public:
     Market(uint32_t num_future_slots, uint32_t default_slot_price);
 
-    bool add_bid(struct User* user, uint64_t slot_time, uint32_t price);
+    bool add_bid(struct Buyer* buyer, uint64_t slot_time, uint32_t price);
 
-    // delete all bids made by a user for time slot_time, returns true if one or more bids deleted
-    bool delete_bids(struct User* user, uint64_t slot_time);
+    // delete all bids made by a buyer for time slot_time, returns true if one or more bids deleted
+    bool delete_bids(struct Buyer* buyer, uint64_t slot_time);
 
-    bool add_offer(struct User* user, uint64_t slot_time, uint32_t price);
+    bool add_offer(struct Buyer* buyer, uint64_t slot_time, uint32_t price);
 
-    bool add_packet(struct User* user, uint64_t slot_time, std::string packet);
+    bool add_packet(struct Buyer* buyer, uint64_t slot_time, std::string packet);
 
     void advance_time();
     void match_bids_and_orders();
 
-    std::deque<struct Slot> get_order_book();
+    bool empty();
+    void print_order_book();
+    std::vector<struct Slot_view> give_order_book(struct Buyer &recipient);
 };

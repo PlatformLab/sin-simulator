@@ -14,7 +14,7 @@ struct BidOffer {
 
 struct Slot {
     public:
-    /*const*/int64_t time;
+    /*const*/uint64_t time;
     std::string owner; 
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
@@ -24,7 +24,6 @@ struct Slot {
 
     bool delete_bids(std::string &user_name){ return true;}
     bool delete_offers(std::string &user_name){ return true;}
-
 };
 
 class Market {

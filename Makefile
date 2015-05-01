@@ -1,4 +1,4 @@
-OBJS = market.o user.o sin.o 
+OBJS = market.o sin.o 
 CC = g++
 	DEBUG = -g
 	CFLAGS = -Wall -c $(DEBUG) -std=c++11
@@ -9,9 +9,6 @@ sin : $(OBJS)
 
 market.o : common.hh market.hh market.cc
 	$(CC) $(CFLAGS) market.cc
-
-user.o : common.hh user.hh user.cc
-	$(CC) $(CFLAGS) user.cc
 
 sin.o : sin.hh sin.cc
 	$(CC) $(CFLAGS) sin.cc

@@ -9,7 +9,7 @@ using namespace std;
 
 int main(){
     cout << "hello world" << endl;
-    Market mkt(10);
+    Market mkt;
     std::vector<AbstractUser*> users;
     users.emplace_back(new NoopUser());
 

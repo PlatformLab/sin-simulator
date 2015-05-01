@@ -3,10 +3,6 @@
 
 using namespace std;
 
-Market::Market(uint32_t num_future_slots)
-    : order_book(num_future_slots)
-{ }
-
 void Market::advance_time()
 {
     assert(not order_book.empty());

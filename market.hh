@@ -20,8 +20,7 @@ inline void filter_user_bidoffers(std::string &user_name, std::deque<struct BidO
 }
 
 struct Slot {
-    public:
-    /*const*/uint64_t time;
+    const uint64_t time;
     std::string owner; 
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
@@ -30,7 +29,6 @@ struct Slot {
     void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
 
     void delete_bids(std::string &user_name) { filter_user_bidoffers(user_name, bids); }
-
     void delete_offers(std::string &user_name) { filter_user_bidoffers(user_name, offers); }
 };
 
@@ -39,8 +37,6 @@ class Market {
         std::deque<struct Slot> order_book; //ordered my most recent time first
 
     public:
-        Market(uint32_t num_future_slots);
-
         const std::deque<struct Slot> &get_order_book() { return order_book; }
 
         void advance_time();

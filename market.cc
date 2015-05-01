@@ -20,32 +20,30 @@ void Market::advance_time()
     // maybe add new slot to back
 }
 
+static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
+{
+    return (a.cost < b.cost);
+}
+
 void Market::match_bids_and_orders()
 {
-    /*
     for (struct Slot &slot : order_book)
     {
-        // no bids for this slot
-        if (slot.bids.empty()) {
+        // need bids and offers for slot to do something
+        if (slot.bids.empty() or slot.offers.empty()) {
             continue;
         }
 
-        // get highest bid and award slot to that bidder if higher than current offer price for slot
-        auto highest_bid = std::max_element(slot.bids.begin(), slot.bids.end(), compare_two_bids);
-        if (highest_bid->cost > slot.current_offer) {
-            slot.owner.reset(new string(highest_bid->owner));
+        // get highest bid and award slot to that bidder if more than highest offer price for that slot
+        auto highest_bid = std::max_element(slot.bids.begin(), slot.bids.end(), compare_two_bidoffers);
+        auto highest_offer = std::max_element(slot.offers.begin(), slot.offers.end(), compare_two_bidoffers);
 
-            // not for sale at start
-            slot.current_offer = uint32_t(-1);
-
-            if (slot.packet != "") {
-                cout << "dropping packet at slot " << slot.time << " with contents: " << slot.packet << endl;
-            }
-
-            slot.packet = "";
+        if (highest_bid->cost > highest_offer->cost) {
+            slot.owner = highest_bid->owner;
+            slot.bids.clear();
+            slot.offers.clear();
         }
     }
-    */
 }
 
 void Market::print_order_book()

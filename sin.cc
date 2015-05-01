@@ -22,17 +22,31 @@ int main(){
             mkt.print_order_book();
         } else {
             for (struct User &u : users) {
-                auto buyer = u.get_buyer_identity();
+                struct Buyer buyer = u.get_buyer_identity();
                 auto market_view = mkt.give_order_book(buyer);
 
-                for (auto &slot_action : u.take_actions(market_view))
-                {
-                    cout << slot_action.slot_time << endl;
+                struct User_actions actions = u.get_actions(market_view);
 
+                bool success;
                 // let user add bids
+                for (auto &buy_bid : actions.buy_bids) {
+                    success = mkt.add_bid(&buyer, buy_bid.slot_time, buy_bid.price);
+                    assert(success && "failure to add bid");
+                }
                 // let user delete bids
+                for (auto &delete_bid : actions.delete_bids) {
+                    success = mkt.delete_bids(&buyer, delete_bid.slot_time);
+                    assert(success && "failure to del bid");
+                }
                 // let user add offers for slots they own 
+                for (auto &sell_offer : actions.sell_offers) {
+                    success = mkt.add_offer(&buyer, sell_offer.slot_time, sell_offer.price);
+                    assert(success && "failure to add offer");
+                }
                 // let user give packet to send to slot they own
+                for (auto &packet_to_send : actions.packets_to_send) {
+                    success = mkt.add_packet(&buyer, packet_to_send.slot_time, packet_to_send.packet);
+                    assert(success && "failure to add packet");
                 }
             }
         }

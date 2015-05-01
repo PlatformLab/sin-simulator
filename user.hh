@@ -16,7 +16,7 @@ struct User {
         return {name};
     }
     
-    std::vector<struct Slot_action> take_actions(std::vector<struct Slot_view> &given_view)
+    struct User_actions get_actions(std::vector<struct Slot_view> &given_view)
     {
         return {};
     }

@@ -1,6 +1,8 @@
 #ifndef COMMON
 #define COMMON
 
+#include <vector>
+
 struct Buyer {
     std::string name;
 };
@@ -12,13 +14,29 @@ struct Slot_view {
     bool you_own;
 };
 
-struct Slot_action {
+struct User_action {
     uint64_t slot_time;
-    union action {
-        uint32_t offer_price;
-        uint32_t buy_price;
-        std::string packet_to_send;
-    };
+};
+
+struct Buy_bid : public User_action {
+    uint32_t price;
+};
+
+struct Delete_bid : public User_action { };
+
+struct Sell_offer : public User_action {
+    uint32_t price;
+};
+
+struct Packet_to_send : public User_action {
+    std::string packet;
+};
+
+struct User_actions {
+    std::vector<struct Buy_bid> buy_bids;
+    std::vector<struct Delete_bid> delete_bids;
+    std::vector<struct Sell_offer> sell_offers;
+    std::vector<struct Packet_to_send> packets_to_send;
 };
 
 #endif /* COMMON */

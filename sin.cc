@@ -22,7 +22,7 @@ int main(){
             mkt.advance_time();
             last_time = cur_time;
             mkt.print_order_book();
-        } else {
+        //} else {
             for (AbstractUser *u : users) {
                 string &user_name = u->get_name();
                 auto market_view = mkt.give_order_book(user_name);

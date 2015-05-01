@@ -18,6 +18,7 @@ struct Slot {
 
     Slot(uint64_t time, uint32_t base_price) 
         : time(time),
+        owner(nullptr),
         current_offer(base_price),
         packet("")
         {}

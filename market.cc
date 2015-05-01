@@ -141,8 +141,14 @@ bool Market::empty()
 void Market::print_order_book()
 {
     cout << "[ ";
+    bool is_first = true;
     for (struct Slot &slot : order_book)
     {
+        if (is_first) {
+            is_first = false;
+        } else {
+            cout << " | ";
+        }
         cout << "Time:" << slot.time;
 
         cout << ", owner:";
@@ -152,10 +158,9 @@ void Market::print_order_book()
             cout << "null";
 
         cout << ", cost: " << slot.current_offer;
-        cout << " | ";
     }
 
-    cout << "]" << endl;
+    cout << " ]" << endl;
 }
 
 std::vector<struct Slot_view> Market::give_order_book(struct Buyer &recipient)

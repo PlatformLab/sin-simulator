@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <deque>
-#include <vector>
+#include <queue>
 #include <cassert>
 #include <memory>
 
@@ -28,7 +28,7 @@ struct Slot {
 
 class Market {
     private:
-    std::deque<struct Slot> order_book;
+    std::priority_queue<struct Slot> order_book; //ordered my most recent time first
 
     public:
     Market(uint32_t num_future_slots);

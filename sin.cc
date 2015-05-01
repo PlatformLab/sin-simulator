@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include "abstract_user.hh"
+#include "noop_user.hh"
 #include "market.hh"
 
 using namespace std;

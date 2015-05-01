@@ -3,10 +3,6 @@
 
 #include <vector>
 
-struct Buyer {
-    std::string name;
-};
-
 // information about a slot that market gives to a buyer
 struct Slot_view {
     uint64_t time;

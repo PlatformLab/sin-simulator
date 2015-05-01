@@ -18,11 +18,6 @@ class User {
     }
     
     virtual struct User_actions get_actions(std::vector<struct Slot_view> &given_view) = 0;
-    /*
-    {
-        return {};
-    }
-    */
 };
 
 #endif /* ABSTRACT_USER */

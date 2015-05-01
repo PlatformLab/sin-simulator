@@ -10,7 +10,7 @@ sin : $(OBJS)
 market.o : common.hh market.hh market.cc
 	$(CC) $(CFLAGS) market.cc
 
-sin.o : abstract_user.hh sin.hh sin.cc
+sin.o : abstract_user.hh noop_user.hh sin.hh sin.cc
 	$(CC) $(CFLAGS) sin.cc
 
 clean:

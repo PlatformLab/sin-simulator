@@ -9,7 +9,7 @@ using namespace std;
 int main(){
     cout << "hello world" << endl;
     Market mkt(10, 1);
-    std::vector<struct User> users;
+    std::vector<User> users;
 
     time_t last_time = 0;
     time_t cur_time = time(nullptr);

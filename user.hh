@@ -7,11 +7,12 @@
 
 #include "common.hh"
 
-struct User {
+class User {
     uint32_t money;
     uint32_t flow_size;
     std::string name;
 
+    public:
     std::string &get_name(){
         return name;
     }

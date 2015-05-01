@@ -18,36 +18,27 @@ struct Slot {
     std::string owner; 
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
+
+    bool add_bid(std::string &user_name, uint32_t price) { return true;}
+    bool add_offer(std::string &user_name, uint32_t price){ return true;}
+
+    bool delete_bids(std::string &user_name){ return true;}
+    bool delete_offers(std::string &user_name){ return true;}
+
 };
 
 class Market {
     private:
     std::deque<struct Slot> order_book;
-    const uint32_t order_book_size;
-    uint64_t cur_time;
-    const uint32_t default_slot_price;
 
     public:
-    Market(uint32_t num_future_slots, uint32_t default_slot_price);
+    Market(uint32_t num_future_slots);
 
-    const std::deque<struct Slot> &get_order_book()
-    {
-        return order_book;
-    }
-
-    bool add_bid(std::string &user_name, uint64_t slot_time, uint32_t price);
-
-    // delete all bids made by a user for time slot_time, returns true if one or more bids deleted
-    bool delete_bids(std::string &user_name, uint64_t slot_time);
-
-    bool add_offer(std::string &user_name, uint64_t slot_time, uint32_t price);
-
-    bool add_packet(std::string &user_name, uint64_t slot_time, std::string packet);
+    const std::deque<struct Slot> &get_order_book() { return order_book; }
 
     void advance_time();
     void match_bids_and_orders();
 
-    bool empty();
     void print_order_book();
 
     // owner only create slot

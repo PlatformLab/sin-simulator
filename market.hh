@@ -4,6 +4,7 @@
 #include <iostream>
 #include <deque>
 #include <queue>
+#include <algorithm>
 #include <cassert>
 #include <memory>
 
@@ -12,6 +13,12 @@ struct BidOffer {
     std::string owner;
 };
 
+void filter_user_bidoffers(std::string &user_name, std::deque<struct BidOffer> &from)
+{
+    auto name_matches = [&user_name](struct BidOffer x){return x.owner == user_name;}; 
+    std::remove_if(from.begin(),from.end(), name_matches );
+}
+
 struct Slot {
     public:
     /*const*/uint64_t time;
@@ -19,16 +26,17 @@ struct Slot {
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
 
-    bool add_bid(std::string &user_name, uint32_t price) { return true;}
-    bool add_offer(std::string &user_name, uint32_t price){ return true;}
+    void add_bid(struct BidOffer bid) { bids.emplace_back(bid); }
+    void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
 
-    bool delete_bids(std::string &user_name){ return true;}
-    bool delete_offers(std::string &user_name){ return true;}
+    void delete_bids(std::string &user_name) { filter_user_bidoffers(user_name, bids); }
+
+    void delete_offers(std::string &user_name) { filter_user_bidoffers(user_name, offers); }
 };
 
 class Market {
     private:
-    std::priority_queue<struct Slot> order_book; //ordered my most recent time first
+    std::deque<struct Slot> order_book; //ordered my most recent time first
 
     public:
     Market(uint32_t num_future_slots);

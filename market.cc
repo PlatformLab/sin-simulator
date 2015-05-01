@@ -20,13 +20,6 @@ void Market::advance_time()
     // maybe add new slot to back
 }
 
-// helper used for matching bids
-/*
-static bool compare_two_bids(struct Bid &a, struct Bid &b)
-{
-    return (a.cost < b.cost);
-}
-*/
 void Market::match_bids_and_orders()
 {
     /*

@@ -13,8 +13,7 @@ int main(){
     Market mkt;
     std::vector<AbstractUser*> users;
     users.emplace_back(new NoopUser());
-    users.emplace_back(new BasicUser("gregs", 3));
-    users.emplace_back(new BasicUser("keith", 4));
+    users.emplace_back(new BasicUser("gregs", 2));
 
     const time_t market_time_window = 10;
     const time_t base_time = time(nullptr);

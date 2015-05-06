@@ -16,11 +16,6 @@ void Market::advance_time()
     // maybe add new slot to back
 }
 
-static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
-{
-    return (a.cost < b.cost);
-}
-
 void Market::match_bids_and_orders()
 {
     for (struct Slot &slot : order_book)
@@ -31,11 +26,8 @@ void Market::match_bids_and_orders()
         }
 
         // get highest bid and award slot to that bidder if more than lowest offer price for that slot
-        auto highest_bid = std::max_element(slot.bids.begin(), slot.bids.end(), compare_two_bidoffers);
-        auto lowest_offer = std::min_element(slot.offers.begin(), slot.offers.end(), compare_two_bidoffers);
-
-        if (highest_bid->cost > lowest_offer->cost) {
-            slot.owner = highest_bid->owner;
+        if (slot.highest_bid().cost > slot.lowest_offer().cost) {
+            slot.owner = slot.highest_bid().owner;
             slot.bids.clear();
             slot.offers.clear();
         }

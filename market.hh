@@ -13,10 +13,23 @@ struct BidOffer {
     std::string owner;
 };
 
-inline void filter_user_bidoffers(std::string &user_name, std::deque<struct BidOffer> &from)
+inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
 {
     auto name_matches = [&user_name](struct BidOffer x){return x.owner == user_name;}; 
     std::remove_if(from.begin(),from.end(), name_matches );
+}
+
+/*j
+struct MetaSlot {
+    const uint64_t start_time;
+    const uint32_t length;
+    std::deque<struct BidOffer> bids;
+    std::deque<struct BidOffer> offers;
+}
+*/
+static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
+{
+    return (a.cost < b.cost);
 }
 
 struct Slot {
@@ -30,8 +43,11 @@ struct Slot {
     void add_bid(struct BidOffer bid) { bids.emplace_back(bid); }
     void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
 
-    void delete_bids(std::string &user_name) { filter_user_bidoffers(user_name, bids); }
-    void delete_offers(std::string &user_name) { filter_user_bidoffers(user_name, offers); }
+    const struct BidOffer &highest_bid() { return *std::max_element(bids.begin(), bids.end(), compare_two_bidoffers); }
+    const struct BidOffer &lowest_offer() { return *std::min_element(offers.begin(), offers.end(), compare_two_bidoffers); }
+
+    void delete_bids(const std::string &user_name) { filter_user_bidoffers(user_name, bids); }
+    void delete_offers(const std::string &user_name) { filter_user_bidoffers(user_name, offers); }
 };
 
 class Market {

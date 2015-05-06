@@ -43,8 +43,12 @@ struct Slot {
     void add_bid(struct BidOffer bid) { bids.emplace_back(bid); }
     void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
 
-    const struct BidOffer &highest_bid() { return *std::max_element(bids.begin(), bids.end(), compare_two_bidoffers); }
-    const struct BidOffer &lowest_offer() { return *std::min_element(offers.begin(), offers.end(), compare_two_bidoffers); }
+    const struct BidOffer &highest_bid() {
+        assert(not bids.empty());
+        return *std::max_element(bids.begin(), bids.end(), compare_two_bidoffers); }
+    const struct BidOffer &lowest_offer() {
+        assert(not offers.empty());
+        return *std::min_element(offers.begin(), offers.end(), compare_two_bidoffers); }
 
     void delete_bids(const std::string &user_name) { filter_user_bidoffers(user_name, bids); }
     void delete_offers(const std::string &user_name) { filter_user_bidoffers(user_name, offers); }

@@ -11,10 +11,9 @@ class BasicUser : public AbstractUser
 
         void take_actions(struct Market& mkt)
         {
-            get_best_slots(mkt.get_order_book(), flow_size);
-
             std::cout << "I'm a basic user named " << name;
             std::cout << " with a flow of size " << flow_size << std::endl;
+            get_best_slots(mkt.get_order_book(), flow_size);
         }
 
 
@@ -26,6 +25,9 @@ class BasicUser : public AbstractUser
         std::cout << "got idxs to buy ";
         for (auto i : idxs_to_buy)
         {
+            auto &slot = order_book.at(i);
+            struct BidOffer toAdd = { slot.lowest_offer().cost, name };
+            slot.add_bid( toAdd );
             std::cout << i << " ";
         }
         std::cout << std::endl;
@@ -48,8 +50,15 @@ class BasicUser : public AbstractUser
         for (size_t i = start; i < order_book.size()-n; i++)
         {
             std::vector<size_t> recursive_idxs(idxs);
-            int utility = -order_book.at(i).lowest_offer().cost
-                + recursive_slot_checker(order_book, i+1, n-1, recursive_idxs);
+            recursive_idxs.emplace_back(i);
+
+            int utility;
+            if (n == 1) {
+                utility = -order_book.at(i).lowest_offer().cost - i;  // where i is flow completion time
+            } else {
+                utility = -order_book.at(i).lowest_offer().cost
+                    + recursive_slot_checker(order_book, i+1, n-1, recursive_idxs);
+            }
             if (utility > best_utility) {
                 best_utility = utility;
                 best_idxs = recursive_idxs;

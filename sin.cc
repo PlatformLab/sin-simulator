@@ -29,7 +29,6 @@ int main(){
         cur_time = time(nullptr) - base_time;
         // advance time if we havent already for that same time
         if (cur_time != last_time) {
-
             for (int i = 0; i < 4; i++)
             {
                 for (AbstractUser *u : users) {
@@ -38,8 +37,6 @@ int main(){
 
                 mkt.match_bids_and_orders();
 
-                last_time = cur_time;
-
             }
             mkt.print_order_book();
             cout << endl;
@@ -47,6 +44,8 @@ int main(){
             mkt.advance_time();
             mkt.owner_add_slot("ccast", cur_time + market_time_window);
             mkt.get_order_book().back().add_offer({1, "ccast"});
+
+            last_time = cur_time;
         }
     }
     return 1;

@@ -28,11 +28,16 @@ void Market::match_bids_and_orders()
 
         // get highest bid and award slot to that bidder if more than lowest offer price for that slot
         if (slot.highest_bid().cost > slot.lowest_offer().cost) {
-            slot.owner = slot.highest_bid().owner;
-            slot.if_packet_sent = slot.highest_bid().if_packet_sent;
+            struct BidOffer winner = slot.highest_bid();
+            slot.owner = winner.owner;
+            slot.if_packet_sent = winner.if_packet_sent;
             slot.offers.clear();
-            slot.highest_bid().if_slot_bought();
             slot.bids.clear();
+
+            slot.if_offer_taken();
+
+            winner.if_bid_wins();
+            slot.if_offer_taken = winner.if_offer_taken;
         }
     }
 }

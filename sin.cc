@@ -12,12 +12,13 @@ int main(){
     Market mkt;
     std::vector<AbstractUser*> users;
     users.emplace_back(new BasicUser("gregs", 4));
+//    users.emplace_back(new BasicUser("keith", 2));
 
     const time_t market_time_window = 10;
     const time_t base_time = time(nullptr);
 
 
-    for (time_t slot_time = 1; slot_time <= market_time_window; slot_time++) {
+    for (time_t slot_time = 0; slot_time < market_time_window; slot_time++) {
         mkt.owner_add_slot("comcast", slot_time);
         mkt.get_order_book().back().add_offer({1, "comcast"});
     }
@@ -31,8 +32,8 @@ int main(){
             mkt.match_bids_and_orders();
 
             mkt.advance_time();
-            mkt.owner_add_slot("comcast", cur_time + market_time_window);
-            mkt.get_order_book().back().add_offer({1, "comcast"});
+            mkt.owner_add_slot("ccast", cur_time + market_time_window);
+            mkt.get_order_book().back().add_offer({1, "ccast"});
 
             last_time = cur_time;
             mkt.print_order_book();
@@ -40,6 +41,7 @@ int main(){
             for (AbstractUser *u : users) {
                 u->take_actions(mkt);
             }
+            cout << endl;
         }
     }
     return 1;

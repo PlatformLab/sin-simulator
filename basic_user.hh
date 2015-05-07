@@ -5,7 +5,6 @@
 
 class BasicUser : public AbstractUser
 {
-    const std::string name;
     size_t flow_size;
 
     public:
@@ -30,6 +29,7 @@ class BasicUser : public AbstractUser
 
         void packet_sent()
         {
+            std::cout << "in packet sent for " << name << std::endl;
             flow_size--;
             if (flow_size == 0)
                 std::cout << "flow for user " << name << " finished" << std::endl;
@@ -41,11 +41,12 @@ class BasicUser : public AbstractUser
         std::vector<size_t> idxs_to_buy;
         recursive_slot_checker(order_book, 0, flow_size, idxs_to_buy);
        
-        std::cout << "got idxs to buy ";
+        std::cout << name << " got idxs to buy ";
         for (auto i : idxs_to_buy)
         {
             auto &slot = order_book.at(i);
             struct BidOffer toAdd = { slot.lowest_offer().cost + 1, name };
+            toAdd.if_sent = [&] () {packet_sent();};
             slot.add_bid( toAdd );
             std::cout << i << " ";
         }

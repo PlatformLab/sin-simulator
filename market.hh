@@ -7,13 +7,14 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <functional>
 
 #include "abstract_user.hh"
 
 struct BidOffer {
     uint32_t cost;
     std::string owner;
-    void (*if_sent) ();
+    std::function<void ()> if_sent;
 };
 
 inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
@@ -37,6 +38,7 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 
 struct Slot {
     std::string owner;
+    std::function<void ()> if_sent = [](){};
     const uint64_t time;
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;

@@ -82,7 +82,7 @@ class BasicUser : public AbstractUser
     std::vector<size_t> &idxs)
     {
         int best_utility = -11111;
-        std::vector<size_t> best_idxs = idxs;
+        std::vector<size_t> best_idxs;
         for (size_t i = start; i < order_book.size()-n; i++)
         {
             struct Slot &cur_slot = order_book.at(i);

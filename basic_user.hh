@@ -27,6 +27,11 @@ class BasicUser : public AbstractUser
             }
         }
 
+        void slot_bought()
+        {
+            std::cout << "in slot bought for " << name << std::endl;
+        }
+
         void packet_sent()
         {
             std::cout << "in packet sent for " << name << std::endl;
@@ -46,7 +51,8 @@ class BasicUser : public AbstractUser
         {
             auto &slot = order_book.at(i);
             struct BidOffer toAdd = { slot.lowest_offer().cost + 1, name };
-            toAdd.if_sent = [&] () {packet_sent();};
+            toAdd.if_packet_sent = [&] () {packet_sent();};
+            toAdd.if_slot_bought = [&] () {slot_bought();};
             slot.add_bid( toAdd );
             std::cout << i << " ";
         }

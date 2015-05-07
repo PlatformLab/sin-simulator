@@ -9,7 +9,7 @@ void Market::advance_time()
     struct Slot &front = order_book.front();
 
     cout << "slot at time " << front.time << " awarded to " << front.owner << endl;
-    front.if_sent();
+    front.if_packet_sent();
 
     // delete front slot
     order_book.pop_front();
@@ -29,9 +29,10 @@ void Market::match_bids_and_orders()
         // get highest bid and award slot to that bidder if more than lowest offer price for that slot
         if (slot.highest_bid().cost > slot.lowest_offer().cost) {
             slot.owner = slot.highest_bid().owner;
-            slot.if_sent = slot.highest_bid().if_sent;
-            slot.bids.clear();
+            slot.if_packet_sent = slot.highest_bid().if_packet_sent;
             slot.offers.clear();
+            slot.highest_bid().if_slot_bought();
+            slot.bids.clear();
         }
     }
 }

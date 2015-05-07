@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cassert>
 #include "abstract_user.hh"
-#include "noop_user.hh"
 #include "basic_user.hh"
 #include "market.hh"
 
@@ -12,7 +11,6 @@ int main(){
     cout << "hello world" << endl;
     Market mkt;
     std::vector<AbstractUser*> users;
-    users.emplace_back(new NoopUser());
     users.emplace_back(new BasicUser("gregs", 4));
 
     const time_t market_time_window = 10;

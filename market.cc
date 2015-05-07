@@ -8,7 +8,7 @@ void Market::advance_time()
     assert(not order_book.empty());
     struct Slot &front = order_book.front();
 
-    cout << "slot at time " << front.time << " awarded to " << front.owner->name << endl;
+    cout << "slot at time " << front.time << " awarded to " << front.owner << endl;
 
     // delete front slot
     order_book.pop_front();
@@ -48,8 +48,8 @@ void Market::print_order_book()
         cout << "Time:" << slot.time;
 
         cout << ", owner:";
-        if (slot.owner)
-            cout << slot.owner->name;
+        if (slot.owner != "")
+            cout << slot.owner;
         else
             cout << "null";
 

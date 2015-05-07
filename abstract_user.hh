@@ -14,7 +14,6 @@ class AbstractUser {
         AbstractUser(const std::string &name) : name(name) {}
 
         virtual void take_actions(struct Market& mkt) = 0;
-        virtual void packet_sent() = 0;
 };
 
 #endif /* ABSTRACT_USER */

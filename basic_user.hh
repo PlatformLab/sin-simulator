@@ -17,7 +17,7 @@ class BasicUser : public AbstractUser
                 size_t slots_owned = 0;
                 for (auto &slot : mkt.get_order_book())
                 {
-                    if (slot.owner->name == name)
+                    if (slot.owner == name)
                         slots_owned++;
                 }
                 std::cout << "I'm a basic user named " << name;
@@ -45,7 +45,7 @@ class BasicUser : public AbstractUser
         for (auto i : idxs_to_buy)
         {
             auto &slot = order_book.at(i);
-            struct BidOffer toAdd = { slot.lowest_offer().cost + 1, std::shared_ptr<AbstractUser>(this) };
+            struct BidOffer toAdd = { slot.lowest_offer().cost + 1, name };
             slot.add_bid( toAdd );
             std::cout << i << " ";
         }
@@ -56,14 +56,13 @@ class BasicUser : public AbstractUser
     int recursive_slot_checker(std::deque<struct Slot> &order_book, size_t start, size_t n,
     std::vector<size_t> &idxs)
     {
-        // WE CANT OWN SLOT
         int best_utility = -11111;
         std::vector<size_t> &best_idxs = idxs;
         for (size_t i = start; i < order_book.size()-n; i++)
         {
             std::vector<size_t> recursive_idxs(idxs);
             struct Slot &cur_slot = order_book.at(i);
-            if (cur_slot.owner->name != name) {
+            if (cur_slot.owner != name) {
                 recursive_idxs.emplace_back(i);
 
                 int utility;

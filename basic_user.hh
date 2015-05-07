@@ -8,9 +8,9 @@ class BasicUser : public AbstractUser
     size_t flow_size;
 
     public:
-        BasicUser(const std::string &name, size_t flow_size) : AbstractUser(name), flow_size(flow_size) {}
+        BasicUser(const std::string &name, struct Market& mkt, size_t flow_size) : AbstractUser(name, mkt), flow_size(flow_size) {}
 
-        void take_actions(struct Market& mkt)
+        void take_actions()
         {
             if (flow_size) {
                 size_t slots_owned = 0;
@@ -31,6 +31,7 @@ class BasicUser : public AbstractUser
         {
             std::cout << "in slot bought for " << name << std::endl;
             // price and make offer, do we do this once per packet bought or like in rounds or what
+            //get_best_slots(mkt.
         }
 
         void packet_sent()

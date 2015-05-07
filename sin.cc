@@ -11,8 +11,8 @@ int main(){
     cout << "hello world" << endl;
     Market mkt;
     std::vector<AbstractUser*> users;
-    users.emplace_back(new BasicUser("gregs", 4));
-    users.emplace_back(new BasicUser("keith", 2));
+    users.emplace_back(new BasicUser("gregs", mkt, 4));
+    users.emplace_back(new BasicUser("keith", mkt, 2));
 
     const time_t market_time_window = 10;
     const time_t base_time = time(nullptr);
@@ -33,7 +33,7 @@ int main(){
             for (int i = 0; i < 4; i++)
             {
                 for (AbstractUser *u : users) {
-                    u->take_actions(mkt);
+                    u->take_actions();
                 }
 
                 mkt.match_bids_and_orders();

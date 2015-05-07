@@ -30,6 +30,7 @@ class BasicUser : public AbstractUser
         void slot_bought()
         {
             std::cout << "in slot bought for " << name << std::endl;
+            // price and make offer, do we do this once per packet bought or like in rounds or what
         }
 
         void packet_sent()

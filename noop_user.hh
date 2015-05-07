@@ -7,10 +7,13 @@
 class NoopUser : public AbstractUser
 {
     public:
+//        NoopUser(const std::string &name) = default;
         void take_actions(struct Market& mkt)
         {
             std::cout << "I'm a noop user!" << std::endl;
         }
+
+        void packet_sent() { }
 };
 
 #endif /* NOOP_USER */

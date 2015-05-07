@@ -5,17 +5,16 @@
 #include <cassert>
 #include <vector>
 
-#include "market.hh"
+struct Market;
 
 class AbstractUser {
-    std::string name;
-
     public:
-    std::string &get_name(){
-        return name;
-    }
-    
-    virtual void take_actions(struct Market& mkt) = 0;
+        const std::string name;
+
+        AbstractUser(const std::string &name) : name(name) {}
+
+        virtual void take_actions(struct Market& mkt) = 0;
+        virtual void packet_sent() = 0;
 };
 
 #endif /* ABSTRACT_USER */

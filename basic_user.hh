@@ -1,19 +1,38 @@
 #include <iostream>
+#include <deque>
 #include "abstract_user.hh"
+#include "market.hh"
 
 class BasicUser : public AbstractUser
 {
     const std::string name;
-    const size_t flow_size;
+    size_t flow_size;
 
     public:
-        BasicUser(std::string name, size_t flow_size) : name(name), flow_size(flow_size) {}
+        BasicUser(const std::string &name, size_t flow_size) : AbstractUser(name), flow_size(flow_size) {}
 
         void take_actions(struct Market& mkt)
         {
-            std::cout << "I'm a basic user named " << name;
-            std::cout << " with a flow of size " << flow_size << std::endl;
-            get_best_slots(mkt.get_order_book(), flow_size);
+            if (flow_size) {
+                size_t slots_owned = 0;
+                for (auto &slot : mkt.get_order_book())
+                {
+                    if (slot.owner->name == name)
+                        slots_owned++;
+                }
+                std::cout << "I'm a basic user named " << name;
+                std::cout << " with a flow of size " << flow_size <<
+                    " and I currently have " << slots_owned << " slots" << std::endl;
+                if (flow_size > slots_owned)
+                    get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
+            }
+        }
+
+        void packet_sent()
+        {
+            flow_size--;
+            if (flow_size == 0)
+                std::cout << "flow for user " << name << " finished" << std::endl;
         }
 
 
@@ -26,7 +45,7 @@ class BasicUser : public AbstractUser
         for (auto i : idxs_to_buy)
         {
             auto &slot = order_book.at(i);
-            struct BidOffer toAdd = { slot.lowest_offer().cost, name };
+            struct BidOffer toAdd = { slot.lowest_offer().cost + 1, std::shared_ptr<AbstractUser>(this) };
             slot.add_bid( toAdd );
             std::cout << i << " ";
         }
@@ -38,30 +57,27 @@ class BasicUser : public AbstractUser
     std::vector<size_t> &idxs)
     {
         // WE CANT OWN SLOT
-        // base case
-        if (n == 1)
-        {
-            idxs.emplace_back(start);
-            return -order_book.at(start).lowest_offer().cost - start; // cost - flow completion time
-        }
-
         int best_utility = -11111;
         std::vector<size_t> &best_idxs = idxs;
         for (size_t i = start; i < order_book.size()-n; i++)
         {
             std::vector<size_t> recursive_idxs(idxs);
-            recursive_idxs.emplace_back(i);
+            struct Slot &cur_slot = order_book.at(i);
+            if (cur_slot.owner->name != name) {
+                recursive_idxs.emplace_back(i);
 
-            int utility;
-            if (n == 1) {
-                utility = -order_book.at(i).lowest_offer().cost - i;  // where i is flow completion time
-            } else {
-                utility = -order_book.at(i).lowest_offer().cost
-                    + recursive_slot_checker(order_book, i+1, n-1, recursive_idxs);
-            }
-            if (utility > best_utility) {
-                best_utility = utility;
-                best_idxs = recursive_idxs;
+                int utility;
+                // base case
+                if (n == 1) {
+                    utility = -(order_book.at(i).lowest_offer().cost+1) - i;  // where i is flow completion time
+                } else {
+                    utility = -(order_book.at(i).lowest_offer().cost+1)
+                        + recursive_slot_checker(order_book, i+1, n-1, recursive_idxs);
+                }
+                if (utility > best_utility) {
+                    best_utility = utility;
+                    best_idxs = recursive_idxs;
+                }
             }
         }
         //assert(best_utility != -11111)

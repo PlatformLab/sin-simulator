@@ -8,14 +8,16 @@
 #include <cassert>
 #include <memory>
 
+#include "abstract_user.hh"
+
 struct BidOffer {
     uint32_t cost;
-    std::string owner;
+    std::shared_ptr<AbstractUser> owner;
 };
 
 inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
 {
-    auto name_matches = [&user_name](struct BidOffer x){return x.owner == user_name;}; 
+    auto name_matches = [&user_name](struct BidOffer x){return x.owner->name == user_name;}; 
     std::remove_if(from.begin(),from.end(), name_matches );
 }
 
@@ -33,12 +35,12 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 }
 
 struct Slot {
-    std::string owner; 
+    std::shared_ptr<AbstractUser> owner;
     const uint64_t time;
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
 
-    Slot(std::string owner_name, uint64_t time) : owner(owner_name), time(time) {}
+    Slot(std::shared_ptr<AbstractUser> owner, uint64_t time) : owner(owner), time(time) {}
 
     void add_bid(struct BidOffer bid) { bids.emplace_back(bid); }
     void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
@@ -67,7 +69,8 @@ class Market {
         void print_order_book();
 
         // owner only create slot
-        void owner_add_slot(std::string owner_name, uint64_t slot_time) { order_book.emplace_back(owner_name, slot_time); };
+        void owner_add_slot(std::shared_ptr<AbstractUser> owner, uint64_t slot_time)
+        { order_book.emplace_back(owner, slot_time); };
 };
 
 #endif /* MARKET */

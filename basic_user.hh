@@ -82,12 +82,12 @@ class BasicUser : public AbstractUser
     std::vector<size_t> &idxs)
     {
         int best_utility = -11111;
-        std::vector<size_t> &best_idxs = idxs;
+        std::vector<size_t> best_idxs = idxs;
         for (size_t i = start; i < order_book.size()-n; i++)
         {
-            std::vector<size_t> recursive_idxs(idxs);
             struct Slot &cur_slot = order_book.at(i);
             if (cur_slot.owner != name and not cur_slot.offers.empty()) {
+                std::vector<size_t> recursive_idxs = idxs; // hopefully copy
                 recursive_idxs.emplace_back(i);
 
                 int utility;
@@ -100,10 +100,11 @@ class BasicUser : public AbstractUser
                 }
                 if (utility > best_utility) {
                     best_utility = utility;
-                    best_idxs = recursive_idxs;
+                    best_idxs = recursive_idxs; //hopefully copy as well
                 }
             }
         }
+        idxs = best_idxs;
         //assert(best_utility != -11111)
         return best_utility;
     }

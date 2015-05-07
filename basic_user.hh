@@ -14,6 +14,18 @@ static size_t num_slots_owned(std::deque<struct Slot> &order_book, const std::st
     return slots_owned;
 }
 
+static size_t current_flow_completion_time(std::deque<struct Slot> &order_book, const std::string &name)
+{
+    size_t highest_owned_slot_idx = 0;
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        if (order_book.at(i).owner == name) {
+            highest_owned_slot_idx = i;
+        }
+    }
+    return highest_owned_slot_idx;
+}
+
 static uint32_t cost_to_get_slot(struct Slot& slot)
 {
     if (not slot.bids.empty()) {
@@ -45,11 +57,9 @@ class BasicUser : public AbstractUser
         void bid_won()
         {
             // price and make offer, do we do this once per packet bought or like in rounds or what
-
-            //size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
-            //get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
             std::vector<size_t> idxs_to_buy;
-            int utility_delta = recursive_pick_best_slots(mkt.get_order_book(), 0, 1, idxs_to_buy);
+            size_t cur_fct = current_flow_completion_time(mkt.get_order_book(), name);
+            int utility_delta = recursive_pick_best_slots(mkt.get_order_book(), 0, 1, idxs_to_buy, cur_fct);
             std::cout << "in bid won for " << name << " got utility delta " << utility_delta 
             << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
         }
@@ -71,7 +81,8 @@ class BasicUser : public AbstractUser
     void get_best_slots(std::deque<struct Slot> &order_book, size_t flow_size)
     {
         std::vector<size_t> idxs_to_buy;
-        recursive_pick_best_slots(order_book, 0, flow_size, idxs_to_buy);
+        size_t cur_fct = current_flow_completion_time(order_book, name);
+        recursive_pick_best_slots(order_book, 0, flow_size, idxs_to_buy, cur_fct);
        
         for (auto i : idxs_to_buy)
         {
@@ -87,7 +98,7 @@ class BasicUser : public AbstractUser
 
     private:
     int recursive_pick_best_slots(std::deque<struct Slot> &order_book, size_t start, size_t n,
-    std::vector<size_t> &idxs)
+    std::vector<size_t> &idxs, size_t cur_fct)
     {
         int best_utility = -11111;
         std::vector<size_t> best_idxs;
@@ -101,10 +112,10 @@ class BasicUser : public AbstractUser
                 int utility;
                 // base case
                 if (n == 1) {
-                    utility = -cost_to_get_slot(cur_slot) - i;  // where i is flow completion time
+                    utility = -cost_to_get_slot(cur_slot) - std::max(i, cur_fct);
                 } else {
                     utility = -cost_to_get_slot(cur_slot) 
-                        + recursive_pick_best_slots(order_book, i+1, n-1, recursive_idxs);
+                        + recursive_pick_best_slots(order_book, i+1, n-1, recursive_idxs, cur_fct);
                 }
                 if (utility > best_utility) {
                     best_utility = utility;

@@ -63,15 +63,15 @@ class BasicUser : public AbstractUser
         {
             std::vector<size_t> recursive_idxs(idxs);
             struct Slot &cur_slot = order_book.at(i);
-            if (cur_slot.owner != name) {
+            if (cur_slot.owner != name and not cur_slot.offers.empty()) {
                 recursive_idxs.emplace_back(i);
 
                 int utility;
                 // base case
                 if (n == 1) {
-                    utility = -(order_book.at(i).lowest_offer().cost+1) - i;  // where i is flow completion time
+                    utility = -(cur_slot.lowest_offer().cost+1) - i;  // where i is flow completion time
                 } else {
-                    utility = -(order_book.at(i).lowest_offer().cost+1)
+                    utility = -(cur_slot.lowest_offer().cost+1)
                         + recursive_slot_checker(order_book, i+1, n-1, recursive_idxs);
                 }
                 if (utility > best_utility) {

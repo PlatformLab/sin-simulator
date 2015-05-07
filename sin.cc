@@ -12,7 +12,7 @@ int main(){
     Market mkt;
     std::vector<AbstractUser*> users;
     users.emplace_back(new BasicUser("gregs", 4));
-//    users.emplace_back(new BasicUser("keith", 2));
+    users.emplace_back(new BasicUser("keith", 2));
 
     const time_t market_time_window = 10;
     const time_t base_time = time(nullptr);
@@ -29,19 +29,24 @@ int main(){
         cur_time = time(nullptr) - base_time;
         // advance time if we havent already for that same time
         if (cur_time != last_time) {
-            mkt.match_bids_and_orders();
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (AbstractUser *u : users) {
+                    u->take_actions(mkt);
+                }
+
+                mkt.match_bids_and_orders();
+
+                last_time = cur_time;
+
+            }
+            mkt.print_order_book();
+            cout << endl;
 
             mkt.advance_time();
             mkt.owner_add_slot("ccast", cur_time + market_time_window);
             mkt.get_order_book().back().add_offer({1, "ccast"});
-
-            last_time = cur_time;
-            mkt.print_order_book();
-
-            for (AbstractUser *u : users) {
-                u->take_actions(mkt);
-            }
-            cout << endl;
         }
     }
     return 1;

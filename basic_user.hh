@@ -56,15 +56,7 @@ class BasicUser : public AbstractUser
 
         void take_actions()
         {
-            if (flow_size) {
-                std::deque<struct Slot> &order_book = mkt.get_order_book();
-                for (size_t i = 0; i < mkt.get_order_book().size(); i++)
-                {
-                    if (mkt.get_order_book().at(i).owner == name) {
-                        bid_won(i);
-                    }
-                }
-
+            if (flow_size > 0) {
                 size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
                 std::cout << "I'm a basic user named " << name;
                 std::cout << " with a flow of size " << flow_size <<
@@ -74,20 +66,19 @@ class BasicUser : public AbstractUser
             }
         }
 
-        void bid_won(size_t at_idx)
+        void add_offer_to_slot(size_t at_idx)
         {
+            std::deque<struct Slot> &order_book = mkt.get_order_book();
+            struct Slot &slot = order_book.at(at_idx);
+            assert(slot.owner == name);
+
             // price and make offer
             std::vector<size_t> idxs_to_buy;
-            size_t fct_if_sold = flow_completion_time_if_sold(mkt.get_order_book(), name, at_idx);
-            int utility_delta = recursive_pick_best_slots(mkt.get_order_book(), 0, 1, idxs_to_buy, fct_if_sold);
-            std::cout << "in bid won for " << name << " at idx " << at_idx << " and fct_if_sold " << fct_if_sold
+            size_t fct_if_sold = flow_completion_time_if_sold(order_book, name, at_idx);
+            int utility_delta = recursive_pick_best_slots(order_book, 0, 1, idxs_to_buy, fct_if_sold);
+            std::cout << name << " adding offer to idx " << at_idx << " and fct_if_sold " << fct_if_sold
             << " got utility delta " << utility_delta 
             << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
-        }
-
-        void offer_taken(size_t at_idx)
-        {
-            std::cout << "in offer taken for " << name << std::endl;
         }
 
         void packet_sent()
@@ -110,9 +101,13 @@ class BasicUser : public AbstractUser
             auto &slot = order_book.at(i);
             struct BidOffer toAdd = { cost_to_get_slot(slot), name };
             toAdd.if_packet_sent = [&] () {packet_sent();};
-            //toAdd.if_bid_wins = [&] (size_t i) {bid_won(i);};
             slot.add_bid( toAdd );
             std::cout << name << " making bid of $" << toAdd.cost << " to idx " << i << std::endl;
+            if (slot.owner == name)
+            {
+                std::cout << "bid successful for slot " << i << "!" << std::endl;
+                add_offer_to_slot(i); 
+            }
         }
         std::cout << std::endl;
     }

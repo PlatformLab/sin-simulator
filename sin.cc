@@ -38,9 +38,6 @@ int main(){
                 for (AbstractUser *u : users) {
                     u->take_actions();
                 }
-
-                mkt.match_bids_and_orders();
-
             }
             mkt.print_order_book();
             cout << endl;

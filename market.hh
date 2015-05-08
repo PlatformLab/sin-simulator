@@ -15,8 +15,6 @@ struct BidOffer {
     uint32_t cost;
     std::string owner;
     std::function<void ()> if_packet_sent;
-    std::function<void (size_t)> if_bid_wins;
-    std::function<void (size_t)> if_offer_taken;
 };
 
 inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
@@ -25,14 +23,6 @@ inline void filter_user_bidoffers(const std::string &user_name, std::deque<struc
     std::remove_if(from.begin(),from.end(), name_matches );
 }
 
-/*j
-struct MetaSlot {
-    const uint64_t start_time;
-    const uint32_t length;
-    std::deque<struct BidOffer> bids;
-    std::deque<struct BidOffer> offers;
-}
-*/
 static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 {
     return (a.cost < b.cost);
@@ -41,15 +31,34 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 struct Slot {
     std::string owner;
     std::function<void ()> if_packet_sent = [](){};
-    std::function<void (size_t)> if_offer_taken = [](size_t){};
     const uint64_t time;
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
 
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
 
-    void add_bid(struct BidOffer bid) { bids.emplace_back(bid); }
-    void add_offer(struct BidOffer offer) { offers.emplace_back(offer); }
+    void settle_slot()
+    {
+        if (not bids.empty() and not offers.empty() and
+                highest_bid().cost > lowest_offer().cost) {
+            owner = highest_bid().owner;
+            if_packet_sent = highest_bid().if_packet_sent;
+            offers.clear();
+            bids.clear();
+        }
+    }
+
+    void add_bid(struct BidOffer bid)
+    {
+        bids.emplace_back(bid);
+        settle_slot();
+    }
+
+    void add_offer(struct BidOffer offer)
+    {
+        offers.emplace_back(offer);
+        settle_slot();
+    }
 
     const struct BidOffer &highest_bid() {
         assert(not bids.empty());
@@ -70,7 +79,6 @@ class Market {
         std::deque<struct Slot> &get_order_book() { return order_book; }
 
         void advance_time();
-        void match_bids_and_orders();
 
         void print_order_book();
 

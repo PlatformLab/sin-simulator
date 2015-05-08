@@ -17,33 +17,6 @@ void Market::advance_time()
     // maybe add new slot to back
 }
 
-void Market::match_bids_and_orders()
-{
-    for (size_t i = 0; i < order_book.size(); i++)
-    {
-        struct Slot &slot = order_book.at(i);
-
-        // need bids and offers for slot to do something
-        if (slot.bids.empty() or slot.offers.empty()) {
-            continue;
-        }
-
-        // get highest bid and award slot to that bidder if more than lowest offer price for that slot
-        if (slot.highest_bid().cost > slot.lowest_offer().cost) {
-            struct BidOffer winner = slot.highest_bid();
-            slot.owner = winner.owner;
-            slot.if_packet_sent = winner.if_packet_sent;
-            slot.offers.clear();
-            slot.bids.clear();
-
-            slot.if_offer_taken(i);
-
-            winner.if_bid_wins(i);
-            slot.if_offer_taken = winner.if_offer_taken;
-        }
-    }
-}
-
 void Market::print_order_book()
 {
     cout << "[ ";

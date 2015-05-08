@@ -45,18 +45,6 @@ class BasicUser : public AbstractUser
     public:
         BasicUser(const std::string &name, struct Market& mkt, size_t flow_size) : AbstractUser(name, mkt), flow_size(flow_size) {}
 
-        void take_actions()
-        {
-            if (flow_size > 0) {
-                size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
-                std::cout << "I'm a basic user named " << name;
-                std::cout << " with a flow of size " << flow_size <<
-                    " and I currently have " << slots_owned << " slots" << std::endl;
-                if (flow_size > slots_owned)
-                    get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
-            }
-        }
-
         void add_offer_to_slot(size_t at_idx)
         {
             std::deque<struct Slot> &order_book = mkt.get_order_book();
@@ -70,6 +58,31 @@ class BasicUser : public AbstractUser
             std::cout << name << " adding offer to idx " << at_idx << " and fct_if_sold " << fct_if_sold
             << " got utility delta " << utility_delta 
             << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
+            assert(utility_delta < 0);
+            struct BidOffer toAdd = { (uint32_t) (-utility_delta) + 1, name };
+            slot.add_offer( toAdd );
+        }
+
+        void take_actions()
+        {
+            std::deque<struct Slot> &order_book = mkt.get_order_book();
+            for (size_t i = 0; i < order_book.size(); i++)
+            {
+                struct Slot &cur_slot = order_book.at(i);
+                if (cur_slot.owner == name and not cur_slot.has_offers())
+                {
+                    add_offer_to_slot(i);
+                }
+            }
+
+            if (flow_size > 0) {
+                size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
+                std::cout << "I'm a basic user named " << name;
+                std::cout << " with a flow of size " << flow_size <<
+                    " and I currently have " << slots_owned << " slots" << std::endl;
+                if (flow_size > slots_owned)
+                    get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
+            }
         }
 
         void packet_sent()
@@ -97,7 +110,7 @@ class BasicUser : public AbstractUser
             if (slot.owner == name)
             {
                 std::cout << "... got slot!" << std::endl;
-                add_offer_to_slot(i); 
+//                add_offer_to_slot(i); 
             }
         }
         std::cout << std::endl;

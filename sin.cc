@@ -20,7 +20,8 @@ int main(){
 
     for (time_t slot_time = 0; slot_time < market_time_window; slot_time++) {
         mkt.owner_add_slot("comcast", slot_time);
-        mkt.get_order_book().back().add_offer({10-(uint32_t) slot_time, "comcast"});
+        //mkt.get_order_book().back().add_offer({10-(uint32_t) slot_time, "comcast"});
+        mkt.get_order_book().back().add_offer({1, "comcast"});
     }
 
     std::cout << "initial order book:" << std::endl;

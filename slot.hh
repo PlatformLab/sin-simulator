@@ -15,17 +15,6 @@ struct BidOffer {
     std::function<void ()> if_packet_sent;
 };
 
-inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
-{
-    auto name_matches = [&user_name](struct BidOffer x){return x.owner == user_name;}; 
-    std::remove_if(from.begin(),from.end(), name_matches );
-}
-
-static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
-{
-    return (a.cost < b.cost);
-}
-
 struct Slot {
     std::string owner;
     std::function<void ()> if_packet_sent = [](){};
@@ -38,46 +27,21 @@ struct Slot {
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
 
     private:
-    void settle_slot()
-    {
-        if (not bids.empty() and not offers.empty() and
-                highest_bid().cost > lowest_offer().cost) {
-            owner = highest_bid().owner;
-            if_packet_sent = highest_bid().if_packet_sent;
-            offers.clear();
-            bids.clear();
-        }
-    }
+    void settle_slot();
 
     public:
-    void add_bid(struct BidOffer bid)
-    {
-        bids.emplace_back(bid);
-        settle_slot();
-    }
+    void add_bid(struct BidOffer bid);
 
-    void add_offer(struct BidOffer offer)
-    {
-        offers.emplace_back(offer);
-        settle_slot();
-    }
+    void add_offer(struct BidOffer offer);
 
-    bool has_offers() { return not offers.empty(); }
-    bool has_bids() { return not bids.empty(); }
+    bool has_offers();
+    bool has_bids();
 
-    const struct BidOffer &highest_bid()
-    {
-        assert(not bids.empty());
-        return *std::max_element(bids.begin(), bids.end(), compare_two_bidoffers);
-    }
-    const struct BidOffer &lowest_offer()
-    {
-        assert(not offers.empty());
-        return *std::min_element(offers.begin(), offers.end(), compare_two_bidoffers);
-    }
+    const struct BidOffer &highest_bid();
+    const struct BidOffer &lowest_offer();
 
-    void delete_bids(const std::string &user_name) { filter_user_bidoffers(user_name, bids); }
-    void delete_offers(const std::string &user_name) { filter_user_bidoffers(user_name, offers); }
+    void delete_bids(const std::string &user_name);
+    void delete_offers(const std::string &user_name);
 };
 
 #endif /* SLOT */

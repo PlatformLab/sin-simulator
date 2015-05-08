@@ -1,4 +1,4 @@
-OBJS = market.o sin.o 
+OBJS = slot.o market.o sin.o 
 CC = g++
 	DEBUG = -g
 	CFLAGS = -Wall -c $(DEBUG) -std=c++11
@@ -6,6 +6,9 @@ LFLAGS = -Wall $(DEBUG)
 
 sin : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o sin
+
+slot.o : slot.hh slot.cc
+	$(CC) $(CFLAGS) slot.cc
 
 market.o : market.hh market.cc
 	$(CC) $(CFLAGS) market.cc

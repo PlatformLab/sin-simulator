@@ -40,7 +40,7 @@ static size_t flow_completion_time_if_sold(std::deque<struct Slot> &order_book, 
 
 static uint32_t cost_to_get_slot(struct Slot& slot)
 {
-    if (not slot.bids.empty()) {
+    if (slot.has_bids()) {
         return std::max(slot.lowest_offer().cost+1, slot.highest_bid().cost+1);
     } else {
         return slot.lowest_offer().cost+1;
@@ -121,7 +121,7 @@ class BasicUser : public AbstractUser
         for (size_t i = start; i < order_book.size()-n; i++)
         {
             struct Slot &cur_slot = order_book.at(i);
-            if (cur_slot.owner != name and not cur_slot.offers.empty()) {
+            if (cur_slot.owner != name and cur_slot.has_offers()) {
                 std::vector<size_t> recursive_idxs = idxs; // hopefully copy
                 recursive_idxs.emplace_back(i);
 

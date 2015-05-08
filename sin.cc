@@ -33,7 +33,7 @@ int main(){
         cur_time = time(nullptr) - base_time;
         // advance time if we havent already for that same time
         if (cur_time != last_time) {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 1; i++)
             {
                 for (AbstractUser *u : users) {
                     u->take_actions();

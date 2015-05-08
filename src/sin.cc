@@ -1,4 +1,3 @@
-#include "sin.hh"
 #include <iostream>
 #include <cassert>
 #include "abstract_user.hh"

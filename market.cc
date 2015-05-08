@@ -35,10 +35,9 @@ void Market::print_order_book()
         else
             cout << "null";
 
-        auto lowest_offer = std::min_element(slot.offers.begin(), slot.offers.end(), compare_two_bidoffers);
         cout << " $";
-        if (lowest_offer != slot.offers.end())
-            cout << lowest_offer->cost;
+        if (slot.has_offers())
+            cout << slot.lowest_offer().cost;
         else
             cout << "null";
     }

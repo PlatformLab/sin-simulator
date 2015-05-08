@@ -32,11 +32,14 @@ struct Slot {
     std::string owner;
     std::function<void ()> if_packet_sent = [](){};
     const uint64_t time;
+    private:
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;
 
+    public:
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
 
+    private:
     void settle_slot()
     {
         if (not bids.empty() and not offers.empty() and
@@ -48,6 +51,7 @@ struct Slot {
         }
     }
 
+    public:
     void add_bid(struct BidOffer bid)
     {
         bids.emplace_back(bid);
@@ -59,6 +63,9 @@ struct Slot {
         offers.emplace_back(offer);
         settle_slot();
     }
+
+    bool has_offers() { return not offers.empty(); }
+    bool has_bids() { return not bids.empty(); }
 
     const struct BidOffer &highest_bid() {
         assert(not bids.empty());

@@ -13,6 +13,7 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 
 void Slot::settle_slot()
 {
+    // while market crossed
     if (not bids.empty() and not offers.empty() and
             highest_bid().cost >= lowest_offer().cost) {
         owner = highest_bid().owner;

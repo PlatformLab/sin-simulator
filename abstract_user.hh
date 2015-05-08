@@ -10,7 +10,7 @@ struct Market;
 class AbstractUser {
     public:
         const std::string name;
-        struct Market& mkt;
+        struct Market& mkt; // dont do this
 
         AbstractUser(const std::string &name, struct Market& mkt) : name(name), mkt(mkt) {}
 

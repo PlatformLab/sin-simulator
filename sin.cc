@@ -10,7 +10,7 @@ using namespace std;
 int main(){
     cout << "hello world" << endl;
     Market mkt;
-    std::vector<AbstractUser*> users;
+    std::vector<AbstractUser*> users; // unique_ptrs
     users.emplace_back(new BasicUser("gregs", mkt, 4));
     users.emplace_back(new BasicUser("keith", mkt, 2));
 
@@ -38,9 +38,9 @@ int main(){
             {
                 for (AbstractUser *u : users) {
                     u->take_actions();
+                    mkt.print_order_book();
                 }
             }
-            mkt.print_order_book();
             cout << endl;
 
             mkt.advance_time();

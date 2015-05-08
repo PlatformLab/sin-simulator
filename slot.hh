@@ -15,6 +15,7 @@ struct BidOffer {
     std::function<void ()> if_packet_sent;
 };
 
+// make class, 
 struct Slot {
     std::string owner;
     std::function<void ()> if_packet_sent = [](){};

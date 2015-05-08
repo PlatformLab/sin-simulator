@@ -59,7 +59,7 @@ class BasicUser : public AbstractUser
             << " got utility delta " << utility_delta 
             << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
             assert(utility_delta < 0);
-            struct BidOffer toAdd = { (uint32_t) (-utility_delta) + 1, name };
+            struct BidOffer toAdd = { (uint32_t) (-utility_delta)-fct_if_sold + 1, name };
             slot.add_offer( toAdd );
         }
 
@@ -110,7 +110,7 @@ class BasicUser : public AbstractUser
             if (slot.owner == name)
             {
                 std::cout << "... got slot!" << std::endl;
-//                add_offer_to_slot(i); 
+                add_offer_to_slot(i);
             }
         }
         std::cout << std::endl;

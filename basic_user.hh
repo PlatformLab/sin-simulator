@@ -65,6 +65,14 @@ class BasicUser : public AbstractUser
 
         void take_actions()
         {
+            if (flow_size > 0) {
+                size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
+                std::cout << "I'm a basic user named " << name;
+                std::cout << " with a flow of size " << flow_size <<
+                    " and I currently have " << slots_owned << " slots" << std::endl;
+                if (flow_size > slots_owned)
+                    get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
+            }
             std::deque<struct Slot> &order_book = mkt.get_order_book();
             for (size_t i = 0; i < order_book.size(); i++)
             {
@@ -73,15 +81,6 @@ class BasicUser : public AbstractUser
                 {
                     add_offer_to_slot(i);
                 }
-            }
-
-            if (flow_size > 0) {
-                size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
-                std::cout << "I'm a basic user named " << name;
-                std::cout << " with a flow of size " << flow_size <<
-                    " and I currently have " << slots_owned << " slots" << std::endl;
-                if (flow_size > slots_owned)
-                    get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
             }
         }
 
@@ -110,7 +109,7 @@ class BasicUser : public AbstractUser
             if (slot.owner == name)
             {
                 std::cout << "... got slot!" << std::endl;
-                add_offer_to_slot(i);
+                //add_offer_to_slot(i);
             }
         }
         std::cout << std::endl;

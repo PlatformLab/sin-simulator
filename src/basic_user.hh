@@ -43,9 +43,9 @@ class BasicUser : public AbstractUser
     size_t flow_size;
 
     public:
-        BasicUser(const std::string &name, struct Market& mkt, size_t flow_size) : AbstractUser(name, mkt), flow_size(flow_size) {}
+        BasicUser(const std::string &name, size_t flow_size) : AbstractUser(name), flow_size(flow_size) {}
 
-        void add_offer_to_slot(size_t at_idx)
+        void add_offer_to_slot(Market &mkt, size_t at_idx)
         {
             std::deque<struct Slot> &order_book = mkt.get_order_book();
             struct Slot &slot = order_book.at(at_idx);
@@ -59,11 +59,11 @@ class BasicUser : public AbstractUser
             << " got utility delta " << utility_delta 
             << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
             assert(utility_delta < 0);
-            struct BidOffer toAdd = { (uint32_t) (-utility_delta)-fct_if_sold + 1, name };
+            struct BidOffer toAdd = { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name };
             slot.add_offer( toAdd );
         }
 
-        void take_actions()
+        void take_actions(struct Market& mkt)
         {
             if (flow_size > 0) {
                 size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
@@ -79,7 +79,7 @@ class BasicUser : public AbstractUser
                 struct Slot &cur_slot = order_book.at(i);
                 if (cur_slot.owner == name and not cur_slot.has_offers())
                 {
-                    add_offer_to_slot(i);
+                    add_offer_to_slot(mkt, i);
                 }
             }
         }

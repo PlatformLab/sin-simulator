@@ -12,7 +12,7 @@
 struct BidOffer {
     uint32_t cost;
     std::string owner;
-    std::function<void ()> if_packet_sent;
+    std::function<void ()> if_packet_sent;// = [](){};
 };
 
 // make class, 
@@ -21,8 +21,8 @@ struct Slot {
     std::function<void ()> if_packet_sent = [](){};
     const uint64_t time;
     private:
-    std::deque<struct BidOffer> bids;
-    std::deque<struct BidOffer> offers;
+    std::deque<struct BidOffer> bids = {};
+    std::deque<struct BidOffer> offers = {};
 
     public:
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}

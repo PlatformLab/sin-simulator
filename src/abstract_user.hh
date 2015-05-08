@@ -10,11 +10,12 @@ struct Market;
 class AbstractUser {
     public:
         const std::string name;
-        struct Market& mkt; // dont do this
 
-        AbstractUser(const std::string &name, struct Market& mkt) : name(name), mkt(mkt) {}
+        AbstractUser(const std::string &name) : name(name) {}
 
-        virtual void take_actions() = 0;
+        virtual void take_actions( Market& mkt ) = 0;
+
+        virtual ~AbstractUser() = default;
 };
 
 #endif /* ABSTRACT_USER */

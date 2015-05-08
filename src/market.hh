@@ -14,7 +14,7 @@
 
 class Market {
     private:
-        std::deque<struct Slot> order_book; //ordered my most recent time first
+        std::deque<struct Slot> order_book = {}; //ordered my most recent time first
 
     public:
         std::deque<struct Slot> &get_order_book() { return order_book; }

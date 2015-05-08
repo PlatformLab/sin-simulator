@@ -9,9 +9,9 @@ using namespace std;
 int main(){
     cout << "hello world" << endl;
     Market mkt;
-    vector<unique_ptr<AbstractUser>> users; // unique_ptrs
-    users.push_back( make_unique<BasicUser>( "gregs", mkt, 4 ) );
-    users.push_back( make_unique<BasicUser>( "keith", mkt, 2 ) );
+    vector<unique_ptr<AbstractUser>> users;
+    users.push_back( make_unique<BasicUser>( "gregs", 4 ) );
+    users.push_back( make_unique<BasicUser>( "keith", 2 ) );
 
     const time_t market_time_window = 10;
     const time_t base_time = time(nullptr);
@@ -36,7 +36,7 @@ int main(){
             for (int i = 0; i < 1; i++)
             {
                 for ( auto & u : users ) {
-                    u->take_actions();
+                    u->take_actions(mkt);
                     mkt.print_order_book();
                 }
             }

@@ -93,10 +93,10 @@ class BasicUser : public AbstractUser
             struct BidOffer toAdd = { slot.lowest_offer().cost, name };
             toAdd.if_packet_sent = [&] () {packet_sent();};
             slot.add_bid( toAdd );
-            std::cout << name << " making bid of $" << toAdd.cost << " to idx " << i << std::endl;
+            std::cout << name << " making bid of $" << toAdd.cost << " to idx " << i;
             if (slot.owner == name)
             {
-                std::cout << "bid successful for slot " << i << "!" << std::endl;
+                std::cout << "... got slot!" << std::endl;
                 add_offer_to_slot(i); 
             }
         }

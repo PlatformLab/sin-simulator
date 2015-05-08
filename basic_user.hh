@@ -38,15 +38,6 @@ static size_t flow_completion_time_if_sold(std::deque<struct Slot> &order_book, 
     return fct_if_sold;
 }
 
-static uint32_t cost_to_get_slot(struct Slot& slot)
-{
-    if (slot.has_bids()) {
-        return std::max(slot.lowest_offer().cost+1, slot.highest_bid().cost+1);
-    } else {
-        return slot.lowest_offer().cost+1;
-    }
-}
-
 class BasicUser : public AbstractUser
 {
     size_t flow_size;
@@ -99,7 +90,7 @@ class BasicUser : public AbstractUser
         for (auto i : idxs_to_buy)
         {
             auto &slot = order_book.at(i);
-            struct BidOffer toAdd = { cost_to_get_slot(slot), name };
+            struct BidOffer toAdd = { slot.lowest_offer().cost, name };
             toAdd.if_packet_sent = [&] () {packet_sent();};
             slot.add_bid( toAdd );
             std::cout << name << " making bid of $" << toAdd.cost << " to idx " << i << std::endl;
@@ -128,9 +119,9 @@ class BasicUser : public AbstractUser
                 int utility;
                 // base case
                 if (n == 1) {
-                    utility = -cost_to_get_slot(cur_slot) - std::max(i, cur_fct);
+                    utility = -cur_slot.lowest_offer().cost - std::max(i, cur_fct);
                 } else {
-                    utility = -cost_to_get_slot(cur_slot) 
+                    utility = -cur_slot.lowest_offer().cost 
                         + recursive_pick_best_slots(order_book, i+1, n-1, recursive_idxs, cur_fct);
                 }
                 if (utility > best_utility) {

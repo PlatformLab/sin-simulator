@@ -14,7 +14,7 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 void Slot::settle_slot()
 {
     if (not bids.empty() and not offers.empty() and
-            highest_bid().cost > lowest_offer().cost) {
+            highest_bid().cost >= lowest_offer().cost) {
         owner = highest_bid().owner;
         if_packet_sent = highest_bid().if_packet_sent;
         offers.clear();

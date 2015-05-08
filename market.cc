@@ -19,8 +19,10 @@ void Market::advance_time()
 
 void Market::match_bids_and_orders()
 {
-    for (struct Slot &slot : order_book)
+    for (size_t i = 0; i < order_book.size(); i++)
     {
+        struct Slot &slot = order_book.at(i);
+
         // need bids and offers for slot to do something
         if (slot.bids.empty() or slot.offers.empty()) {
             continue;
@@ -34,9 +36,9 @@ void Market::match_bids_and_orders()
             slot.offers.clear();
             slot.bids.clear();
 
-            slot.if_offer_taken();
+            slot.if_offer_taken(i);
 
-            winner.if_bid_wins();
+            winner.if_bid_wins(i);
             slot.if_offer_taken = winner.if_offer_taken;
         }
     }

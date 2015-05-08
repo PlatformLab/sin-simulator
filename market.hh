@@ -15,8 +15,8 @@ struct BidOffer {
     uint32_t cost;
     std::string owner;
     std::function<void ()> if_packet_sent;
-    std::function<void ()> if_bid_wins;
-    std::function<void ()> if_offer_taken;
+    std::function<void (size_t)> if_bid_wins;
+    std::function<void (size_t)> if_offer_taken;
 };
 
 inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
@@ -41,7 +41,7 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
 struct Slot {
     std::string owner;
     std::function<void ()> if_packet_sent = [](){};
-    std::function<void ()> if_offer_taken = [](){};
+    std::function<void (size_t)> if_offer_taken = [](size_t){};
     const uint64_t time;
     std::deque<struct BidOffer> bids;
     std::deque<struct BidOffer> offers;

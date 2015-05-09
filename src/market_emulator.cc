@@ -11,14 +11,21 @@ void MarketEmulator::run_to_completion()
     size_t market_time_window = 10;
 
     while (not mkt.get_order_book().empty()) {
+        for (auto &u : users_to_add)
+        {
+            if (u.time_to_start == cur_time) 
+            {
+                active_users.emplace_back(std::move(u.user));
+            }
+
+        }
+
         for (int i = 0; i < 1; i++)
         {
-            /*
-            for ( auto & u : users ) {
-                u.second->take_actions(mkt);
+            for ( auto & u : active_users ) {
+                u->take_actions(mkt);
                 mkt.print_order_book();
             }
-            */
         }
         cout << endl;
 

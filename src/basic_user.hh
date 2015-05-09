@@ -61,7 +61,7 @@ class BasicUser : public AbstractUser
             << " got utility delta " << utility_delta 
             << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
             assert(utility_delta < 0);
-            struct BidOffer toAdd = { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name };
+            struct BidOffer toAdd = { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name, [](){} };
             slot.add_offer( toAdd );
         }
 
@@ -104,7 +104,7 @@ class BasicUser : public AbstractUser
         for (auto i : idxs_to_buy)
         {
             auto &slot = order_book.at(i);
-            struct BidOffer toAdd = { slot.lowest_offer().cost, name };
+            struct BidOffer toAdd = { slot.lowest_offer().cost, name, [](){} };
             toAdd.if_packet_sent = [&] () {packet_sent();};
             slot.add_bid( toAdd );
             std::cout << name << " making bid of $" << toAdd.cost << " to idx " << i;

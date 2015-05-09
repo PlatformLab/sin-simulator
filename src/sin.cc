@@ -4,6 +4,7 @@
 #include <cassert>
 #include "abstract_user.hh"
 #include "basic_user.hh"
+#include "market_emulator.hh"
 #include "market.hh"
 
 using namespace std;
@@ -22,7 +23,7 @@ int main(){
     for (time_t slot_time = 0; slot_time < market_time_window; slot_time++) {
         mkt.owner_add_slot("comcast", slot_time);
         //mkt.get_order_book().back().add_offer({10-(uint32_t) slot_time, "comcast"});
-        mkt.get_order_book().back().add_offer({1, "comcast"});
+        mkt.get_order_book().back().add_offer({1, "comcast", [](){}});
     }
 
     std::cout << "initial order book:" << std::endl;
@@ -46,7 +47,7 @@ int main(){
 
             mkt.advance_time();
             mkt.owner_add_slot("ccast", cur_time + market_time_window);
-            mkt.get_order_book().back().add_offer({1, "ccast"});
+            mkt.get_order_book().back().add_offer({1, "ccast", [](){}});
 
             last_time = cur_time;
         }

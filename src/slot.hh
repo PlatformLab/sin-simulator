@@ -1,5 +1,7 @@
-#ifndef SLOT
-#define SLOT
+/* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+
+#ifndef SLOT_HH
+#define SLOT_HH
 
 #include <iostream>
 #include <deque>
@@ -15,19 +17,19 @@ struct BidOffer {
     std::function<void ()> if_packet_sent;// = [](){};
 };
 
-// make class, 
-struct Slot {
-    std::string owner;
-    std::function<void ()> if_packet_sent = [](){};
-    const uint64_t time;
-    private:
+class Slot {
     std::deque<struct BidOffer> bids = {};
     std::deque<struct BidOffer> offers = {};
 
     public:
+    std::string owner;
+    std::function<void ()> if_packet_sent = [](){};
+    const uint64_t time;
+
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
 
     private:
+    bool market_crossed();
     void settle_slot();
 
     public:
@@ -45,4 +47,4 @@ struct Slot {
     void delete_offers(const std::string &user_name);
 };
 
-#endif /* SLOT */
+#endif /* SLOT_HH */

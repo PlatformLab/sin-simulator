@@ -1,3 +1,5 @@
+/* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+
 #include "slot.hh"
 
 inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
@@ -11,11 +13,17 @@ static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
     return (a.cost < b.cost);
 }
 
+bool Slot::market_crossed()
+{
+    return not bids.empty() and not offers.empty() and
+            highest_bid().cost >= lowest_offer().cost;
+
+}
+
 void Slot::settle_slot()
 {
     // while market crossed
-    if (not bids.empty() and not offers.empty() and
-            highest_bid().cost >= lowest_offer().cost) {
+    while ( market_crossed() ) {
         owner = highest_bid().owner;
         if_packet_sent = highest_bid().if_packet_sent;
         offers.clear();

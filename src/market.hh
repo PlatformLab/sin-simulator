@@ -1,5 +1,7 @@
-#ifndef MARKET
-#define MARKET
+/* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+
+#ifndef MARKET_HH
+#define MARKET_HH
 
 #include <iostream>
 #include <deque>
@@ -28,4 +30,4 @@ class Market {
         { order_book.emplace_back(owner, slot_time); };
 };
 
-#endif /* MARKET */
+#endif /* MARKET_HH */

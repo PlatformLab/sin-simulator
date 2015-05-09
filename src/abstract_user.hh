@@ -17,6 +17,8 @@ class AbstractUser {
 
         virtual void take_actions( Market& mkt ) = 0;
 
+        virtual bool done() = 0;
+
         virtual ~AbstractUser() = default;
 };
 

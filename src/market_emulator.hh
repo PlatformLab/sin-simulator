@@ -16,9 +16,11 @@
 
 class MarketEmulator {
     Market mkt;
-    std::vector<std::pair< size_t, std::unique_ptr<AbstractUser>>> users = {}; // users and time they join
+    std::vector<std::pair< size_t, std::unique_ptr<AbstractUser>>> users_to_add; // users and time they join
 
-    MarketEmulator(Market &mkt, std::vector<std::pair< size_t, std::unique_ptr<AbstractUser>>> &&users) : mkt(mkt), users(std::move(users)) {};
+std::vector<std::unique_ptr<AbstractUser>> active_users = {};
+
+    MarketEmulator(Market &mkt, std::vector<std::pair< size_t, std::unique_ptr<AbstractUser>>> &&users) : mkt(mkt), users_to_add(std::move(users)) {};
 
     void run_to_completion();
 };

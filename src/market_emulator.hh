@@ -18,14 +18,14 @@ struct EmulatedUser
 {
     size_t time_to_start;
     std::unique_ptr<AbstractUser> user;
-    size_t time_completed;
+    size_t time_finished;
 };
 
 class MarketEmulator {
     Market mkt;
-    std::vector<EmulatedUser> users_to_add; // users and time they join
+    std::vector<EmulatedUser> users;
 
-    std::vector<std::unique_ptr<AbstractUser>> active_users = {};
+    bool all_users_finished();
 
     public:
     MarketEmulator( std::vector<EmulatedUser> &&users, const std::string &default_user, uint32_t default_price, size_t total_num_slots );

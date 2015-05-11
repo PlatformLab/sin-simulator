@@ -28,7 +28,7 @@ class MarketEmulator {
     std::vector<std::unique_ptr<AbstractUser>> active_users = {};
 
     public:
-    MarketEmulator(Market &mkt, std::vector<EmulatedUser> &&users) : mkt(mkt), users_to_add(std::move(users)) {};
+    MarketEmulator( std::vector<EmulatedUser> &&users, const std::string &default_user, uint32_t default_price, size_t total_num_slots );
 
     void run_to_completion();
 };

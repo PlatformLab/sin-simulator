@@ -16,6 +16,15 @@ int main(){
     users.push_back( make_unique<BasicUser>( "gregs", 4 ) );
     users.push_back( make_unique<BasicUser>( "keith", 2 ) );
 
+    EmulatedUser g = {0, make_unique<BasicUser>( "gregs", 4 ), 0};
+    EmulatedUser k = {0, make_unique<BasicUser>( "keith", 2 ), 0};
+
+    vector<EmulatedUser> usersToEmulate;
+    usersToEmulate.emplace_back(move(g));
+    usersToEmulate.emplace_back(move(k));
+
+    MarketEmulator emulated_market(mkt, move(usersToEmulate));
+
     const time_t market_time_window = 10;
     const time_t base_time = time(nullptr);
 

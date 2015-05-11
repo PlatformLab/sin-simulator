@@ -25,8 +25,9 @@ class MarketEmulator {
     Market mkt;
     std::vector<EmulatedUser> users_to_add; // users and time they join
 
-std::vector<std::unique_ptr<AbstractUser>> active_users = {};
+    std::vector<std::unique_ptr<AbstractUser>> active_users = {};
 
+    public:
     MarketEmulator(Market &mkt, std::vector<EmulatedUser> &&users) : mkt(mkt), users_to_add(std::move(users)) {};
 
     void run_to_completion();

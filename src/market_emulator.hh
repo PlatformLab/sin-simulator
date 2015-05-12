@@ -21,8 +21,8 @@ struct EmulatedUser
 };
 
 class MarketEmulator {
-    Market mkt;
-    std::vector<EmulatedUser> users;
+    Market _mkt;
+    std::vector<EmulatedUser> _users;
 
     bool all_users_finished();
 

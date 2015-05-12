@@ -2,6 +2,8 @@
 
 #include "slot.hh"
 
+using namespace std;
+
 bool Slot::market_crossed()
 {
     return not bids.empty() and not offers.empty() and
@@ -44,26 +46,26 @@ static bool compare_two_bidoffers(BidOffer &a, BidOffer &b)
 const BidOffer &Slot::best_bid()
 {
     assert(not bids.empty());
-    return *std::max_element(bids.begin(), bids.end(), compare_two_bidoffers);
+    return *max_element(bids.begin(), bids.end(), compare_two_bidoffers);
 }
 
 const BidOffer &Slot::best_offer()
 {
     assert(not offers.empty());
-    return *std::min_element(offers.begin(), offers.end(), compare_two_bidoffers);
+    return *min_element(offers.begin(), offers.end(), compare_two_bidoffers);
 }
 
-void filter_user_bidoffers(const std::string &user_name, std::deque<BidOffer> &from)
+void filter_user_bidoffers(const string &user_name, deque<BidOffer> &from)
 {
     remove_if( from.begin(), from.end(), [&](BidOffer x){return x.owner == user_name;} );
 }
 
-void Slot::clear_all_bids(const std::string &user_name)
+void Slot::clear_all_bids(const string &user_name)
 {
     filter_user_bidoffers(user_name, bids);
 }
 
-void Slot::clear_all_offers(const std::string &user_name)
+void Slot::clear_all_offers(const string &user_name)
 {
     filter_user_bidoffers(user_name, offers);
 }

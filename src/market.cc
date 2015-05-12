@@ -17,7 +17,7 @@ void Market::advance_time()
     _order_book.pop_front();
 }
 
-static void Market::print_slots(const std::deque<Slot> &slots)
+static void Market::print_slots(const deque<Slot> &slots)
 {
     cout << "[ ";
     bool is_first = true;

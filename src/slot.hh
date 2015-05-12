@@ -16,7 +16,7 @@ struct BidOffer {
     std::string owner;
 };
 
-template <size_t size>
+// template <size_t size> XXX later
 class Slot {
     std::deque<struct BidOffer> bids = {};
     std::deque<struct BidOffer> offers = {};
@@ -45,6 +45,6 @@ class Slot {
     void delete_offers(const std::string &user_name);
 };
 
-typedef Slot<1> SingleSlot;
+typedef Slot SingleSlot;
 
 #endif /* SLOT_HH */

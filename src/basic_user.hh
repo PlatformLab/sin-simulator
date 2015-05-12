@@ -16,7 +16,7 @@ class BasicUser : public AbstractUser
 {
     const size_t num_packets;
 
-    int recursive_pick_best_slots(std::deque<struct Slot> &order_book, size_t start, size_t n,
+    int recursive_pick_best_slots(std::deque<SingleSlot> &order_book, size_t start, size_t n,
             std::vector<size_t> &idxs, size_t cur_fct);
 
     public:
@@ -24,12 +24,12 @@ class BasicUser : public AbstractUser
 
     void add_offer_to_slot(Market &mkt, size_t at_idx);
 
-    void take_actions(struct Market& mkt);
+    void take_actions(Market& mkt);
 
     void packet_sent();
 
 
-    void get_best_slots(std::deque<struct Slot> &order_book, size_t flow_size);
+    void get_best_slots(std::deque<SingleSlot> &order_book, size_t flow_size);
 
     private:
 };

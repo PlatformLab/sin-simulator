@@ -14,7 +14,6 @@
 struct BidOffer {
     uint32_t cost;
     std::string owner;
-    std::function<void ()> if_packet_sent;// = [](){};
 };
 
 class Slot {
@@ -23,7 +22,6 @@ class Slot {
 
     public:
     std::string owner;
-    std::function<void ()> if_packet_sent = [](){};
     const uint64_t time;
 
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}

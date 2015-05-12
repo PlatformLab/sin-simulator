@@ -11,8 +11,8 @@ using namespace std;
 
 int main(){
     cout << "hello world" << endl;
-    EmulatedUser g = {0, make_unique<BasicUser>( "gregs", 4 ), 0};
-    EmulatedUser k = {0, make_unique<BasicUser>( "keith", 2 ), 0};
+    EmulatedUser g = {0, make_unique<BasicUser>( "gregs", 4 )};
+    EmulatedUser k = {0, make_unique<BasicUser>( "keith", 2 )};
 
     vector<EmulatedUser> usersToEmulate;
     usersToEmulate.emplace_back(move(g));

@@ -39,9 +39,15 @@ static size_t flow_completion_time_if_sold(std::deque<struct Slot> &order_book, 
     return fct_if_sold;
 }
 
+    BasicUser::BasicUser(const std::string &name, size_t num_packets)
+: AbstractUser(name),
+    num_packets(num_packets)
+{
+}
+
 void BasicUser::add_offer_to_slot(Market &mkt, size_t at_idx)
 {
-    std::deque<struct Slot> &order_book = mkt.get_order_book();
+    std::deque<struct Slot> &order_book = mkt.order_book();
     struct Slot &slot = order_book.at(at_idx);
     assert(slot.owner == name);
 
@@ -53,21 +59,39 @@ void BasicUser::add_offer_to_slot(Market &mkt, size_t at_idx)
         << " got utility delta " << utility_delta 
         << " and idx to buy instead " << idxs_to_buy.front() << std::endl;
     assert(utility_delta < 0);
-    struct BidOffer toAdd = { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name, [](){} };
+    struct BidOffer toAdd = { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name };
     slot.add_offer( toAdd );
+}
+
+static size_t num_packets_i_sent(const std::deque<Slot> &sent_slots, const std::string &my_name)
+{
+    size_t num_sent = 0;
+    for (auto & slot : sent_slots) {
+        if (slot.owner == my_name) {
+            num_sent++;
+        }
+    }
+    return num_sent;
 }
 
 void BasicUser::take_actions(struct Market& mkt)
 {
-    if (flow_size > 0) {
-        size_t slots_owned = num_slots_owned(mkt.get_order_book(), name);
+    size_t num_packets_sent = num_packets_i_sent(mkt.sent_slots(), name);
+    size_t num_packets_left_to_send = num_packets - num_packets_sent;
+
+    std::deque<struct Slot> &order_book = mkt.order_book();
+
+    if (num_packets_left_to_send > 0) {
+        size_t slots_owned = num_slots_owned(mkt.order_book(), name);
         std::cout << "I'm a basic user named " << name;
-        std::cout << " with a flow of size " << flow_size <<
-            " and I currently have " << slots_owned << " slots" << std::endl;
-        if (flow_size > slots_owned)
-            get_best_slots(mkt.get_order_book(), flow_size - slots_owned);
+        std::cout << " I have a flow of size " << num_packets << " and have successfully sent " << num_packets_sent;
+        std::cout << " packets and own " << slots_owned << " tentative future slots in the order book" << endl;
+
+        if (num_packets_left_to_send > slots_owned) {
+            get_best_slots(order_book, num_packets_left_to_send-slots_owned);
+        }
     }
-    std::deque<struct Slot> &order_book = mkt.get_order_book();
+
     for (size_t i = 0; i < order_book.size(); i++)
     {
         struct Slot &cur_slot = order_book.at(i);
@@ -78,26 +102,16 @@ void BasicUser::take_actions(struct Market& mkt)
     }
 }
 
-void BasicUser::packet_sent()
-{
-    std::cout << "in packet sent for " << name << std::endl;
-    flow_size--;
-    if (flow_size == 0)
-        std::cout << "flow for user " << name << " finished" << std::endl;
-}
-
-
-void BasicUser::get_best_slots(std::deque<struct Slot> &order_book, size_t flow_size)
+void BasicUser::get_best_slots(std::deque<struct Slot> &order_book, size_t num_packets_to_send)
 {
     std::vector<size_t> idxs_to_buy;
     size_t cur_fct = current_flow_completion_time(order_book, name);
-    recursive_pick_best_slots(order_book, 0, flow_size, idxs_to_buy, cur_fct);
+    recursive_pick_best_slots(order_book, 0, num_packets_to_send, idxs_to_buy, cur_fct);
 
     for (auto i : idxs_to_buy)
     {
         auto &slot = order_book.at(i);
-        struct BidOffer toAdd = { slot.lowest_offer().cost, name, [](){} };
-        toAdd.if_packet_sent = [&] () {packet_sent();};
+        struct BidOffer toAdd = { slot.lowest_offer().cost, name };
         slot.add_bid( toAdd );
         std::cout << name << " making bid of $" << toAdd.cost << " to idx " << i;
         if (slot.owner == name)
@@ -138,9 +152,4 @@ int BasicUser::recursive_pick_best_slots(std::deque<struct Slot> &order_book, si
     idxs = best_idxs;
     //assert(best_utility != -11111)
     return best_utility;
-}
-
-bool BasicUser::done()
-{
-    return flow_size;
 }

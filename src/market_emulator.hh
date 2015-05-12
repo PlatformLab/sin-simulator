@@ -18,7 +18,6 @@ struct EmulatedUser
 {
     size_t time_to_start;
     std::unique_ptr<AbstractUser> user;
-    size_t time_finished;
 };
 
 class MarketEmulator {

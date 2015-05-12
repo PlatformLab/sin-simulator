@@ -25,7 +25,6 @@ void Slot::settle_slot()
     // while market crossed
     while ( market_crossed() ) {
         owner = highest_bid().owner;
-        if_packet_sent = highest_bid().if_packet_sent;
         offers.clear();
         bids.clear();
     }

@@ -7,23 +7,21 @@ using namespace std;
 
 void Market::advance_time()
 {
-    assert(not order_book.empty());
-    struct Slot &front = order_book.front();
+    assert(not _order_book.empty());
+    struct Slot &front = _order_book.front();
 
     cout << "slot at time " << front.time << " awarded to " << front.owner << endl;
-    front.if_packet_sent();
 
-    // delete front slot
-    order_book.pop_front();
-
-    // maybe add new slot to back
+    // add slot to sent_slots and delete from order book
+    _sent_slots.push_back(move(front));
+    _order_book.pop_front();
 }
 
-void Market::print_order_book()
+void Market::print_slots(std::deque<Slot> &slots)
 {
     cout << "[ ";
     bool is_first = true;
-    for (struct Slot &slot : order_book)
+    for (Slot &slot : slots)
     {
         if (is_first) {
             is_first = false;

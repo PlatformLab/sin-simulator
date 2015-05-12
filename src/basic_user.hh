@@ -10,10 +10,10 @@
 
 class BasicUser : public AbstractUser
 {
-    size_t flow_size;
+    const size_t num_packets;
 
     public:
-    BasicUser(const std::string &name, size_t flow_size) : AbstractUser(name), flow_size(flow_size) {}
+    BasicUser(const std::string &name, size_t num_packets);
 
     void add_offer_to_slot(Market &mkt, size_t at_idx);
 

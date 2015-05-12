@@ -16,7 +16,7 @@
 
 struct EmulatedUser
 {
-    size_t time_to_start;
+    const size_t time_to_start;
     std::unique_ptr<AbstractUser> user;
 };
 

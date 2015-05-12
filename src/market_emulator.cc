@@ -30,7 +30,7 @@ void MarketEmulator::run_to_completion()
     size_t cur_time = 0;
 
     while (not _mkt.order_book().empty()) {
-        cout << "in while" << endl;
+        // currently one user set of actions per round
         for (int i = 0; i < 1; i++)
         {
             for ( auto & u : _users ) {

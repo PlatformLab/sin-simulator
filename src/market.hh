@@ -15,22 +15,22 @@
 #include "abstract_user.hh"
 #include "slot.hh"
 
+static void print_slots(const std::deque<Slot> &slots);
+
 class Market {
     private:
-        std::deque<SingleSlot> _order_book = {}; //ordered my most recent time first
-        std::deque<Events> _sent_slots = {};
+        std::deque<SingleSlot> order_book_ = {}; //ordered my most recent time first
+        std::deque<SingleSlot> sent_slots_ = {}; // XXX change to events
 
     public:
-        const std::deque<SingleSlot> &sent_slots() const { return _sent_slots; }
-        std::deque<SingleSlot> &mutable_order_book() { return _order_book; }
+        const std::deque<SingleSlot> &sent_slots() const { return sent_slots_; }
+        std::deque<SingleSlot> &mutable_order_book() { return order_book_; }
 
         void advance_time();
 
-        static void print_slots(const std::deque<Slot> &slots);
-
         // owner only create slot
         void owner_add_slot(std::string owner, uint64_t slot_time)
-        { _order_book.emplace_back(owner, slot_time); };
+        { order_book_.emplace_back(owner, slot_time); };
 };
 
 #endif /* MARKET_HH */

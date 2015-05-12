@@ -35,21 +35,21 @@ void Slot::add_offer(BidOffer offer)
     settle_slot();
 }
 
-bool Slot::has_offers() { return not offers.empty(); }
-bool Slot::has_bids() { return not bids.empty(); }
+bool Slot::has_offers() const { return not offers.empty(); }
+bool Slot::has_bids() const { return not bids.empty(); }
 
 static bool compare_two_bidoffers(BidOffer &a, BidOffer &b)
 {
     return (a.cost < b.cost);
 }
 
-const BidOffer &Slot::best_bid()
+const BidOffer &Slot::best_bid () const
 {
     assert(not bids.empty());
     return *max_element(bids.begin(), bids.end(), compare_two_bidoffers);
 }
 
-const BidOffer &Slot::best_offer()
+const BidOffer &Slot::best_offer() const
 {
     assert(not offers.empty());
     return *min_element(offers.begin(), offers.end(), compare_two_bidoffers);

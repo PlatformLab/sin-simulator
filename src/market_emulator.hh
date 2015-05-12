@@ -14,20 +14,14 @@
 #include "abstract_user.hh"
 #include "market.hh"
 
-struct EmulatedUser
-{
-    const size_t time_to_start;
-    std::unique_ptr<AbstractUser> user;
-};
-
 class MarketEmulator {
     Market mkt_;
-    std::vector<EmulatedUser> users_;
+    std::vector<std::unique_ptr<AbstractUser>> users_;
 
     bool all_users_finished();
 
     public:
-    MarketEmulator( std::vector<EmulatedUser> &&users, const std::string &default_user, uint32_t default_price, size_t total_num_slots );
+    MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users, const std::string &default_user, uint32_t default_price, size_t total_num_slots );
 
     void run_to_completion();
 };

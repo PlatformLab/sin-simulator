@@ -11,12 +11,10 @@ using namespace std;
 
 int main(){
     cout << "hello world" << endl;
-    EmulatedUser g {0, make_unique<BasicUser>( "gregs", 4 )};
-    EmulatedUser k {1, make_unique<BasicUser>( "keith", 2 )};
 
-    vector<EmulatedUser> usersToEmulate;
-    usersToEmulate.emplace_back(move(g));
-    usersToEmulate.emplace_back(move(k));
+    vector<unique_ptr<AbstractUser>> usersToEmulate;
+    usersToEmulate.emplace_back(make_unique<BasicUser>( "gregs", 0, 4 ));
+    usersToEmulate.emplace_back(make_unique<BasicUser>( "keith", 1, 2 ));
 
     MarketEmulator emulated_market(move(usersToEmulate), "ccast", 1, 10);
 

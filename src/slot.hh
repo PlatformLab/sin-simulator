@@ -22,7 +22,8 @@ class Slot {
     std::deque<struct BidOffer> offers = {};
 
     public:
-    std::array<std::string, size> owners;
+    //std::array<std::string, size> owners;
+    std::string owner;
     const uint64_t time;
 
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
@@ -35,11 +36,11 @@ class Slot {
     void add_bid(struct BidOffer bid);
     void add_offer(struct BidOffer offer);
 
-    bool has_offers();
-    bool has_bids();
+    bool has_offers() const;
+    bool has_bids() const;
 
-    const struct BidOffer &highest_bid();
-    const struct BidOffer &lowest_offer();
+    const struct BidOffer &best_bid() const;
+    const struct BidOffer &best_offer() const;
 
     void delete_bids(const std::string &user_name);
     void delete_offers(const std::string &user_name);

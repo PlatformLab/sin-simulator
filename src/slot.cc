@@ -15,16 +15,19 @@ void Slot::settle_slot()
         owner = highest_bid().owner;
         offers.clear();
         bids.clear();
+        // median of best bid and best offer transferred from new owner to old owner
+
+        // print to tape and total up later
     }
 }
 
-void Slot::add_bid(struct BidOffer bid)
+void Slot::add_bid(BidOffer bid)
 {
     bids.emplace_back(bid);
     settle_slot();
 }
 
-void Slot::add_offer(struct BidOffer offer)
+void Slot::add_offer(BidOffer offer)
 {
     offers.emplace_back(offer);
     settle_slot();
@@ -33,35 +36,34 @@ void Slot::add_offer(struct BidOffer offer)
 bool Slot::has_offers() { return not offers.empty(); }
 bool Slot::has_bids() { return not bids.empty(); }
 
-static bool compare_two_bidoffers(struct BidOffer &a, struct BidOffer &b)
+static bool compare_two_bidoffers(BidOffer &a, BidOffer &b)
 {
     return (a.cost < b.cost);
 }
 
-const struct BidOffer &Slot::highest_bid()
+const BidOffer &Slot::best_bid()
 {
     assert(not bids.empty());
     return *std::max_element(bids.begin(), bids.end(), compare_two_bidoffers);
 }
 
-const struct BidOffer &Slot::lowest_offer()
+const BidOffer &Slot::best_offer()
 {
     assert(not offers.empty());
     return *std::min_element(offers.begin(), offers.end(), compare_two_bidoffers);
 }
 
-inline void filter_user_bidoffers(const std::string &user_name, std::deque<struct BidOffer> &from)
+void filter_user_bidoffers(const std::string &user_name, std::deque<BidOffer> &from)
 {
-    auto name_matches = [&user_name](struct BidOffer x){return x.owner == user_name;}; 
-    std::remove_if(from.begin(),from.end(), name_matches );
+    remove_if( from.begin(), from.end(), [&](BidOffer x){return x.owner == user_name;} );
 }
 
-void Slot::delete_bids(const std::string &user_name)
+void Slot::clear_all_bids(const std::string &user_name)
 {
     filter_user_bidoffers(user_name, bids);
 }
 
-void Slot::delete_offers(const std::string &user_name)
+void Slot::clear_all_offers(const std::string &user_name)
 {
     filter_user_bidoffers(user_name, offers);
 }

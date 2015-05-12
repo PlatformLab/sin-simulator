@@ -4,6 +4,7 @@
 
 using namespace std;
 
+// std and struct slot
 static size_t num_slots_owned(std::deque<struct Slot> &order_book, const std::string &name)
 {
     size_t slots_owned = 0;

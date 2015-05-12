@@ -8,12 +8,19 @@
 #include "abstract_user.hh"
 #include "market.hh"
 
+// make class owner user
+
+// get a flow at time x of length n
+
 class BasicUser : public AbstractUser
 {
     const size_t num_packets;
 
+    int recursive_pick_best_slots(std::deque<struct Slot> &order_book, size_t start, size_t n,
+            std::vector<size_t> &idxs, size_t cur_fct);
+
     public:
-    BasicUser(const std::string &name, size_t num_packets);
+    BasicUser(const std::string &name, size_t flow_start_time, size_t num_packets);
 
     void add_offer_to_slot(Market &mkt, size_t at_idx);
 
@@ -25,10 +32,6 @@ class BasicUser : public AbstractUser
     void get_best_slots(std::deque<struct Slot> &order_book, size_t flow_size);
 
     private:
-    int recursive_pick_best_slots(std::deque<struct Slot> &order_book, size_t start, size_t n,
-            std::vector<size_t> &idxs, size_t cur_fct);
-
-    bool done();
 };
 
 #endif /* BASIC_USER */

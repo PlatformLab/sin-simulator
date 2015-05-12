@@ -16,12 +16,13 @@ struct BidOffer {
     std::string owner;
 };
 
+template <size_t size>
 class Slot {
     std::deque<struct BidOffer> bids = {};
     std::deque<struct BidOffer> offers = {};
 
     public:
-    std::string owner;
+    std::array<std::string, size> owners;
     const uint64_t time;
 
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
@@ -32,7 +33,6 @@ class Slot {
 
     public:
     void add_bid(struct BidOffer bid);
-
     void add_offer(struct BidOffer offer);
 
     bool has_offers();
@@ -44,5 +44,7 @@ class Slot {
     void delete_bids(const std::string &user_name);
     void delete_offers(const std::string &user_name);
 };
+
+typedef Slot<1> SingleSlot;
 
 #endif /* SLOT_HH */

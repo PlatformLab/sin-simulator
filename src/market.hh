@@ -29,6 +29,9 @@ class Market {
         inline bool operator==(const Market& rhs) const {
             return order_book_ == rhs.order_book_ and sent_slots_ == rhs.sent_slots_;
         }
+        inline bool operator!=(const Market& rhs) const {
+            return not operator==(rhs);
+        }
 };
 
 #endif /* MARKET_HH */

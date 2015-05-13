@@ -47,17 +47,19 @@ void MarketEmulator::run_to_completion()
     do {
         oldMkt = mkt_;
         do {
-            oldMkt = mkt_;
             for ( auto & u : users_ ) {
+                oldMkt = mkt_;
                 u->take_actions(mkt_);
-                print_slots(mkt_.mutable_order_book());
+                if (oldMkt != mkt_) {
+                    print_slots(mkt_.mutable_order_book());
+                }
             }
-        } while (not (oldMkt == mkt_));
+        } while (oldMkt != mkt_);
 
         if (not mkt_.mutable_order_book().empty()) {
             mkt_.advance_time();
         }
-    } while (not (oldMkt == mkt_));
+    } while (oldMkt != mkt_);
 
         // differentiate flows and users, users exist at all time but flows given to users
 

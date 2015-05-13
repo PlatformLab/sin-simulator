@@ -41,25 +41,25 @@ MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users)
 void MarketEmulator::run_to_completion()
 { 
     cout << "run to completion" << endl;
-    size_t cur_time = 0;
 
-    while (not mkt_.mutable_order_book().empty() ) { //and not allusers__done()) {
-        // instead loop until no user takes an action
+    Market oldMkt;
 
-        // differentiate flows and users, users exist at all time but flows given to users
-
-        for (int i = 0; i < 1; i++)
-        {
+    do {
+        oldMkt = mkt_;
+        do {
+            oldMkt = mkt_;
             for ( auto & u : users_ ) {
                 u->take_actions(mkt_);
                 print_slots(mkt_.mutable_order_book());
             }
-        }
-        cout << endl;
+        } while (not (oldMkt == mkt_));
 
-        cur_time++;
-        mkt_.advance_time();
-    }
+        if (not mkt_.mutable_order_book().empty()) {
+            mkt_.advance_time();
+        }
+    } while (not (oldMkt == mkt_));
+
+        // differentiate flows and users, users exist at all time but flows given to users
 
     // print stats
     for ( auto & u : users_ ) {
@@ -68,5 +68,4 @@ void MarketEmulator::run_to_completion()
 
     cout << "sent packets are ";
     print_slots(mkt_.sent_slots());
-
 }

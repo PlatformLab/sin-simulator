@@ -17,6 +17,7 @@
 
 class Market {
     private:
+    public: // temp
         std::deque<SingleSlot> order_book_ = {}; //ordered my most recent time first
         std::deque<SingleSlot> sent_slots_ = {}; // XXX change to events
 
@@ -25,6 +26,9 @@ class Market {
         std::deque<SingleSlot> &mutable_order_book() { return order_book_; }
 
         void advance_time();
+        inline bool operator==(const Market& rhs) const {
+            return order_book_ == rhs.order_book_ and sent_slots_ == rhs.sent_slots_;
+        }
 };
 
 #endif /* MARKET_HH */

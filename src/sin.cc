@@ -8,15 +8,15 @@
 #include "market_emulator.hh"
 #include "market.hh"
 
-using namespace std;
+//using namespace std;
 
 int main(){
-    cout << "hello world" << endl;
+    std::cout << "hello world" << std::endl;
 
-    vector<unique_ptr<AbstractUser>> usersToEmulate;
-    usersToEmulate.emplace_back(make_unique<BasicUser>( "gregs", 0, 4 ));
-    usersToEmulate.emplace_back(make_unique<BasicUser>( "keith", 1, 2 ));
-    usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccast", 1, 10 ));
+    std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
+    usersToEmulate.emplace_back(std::make_unique<BasicUser>( "gregs", 0, 4 ));
+    usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 1, 2 ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10 ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 

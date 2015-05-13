@@ -12,15 +12,12 @@ struct Market;
 class AbstractUser {
     public:
         const std::string name;
-        const size_t flow_start_time;
 
-        AbstractUser(const std::string &name, const size_t flow_start_time)
-            : name(name),
-            flow_start_time(flow_start_time)
-    {
-    }
+        AbstractUser(const std::string &name) : name(name) { }
 
         virtual void take_actions( Market& mkt ) = 0;
+
+        virtual void print_stats( Market& mkt ) const = 0;
 
         virtual ~AbstractUser() = default;
 };

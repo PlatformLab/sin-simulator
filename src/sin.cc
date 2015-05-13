@@ -4,6 +4,7 @@
 #include <cassert>
 #include "abstract_user.hh"
 #include "basic_user.hh"
+#include "owner_user.hh"
 #include "market_emulator.hh"
 #include "market.hh"
 
@@ -15,6 +16,7 @@ int main(){
     vector<unique_ptr<AbstractUser>> usersToEmulate;
     usersToEmulate.emplace_back(make_unique<BasicUser>( "gregs", 0, 4 ));
     usersToEmulate.emplace_back(make_unique<BasicUser>( "keith", 1, 2 ));
+    usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccast" ));
 
     MarketEmulator emulated_market(move(usersToEmulate), "ccast", 1, 10);
 

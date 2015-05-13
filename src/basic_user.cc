@@ -15,6 +15,18 @@ static size_t num_slots_owned(deque<SingleSlot> &order_book, const string &name)
     return slots_owned;
 }
 
+// used to figure out flow completion time at end
+static size_t get_last_packet_sent_time(const std::deque<Slot> &sent_slots, const std::string &name)
+{
+    size_t highest_sent_time = 0;
+    for (auto & slot : sent_slots) {
+        if (slot.owner == name) {
+            highest_sent_time = slot.time;
+        }
+    }
+    return highest_sent_time;
+}
+
 static size_t current_flow_completion_time(deque<SingleSlot> &order_book, const string &name)
 {
     size_t highest_owned_slot_idx = 0;
@@ -39,8 +51,9 @@ static size_t flow_completion_time_if_sold(deque<SingleSlot> &order_book, const 
     return fct_if_sold;
 }
 
-BasicUser::BasicUser(const std::string &name, size_t flow_start_time, size_t num_packets)
-: AbstractUser(name, flow_start_time),
+BasicUser::BasicUser(const std::string &name, const size_t flow_start_time, const size_t num_packets)
+: AbstractUser(name),
+    flow_start_time(flow_start_time),
     num_packets(num_packets)
 {
 }
@@ -100,6 +113,12 @@ void BasicUser::take_actions(Market& mkt)
             add_offer_to_slot(mkt, i);
         }
     }
+}
+
+void BasicUser::print_stats(Market& mkt) const
+{
+        cout << "user " << name << " started at time " << flow_start_time << " and finished at time "
+        << get_last_packet_sent_time(mkt.sent_slots(), name) << endl; // need to track money spent
 }
 
 void BasicUser::get_best_slots(deque<SingleSlot> &order_book, size_t num_packets_to_send)

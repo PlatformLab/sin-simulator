@@ -43,18 +43,6 @@ MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const 
     }
 }
 
-// used to figure out flow completion time at end
-static size_t get_last_packet_sent_time(const std::deque<Slot> &sent_slots, const std::string &name)
-{
-    size_t highest_sent_time = 0;
-    for (auto & slot : sent_slots) {
-        if (slot.owner == name) {
-            highest_sent_time = slot.time;
-        }
-    }
-    return highest_sent_time;
-}
-
 void MarketEmulator::run_to_completion()
 { 
     cout << "run to completion" << endl;
@@ -80,9 +68,9 @@ void MarketEmulator::run_to_completion()
 
     // print stats
     for ( auto & u : users_ ) {
-        cout << "user " << u->name << " started at time " << u->flow_start_time << " and finished at time "
-        << get_last_packet_sent_time(mkt_.sent_slots(), u->name) << endl; // need to track money spent
+        u->print_stats(mkt_);
     }
+
     cout << "sent packets are ";
     print_slots(mkt_.sent_slots());
 

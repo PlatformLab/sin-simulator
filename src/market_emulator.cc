@@ -61,13 +61,11 @@ void MarketEmulator::run_to_completion()
         }
     } while (oldMkt != mkt_);
 
-        // differentiate flows and users, users exist at all time but flows given to users
-
     // print stats
     for ( auto & u : users_ ) {
         u->print_stats(mkt_);
     }
 
-    cout << "sent packets are ";
+    //cout << "sent packets are ";
     //print_slots(mkt_.sent_slots());
 }

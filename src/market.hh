@@ -25,10 +25,6 @@ class Market {
         std::deque<SingleSlot> &mutable_order_book() { return order_book_; }
 
         void advance_time();
-
-        // owner only create slot
-        void owner_add_slot(std::string owner, uint64_t slot_time)
-        { order_book_.emplace_back(owner, slot_time); };
 };
 
 #endif /* MARKET_HH */

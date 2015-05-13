@@ -21,7 +21,7 @@ class MarketEmulator {
     bool all_users_finished();
 
     public:
-    MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users, const std::string &default_user, uint32_t default_price, size_t total_num_slots );
+    MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
 
     void run_to_completion();
 };

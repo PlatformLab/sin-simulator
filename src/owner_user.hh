@@ -11,12 +11,15 @@
 
 class OwnerUser : public AbstractUser
 {
+    const uint32_t default_slot_offer;
+    const size_t total_num_slots;
+
     public:
-    OwnerUser(const std::string &name) : AbstractUser(name) {}
+    OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots);
 
-    void take_actions(Market& ) {}
+    void take_actions(Market& mkt);
 
-    void print_stats(Market& ) const {}
+    void print_stats(Market& mkt) const;
 };
 
 #endif /* OWNER_USER */

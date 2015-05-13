@@ -1,3 +1,8 @@
+/* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+
+#ifndef MARKET_EVENT_HH
+#define MARKET_EVENT_HH
+
 struct PacketSent
 {
     char* owner;
@@ -25,3 +30,5 @@ struct MarketEvent
         return true;
     }
 };
+
+#endif /* MARKET_EVENT_HH */

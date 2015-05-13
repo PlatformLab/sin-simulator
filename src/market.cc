@@ -13,6 +13,6 @@ void Market::advance_time()
     cout << "slot at time " << front.time << " awarded to " << front.owner << endl;
 
     // add slot to sent_slots and delete from order book
-    sent_slots_.push_back(move(front));
+    //completed_events.emplace_back(front.owner, 
     order_book_.pop_front();
 }

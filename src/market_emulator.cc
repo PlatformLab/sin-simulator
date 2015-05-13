@@ -69,5 +69,5 @@ void MarketEmulator::run_to_completion()
     }
 
     cout << "sent packets are ";
-    print_slots(mkt_.sent_slots());
+    //print_slots(mkt_.sent_slots());
 }

@@ -16,12 +16,13 @@ static size_t num_slots_owned(deque<SingleSlot> &order_book, const string &name)
 }
 
 // used to figure out flow completion time at end
-static size_t get_last_packet_sent_time(const std::deque<Slot> &sent_slots, const std::string &name)
+static size_t get_last_packet_sent_time(const std::deque<MarketEvent> &market_events, const std::string &name)
 {
     size_t highest_sent_time = 0;
-    for (auto & slot : sent_slots) {
-        if (slot.owner == name) {
-            highest_sent_time = slot.time;
+    for (auto & event : market_events) {
+        if (event.type == MarketEvent::PACKET_SENT and
+                event.packet_sent.owner == name) {
+            highest_sent_time = event.packet_sent.time;
         }
     }
     return highest_sent_time;
@@ -76,11 +77,12 @@ void BasicUser::add_offer_to_slot(Market &mkt, size_t at_idx)
     slot.add_offer( toAdd );
 }
 
-static size_t num_packets_i_sent(const deque<Slot> &sent_slots, const string &my_name)
+static size_t num_packets_sent(const deque<MarketEvent> &market_events, const string &name)
 {
     size_t num_sent = 0;
-    for (auto & slot : sent_slots) {
-        if (slot.owner == my_name) {
+    for (auto & event : market_events) {
+        if (event.type == MarketEvent::PACKET_SENT and
+                event.packet_sent.owner == name) {
             num_sent++;
         }
     }
@@ -89,15 +91,15 @@ static size_t num_packets_i_sent(const deque<Slot> &sent_slots, const string &my
 
 void BasicUser::take_actions(Market& mkt)
 {
-    size_t num_packets_sent = num_packets_i_sent(mkt.sent_slots(), name);
-    size_t num_packets_left_to_send = num_packets - num_packets_sent;
+    size_t packets_sent = num_packets_sent(mkt.market_events(), name);
+    size_t num_packets_left_to_send = num_packets - packets_sent;
 
     deque<SingleSlot> &order_book = mkt.mutable_order_book();
 
     if (num_packets_left_to_send > 0) {
         size_t slots_owned = num_slots_owned(mkt.mutable_order_book(), name);
         cout << "I'm a basic user named " << name;
-        cout << " I have a flow of size " << num_packets << " and have successfully sent " << num_packets_sent;
+        cout << " I have a flow of size " << num_packets << " and have successfully sent " << packets_sent;
         cout << " packets and own " << slots_owned << " tentative future slots in the order book" << endl;
 
         if (num_packets_left_to_send > slots_owned) {
@@ -118,7 +120,7 @@ void BasicUser::take_actions(Market& mkt)
 void BasicUser::print_stats(Market& mkt) const
 {
         cout << "user " << name << " started at time " << flow_start_time << " and finished at time "
-        << get_last_packet_sent_time(mkt.sent_slots(), name) << endl; // need to track money spent
+        << get_last_packet_sent_time(mkt.market_events(), name) << endl; // need to track money spent
 }
 
 void BasicUser::get_best_slots(deque<SingleSlot> &order_book, size_t num_packets_to_send)

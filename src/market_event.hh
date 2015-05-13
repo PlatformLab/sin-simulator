@@ -1,13 +1,13 @@
 struct PacketSent
 {
-    std::string owner;
+    char* owner;
     uint64_t time;
 };
 
 struct MoneyExchanged
 {
-    std::string from;
-    std::string to;
+    char* from;
+    char* to;
     uint32_t amount;
     uint64_t time;
 };
@@ -20,4 +20,8 @@ struct MarketEvent
         PacketSent packet_sent;
         MoneyExchanged money_exchanged;
     };
+
+    inline bool operator==( const MarketEvent& ) const {
+        return true;
+    }
 };

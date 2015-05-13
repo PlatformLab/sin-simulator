@@ -15,7 +15,7 @@ int main(){
 
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
     usersToEmulate.emplace_back(std::make_unique<BasicUser>( "gregs", 0, 4 ));
-    usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 1, 2 ));
+    usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 5, 2 ));
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));

@@ -37,7 +37,7 @@ static size_t current_flow_completion_time(deque<SingleSlot> &order_book, const 
             highest_owned_slot_idx = i;
         }
     }
-    return highest_owned_slot_idx;
+    return order_book.at(highest_owned_slot_idx).time;
 }
 
 static size_t flow_completion_time_if_sold(deque<SingleSlot> &order_book, const string &name, size_t idx_to_sell)
@@ -126,7 +126,7 @@ void BasicUser::print_stats(Market& mkt) const
 void BasicUser::get_best_slots(deque<SingleSlot> &order_book, size_t num_packets_to_send)
 {
     vector<size_t> idxs_to_buy;
-    size_t cur_fct = current_flow_completion_time(order_book, name);
+    size_t cur_fct = order_book.empty() ? 0 : current_flow_completion_time(order_book, name);
     recursive_pick_best_slots(order_book, 0, num_packets_to_send, idxs_to_buy, cur_fct);
 
     for (auto i : idxs_to_buy)
@@ -153,6 +153,7 @@ int BasicUser::recursive_pick_best_slots(deque<SingleSlot> &order_book, size_t s
     {
         return best_utility;
     }
+
     for (size_t i = start; i < order_book.size()-n; i++)
     {
         SingleSlot &cur_slot = order_book.at(i);
@@ -163,6 +164,7 @@ int BasicUser::recursive_pick_best_slots(deque<SingleSlot> &order_book, size_t s
             int utility;
             // base case
             if (n == 1) {
+//                int flow_length =  - flow_start_time;
                 utility = -cur_slot.best_offer().cost - max(i, cur_fct);
             } else {
                 utility = -cur_slot.best_offer().cost 

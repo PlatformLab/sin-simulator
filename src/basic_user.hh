@@ -8,10 +8,6 @@
 #include "abstract_user.hh"
 #include "market.hh"
 
-// make class owner user
-
-// get a flow at time x of length n
-
 class BasicUser : public AbstractUser
 {
     public:

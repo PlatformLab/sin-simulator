@@ -4,11 +4,11 @@
 
 using namespace std;
 
-    OwnerUser::OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots, const bool add_once)
+    OwnerUser::OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots, const bool only_add_once)
 : AbstractUser( name ),
     default_slot_offer(default_slot_offer),
     total_num_slots(total_num_slots),
-    add_once(add_once),
+    only_add_once(only_add_once),
     added_before(false)
 {
 }
@@ -17,7 +17,7 @@ void OwnerUser::take_actions(Market& mkt)
 {
     auto &order_book = mkt.mutable_order_book();
 
-    if (add_once and not added_before) {
+    if (only_add_once and not added_before) {
         while (order_book.size() < total_num_slots) {
             uint64_t next_time = order_book.empty() ? 0 : order_book.back().time + 1;
 

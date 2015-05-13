@@ -14,6 +14,6 @@ void Market::advance_time()
 
     // add slot to sent_slots and delete from order book
 
-    market_events_.push_back({MarketEvent::PACKET_SENT, {" temp silly", front.time}});
+    market_events_.push_back({MarketEvent::PACKET_SENT, {front.owner, front.time}, { "", "", 0, 0 }});
     order_book_.pop_front();
 }

@@ -13,9 +13,11 @@ class OwnerUser : public AbstractUser
 {
     const uint32_t default_slot_offer;
     const size_t total_num_slots;
+    const bool add_once;
+    bool added_before;
 
     public:
-    OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots);
+    OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots, const bool add_once);
 
     void take_actions(Market& mkt);
 

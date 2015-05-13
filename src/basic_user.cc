@@ -147,6 +147,10 @@ int BasicUser::recursive_pick_best_slots(deque<SingleSlot> &order_book, size_t s
 {
     int best_utility = -11111;
     vector<size_t> best_idxs;
+    if (order_book.size() < n) // make this cleaner later
+    {
+        return best_utility;
+    }
     for (size_t i = start; i < order_book.size()-n; i++)
     {
         SingleSlot &cur_slot = order_book.at(i);

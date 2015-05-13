@@ -4,6 +4,35 @@
 
 using namespace std;
 
+static void print_slots(deque<SingleSlot> &slots)
+{
+    cout << "[ ";
+    bool is_first = true;
+    for (const SingleSlot &slot : slots)
+    {
+        if (is_first) {
+            is_first = false;
+        } else {
+            cout << " | ";
+        }
+        cout << slot.time << ". ";
+
+        if (slot.owner != "")
+            cout << slot.owner;
+        else
+            cout << "null";
+
+        cout << " $";
+        if (slot.has_offers())
+            cout << slot.best_offer().cost;
+        else
+            cout << "null";
+    }
+
+    cout << " ]" << endl;
+}
+
+
 MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const string &default_user, uint32_t default_slot_offer, size_t total_num_slots )
 : mkt_(), users_(move(users))
 {

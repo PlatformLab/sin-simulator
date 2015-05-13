@@ -42,8 +42,8 @@ class Slot {
     const struct BidOffer &best_bid() const;
     const struct BidOffer &best_offer() const;
 
-    void delete_bids(const std::string &user_name);
-    void delete_offers(const std::string &user_name);
+    void clear_all_bids(const std::string &user_name);
+    void clear_all_offers(const std::string &user_name);
 };
 
 typedef Slot SingleSlot;

@@ -7,14 +7,14 @@ using namespace std;
 bool Slot::market_crossed()
 {
     return not bids.empty() and not offers.empty() and
-            highest_bid().cost >= lowest_offer().cost;
+            best_bid().cost >= best_offer().cost;
 }
 
 void Slot::settle_slot()
 {
     // only single loop for now because we clear bids
     while ( market_crossed() ) {
-        owner = highest_bid().owner;
+        owner = best_bid().owner;
         offers.clear();
         bids.clear();
         // median of best bid and best offer transferred from new owner to old owner
@@ -38,7 +38,7 @@ void Slot::add_offer(BidOffer offer)
 bool Slot::has_offers() const { return not offers.empty(); }
 bool Slot::has_bids() const { return not bids.empty(); }
 
-static bool compare_two_bidoffers(BidOffer &a, BidOffer &b)
+static bool compare_two_bidoffers(const BidOffer &a, const BidOffer &b)
 {
     return (a.cost < b.cost);
 }

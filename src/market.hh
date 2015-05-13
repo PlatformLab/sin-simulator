@@ -14,6 +14,7 @@
 
 #include "abstract_user.hh"
 #include "slot.hh"
+#include "market_event.hh"
 
 class Market {
     private:

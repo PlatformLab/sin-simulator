@@ -2,7 +2,7 @@ struct PacketSent
 {
     std::string owner;
     uint64_t time;
-}
+};
 
 struct MoneyExchanged
 {
@@ -10,7 +10,7 @@ struct MoneyExchanged
     std::string to;
     uint32_t amount;
     uint64_t time;
-}
+};
 
 struct MarketEvent
 {
@@ -20,4 +20,4 @@ struct MarketEvent
         PacketSent packet_sent;
         MoneyExchanged money_exchanged;
     };
-}
+};

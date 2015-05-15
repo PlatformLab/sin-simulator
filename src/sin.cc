@@ -4,6 +4,7 @@
 #include <cassert>
 #include "abstract_user.hh"
 #include "basic_user.hh"
+#include "noop_user.hh"
 #include "owner_user.hh"
 #include "market_emulator.hh"
 #include "market.hh"

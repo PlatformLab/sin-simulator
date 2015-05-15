@@ -1,8 +1,25 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
+#include <unordered_map>
 #include "market_emulator.hh"
 
 using namespace std;
+
+static void settle_money(const std::deque<MoneyExchanged> &transactions) 
+{
+    //unordered_map<pair<string, string>, uint32_t> money_owed;
+    unordered_map<string, uint32_t> money_owed;
+    for ( auto &transaction : transactions ) {
+        auto pair = transaction.from + transaction.to;
+        if (money_owed.count(pair) == 0){
+            money_owed[pair] = 0;
+        }
+        money_owed[pair] += transaction.amount;
+    }
+    for ( auto &pair : money_owed ) {
+        cout << pair.first << " $" << pair.second << endl;
+    }
+}
 
 MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users)
 : mkt_(), users_(move(users))
@@ -30,4 +47,6 @@ void MarketEmulator::run_to_completion()
     for ( auto & u : users_ ) {
         u->print_stats(mkt_);
     }
+
+    settle_money(mkt_.money_exchanged());
 }

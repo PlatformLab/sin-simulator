@@ -16,9 +16,8 @@ void MarketEmulator::run_to_completion()
     Market oldMkt;
 
     do {
-        oldMkt = mkt_;
-
         do {
+            oldMkt = mkt_;
             for ( auto & u : users_ ) {
                 u->take_actions(mkt_);
             }

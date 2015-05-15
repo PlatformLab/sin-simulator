@@ -46,6 +46,9 @@ class Slot {
     bool has_offers() const;
     bool has_bids() const;
 
+    bool has_offer(BidOffer bo) const;
+    bool has_bid(BidOffer bo) const;
+
     const struct BidOffer &best_bid() const;
     const struct BidOffer &best_offer() const;
 
@@ -53,7 +56,7 @@ class Slot {
     void clear_all_offers(const std::string &user_name);
 
     inline bool operator==(const Slot& rhs) const {
-        return owner == rhs.owner and time == rhs.time and 
+        return owner == rhs.owner and time == rhs.time and
             bids == rhs.bids and offers == rhs.offers;
     }
 };

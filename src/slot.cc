@@ -10,18 +10,30 @@ bool Slot::market_crossed()
             best_bid().cost >= best_offer().cost;
 }
 
+static uint32_t median(const uint32_t a, const uint32_t b)
+{
+    if (a > b) {
+        return b + ((a-b)/2);
+    } else {
+        return a + ((a-b)/2);
+    }
+}
+
 deque<MoneyExchanged> Slot::settle_slot()
 {
+    deque<MoneyExchanged> transactions = {};
+
     // only single loop for now because we clear bids
     while ( market_crossed() ) {
+        uint32_t sale_price = median(best_offer().cost, best_bid().cost);
+
+        transactions.push_back({ best_offer().owner, best_bid().owner, sale_price, time });
+
         owner = best_bid().owner;
         offers.clear();
         bids.clear();
-        // median of best bid and best offer transferred from new owner to old owner
-
-        // print to tape and total up later
     }
-    return {};
+    return transactions;
 }
 
 deque<MoneyExchanged> Slot::add_bid(BidOffer bid)

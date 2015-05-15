@@ -11,9 +11,9 @@ struct Market;
 
 class AbstractUser {
     public:
-        const std::string name;
+        const std::string name_;
 
-        AbstractUser(const std::string &name) : name(name) { }
+        AbstractUser(const std::string &name) : name_(name) { }
 
         virtual void take_actions( Market& mkt ) = 0;
 

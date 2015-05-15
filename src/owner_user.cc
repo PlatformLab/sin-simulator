@@ -21,8 +21,8 @@ void OwnerUser::take_actions(Market& mkt)
         while (order_book.size() < total_num_slots_) {
             uint64_t next_time = order_book.empty() ? 0 : order_book.back().time + 1;
 
-            mkt.owner_add_to_order_book(name, next_time);
-            mkt.add_offer_to_slot(order_book.size()-1, { default_slot_offer_, name });
+            mkt.owner_add_to_order_book(name_, next_time);
+            mkt.add_offer_to_slot(order_book.size()-1, { default_slot_offer_, name_ });
         }
         added_before_ = true;
     }

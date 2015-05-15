@@ -18,7 +18,6 @@
 
 class Market {
     private:
-    public: // temp XXX easy to change back here because we have getters
         std::deque<SingleSlot> order_book_ = {};
         std::deque<PacketSent> packets_sent_ = {};
         std::deque<MoneyExchanged> money_exchanged_ = {};
@@ -29,6 +28,7 @@ class Market {
         const std::deque<MoneyExchanged> &money_exchanged() const { return money_exchanged_; };
 
         void advance_time();
+        void owner_add_to_order_book(const std::string &name, uint64_t next_time);
 
         void add_offer_to_slot(const size_t slot_idx, BidOffer offer);
         void add_bid_to_slot(const size_t slot_idx, BidOffer bid);

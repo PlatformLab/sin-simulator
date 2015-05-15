@@ -11,10 +11,10 @@
 
 class OwnerUser : public AbstractUser
 {
-    const uint32_t default_slot_offer;
-    const size_t total_num_slots;
-    const bool only_add_once;
-    bool added_before;
+    const uint32_t default_slot_offer_;
+    const size_t total_num_slots_;
+    const bool only_add_once_;
+    bool added_before_;
 
     public:
     OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots, const bool add_once);

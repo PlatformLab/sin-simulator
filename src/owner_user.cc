@@ -6,10 +6,10 @@ using namespace std;
 
     OwnerUser::OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots, const bool only_add_once)
 : AbstractUser( name ),
-    default_slot_offer(default_slot_offer),
-    total_num_slots(total_num_slots),
-    only_add_once(only_add_once),
-    added_before(false)
+    default_slot_offer_(default_slot_offer),
+    total_num_slots_(total_num_slots),
+    only_add_once_(only_add_once),
+    added_before_(false)
 {
 }
 
@@ -17,14 +17,14 @@ void OwnerUser::take_actions(Market& mkt)
 {
     auto &order_book = mkt.order_book();
 
-    if (only_add_once and not added_before) {
-        while (order_book.size() < total_num_slots) {
-            //uint64_t next_time = order_book.empty() ? 0 : order_book.back().time + 1;
+    if (only_add_once_ and not added_before_) {
+        while (order_book.size() < total_num_slots_) {
+            uint64_t next_time = order_book.empty() ? 0 : order_book.back().time + 1;
 
-            //order_book.emplace_back(name, next_time);
-            //order_book.back().add_offer( { default_slot_offer, name } ); 
+            mkt.owner_add_to_order_book(name, next_time);
+            mkt.add_offer_to_slot(order_book.size()-1, { default_slot_offer_, name });
         }
-        added_before = true;
+        added_before_ = true;
     }
 }
 

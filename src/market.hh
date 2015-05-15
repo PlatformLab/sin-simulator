@@ -20,16 +20,24 @@ class Market {
     private:
     public: // temp XXX easy to change back here because we have getters
         std::deque<SingleSlot> order_book_ = {};
-        std::deque<MarketEvent> market_events_ = {};
+        std::deque<PacketSent> packets_sent_ = {};
+        std::deque<MoneyExchanged> money_exchanged_ = {};
 
     public:
-        std::deque<MarketEvent> &market_events() { return market_events_; };
-        std::deque<SingleSlot> &mutable_order_book() { return order_book_; }
+        const std::deque<SingleSlot> &order_book() const { return order_book_; }
+        const std::deque<PacketSent> &packets_sent() const { return packets_sent_; };
+        const std::deque<MoneyExchanged> &money_exchanged() const { return money_exchanged_; };
 
         void advance_time();
+
+        void add_offer_to_slot(const size_t slot_idx, BidOffer offer);
+        void add_bid_to_slot(const size_t slot_idx, BidOffer bid);
+
         inline bool operator==(const Market& rhs) const {
-            return order_book_ == rhs.order_book_ and market_events_ == rhs.market_events_;
+            return order_book_ == rhs.order_book_ and packets_sent_ == rhs.packets_sent_
+                and money_exchanged_ == rhs.money_exchanged_;
         }
+
         inline bool operator!=(const Market& rhs) const {
             return not operator==(rhs);
         }

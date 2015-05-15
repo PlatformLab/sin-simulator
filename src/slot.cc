@@ -10,7 +10,7 @@ bool Slot::market_crossed()
             best_bid().cost >= best_offer().cost;
 }
 
-void Slot::settle_slot()
+deque<MoneyExchanged> Slot::settle_slot()
 {
     // only single loop for now because we clear bids
     while ( market_crossed() ) {
@@ -21,18 +21,19 @@ void Slot::settle_slot()
 
         // print to tape and total up later
     }
+    return {};
 }
 
-void Slot::add_bid(BidOffer bid)
+deque<MoneyExchanged> Slot::add_bid(BidOffer bid)
 {
     bids.emplace_back(bid);
-    settle_slot();
+    return settle_slot();
 }
 
-void Slot::add_offer(BidOffer offer)
+deque<MoneyExchanged> Slot::add_offer(BidOffer offer)
 {
     offers.emplace_back(offer);
-    settle_slot();
+    return settle_slot();
 }
 
 bool Slot::has_offers() const { return not offers.empty(); }

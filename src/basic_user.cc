@@ -1,10 +1,37 @@
-/* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include "basic_user.hh" 
 
 using namespace std;
 
-static size_t num_slots_owned(deque<SingleSlot> &order_book, const string &name)
+static void print_slots(const deque<SingleSlot> &slots)
+{
+    cout << "[ ";
+    bool is_first = true;
+    for (const SingleSlot &slot : slots)
+    {
+        if (is_first) {
+            is_first = false;
+        } else {
+            cout << " | ";
+        }
+        cout << slot.time << ". ";
+
+        if (slot.owner != "")
+            cout << slot.owner;
+        else
+            cout << "null";
+
+        cout << " $";
+        if (slot.has_offers())
+            cout << slot.best_offer().cost;
+        else
+            cout << "null";
+    }
+
+    cout << " ]" << endl;
+}
+
+static size_t num_slots_owned(const deque<SingleSlot> &order_book, const string &name)
 {
     size_t slots_owned = 0;
     for (auto &slot : order_book)
@@ -16,19 +43,18 @@ static size_t num_slots_owned(deque<SingleSlot> &order_book, const string &name)
 }
 
 // used to figure out flow completion time at end
-static size_t get_last_packet_sent_time(const std::deque<MarketEvent> &market_events, const std::string &name)
+static size_t get_last_packet_sent_time(const Market &mkt, const std::string &name)
 {
     size_t highest_sent_time = 0;
-    for (auto & event : market_events) {
-        if (event.type == MarketEvent::PACKET_SENT and
-                event.packet_sent.owner == name) {
-            highest_sent_time = event.packet_sent.time;
+    for ( auto & packet_sent : mkt.packets_sent() ) {
+        if ( packet_sent.owner == name ) {
+            highest_sent_time = packet_sent.time;
         }
     }
     return highest_sent_time;
 }
 
-static size_t current_flow_completion_time(deque<SingleSlot> &order_book, const string &name)
+static size_t current_flow_completion_time(const deque<SingleSlot> &order_book, const string &name)
 {
     size_t highest_owned_slot_idx = 0;
     for (size_t i = 0; i < order_book.size(); i++)
@@ -40,7 +66,7 @@ static size_t current_flow_completion_time(deque<SingleSlot> &order_book, const 
     return order_book.at(highest_owned_slot_idx).time;
 }
 
-static size_t flow_completion_time_if_sold(deque<SingleSlot> &order_book, const string &name, size_t idx_to_sell)
+static size_t flow_completion_time_if_sold(const deque<SingleSlot> &order_book, const string &name, size_t idx_to_sell)
 {
     size_t fct_if_sold = 0;
     for (size_t i = 0; i < order_book.size(); i++)
@@ -54,16 +80,15 @@ static size_t flow_completion_time_if_sold(deque<SingleSlot> &order_book, const 
 
 BasicUser::BasicUser(const std::string &name, const size_t flow_start_time, const size_t num_packets)
 : AbstractUser(name),
-    flow_start_time(flow_start_time),
-    num_packets(num_packets)
+    flow_start_time_(flow_start_time),
+    num_packets_(num_packets)
 {
 }
 
 void BasicUser::add_offer_to_slot(Market &mkt, size_t at_idx)
 {
-    deque<SingleSlot> &order_book = mkt.mutable_order_book();
-    SingleSlot &slot = order_book.at(at_idx);
-    assert(slot.owner == name);
+    const deque<SingleSlot> &order_book = mkt.order_book();
+    assert(order_book.at(at_idx).owner == name);
 
     // price and make offer
     vector<size_t> idxs_to_buy;
@@ -73,16 +98,15 @@ void BasicUser::add_offer_to_slot(Market &mkt, size_t at_idx)
         << " got utility delta " << utility_delta 
         << " and idx to buy instead " << idxs_to_buy.front() << endl;
     assert(utility_delta < 0);
-    BidOffer toAdd = { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name };
-    slot.add_offer( toAdd );
+
+    mkt.add_offer_to_slot(at_idx, { (uint32_t) (-utility_delta) - (uint32_t) fct_if_sold + 1, name } );
 }
 
-static size_t num_packets_sent(const deque<MarketEvent> &market_events, const string &name)
+static size_t num_packets_sent(Market &mkt, const string &name)
 {
     size_t num_sent = 0;
-    for (auto & event : market_events) {
-        if (event.type == MarketEvent::PACKET_SENT and
-                event.packet_sent.owner == name) {
+    for ( auto & packet_sent : mkt.packets_sent() ) {
+        if (packet_sent.owner == name) {
             num_sent++;
         }
     }
@@ -91,51 +115,52 @@ static size_t num_packets_sent(const deque<MarketEvent> &market_events, const st
 
 void BasicUser::take_actions(Market& mkt)
 {
-    size_t packets_sent = num_packets_sent(mkt.market_events(), name);
-    size_t num_packets_left_to_send = num_packets - packets_sent;
+    size_t packets_sent = num_packets_sent(mkt, name);
+    size_t num_packets_left_to_send = num_packets_ - packets_sent;
 
-    deque<SingleSlot> &order_book = mkt.mutable_order_book();
+    const deque<SingleSlot> &order_book = mkt.order_book();
 
     if (num_packets_left_to_send > 0) {
-        size_t slots_owned = num_slots_owned(mkt.mutable_order_book(), name);
+        size_t slots_owned = num_slots_owned(mkt.order_book(), name);
         cout << "I'm a basic user named " << name;
-        cout << " I have a flow of size " << num_packets << " and have successfully sent " << packets_sent;
+        cout << " I have a flow of size " << num_packets_ << " and have successfully sent " << packets_sent;
         cout << " packets and own " << slots_owned << " tentative future slots in the order book" << endl;
 
         if (num_packets_left_to_send > slots_owned) {
-            get_best_slots(order_book, num_packets_left_to_send-slots_owned);
+            get_best_slots(mkt, num_packets_left_to_send-slots_owned);
         }
     }
 
     for (size_t i = 0; i < order_book.size(); i++)
     {
-        SingleSlot &cur_slot = order_book.at(i);
+        const SingleSlot &cur_slot = order_book.at(i);
         if (cur_slot.owner == name and not cur_slot.has_offers())
         {
             add_offer_to_slot(mkt, i);
         }
     }
+    print_slots(order_book);
 }
 
-void BasicUser::print_stats(Market& mkt) const
+void BasicUser::print_stats(const Market& mkt) const
 {
-        cout << "user " << name << " started at time " << flow_start_time << " and finished at time "
-        << get_last_packet_sent_time(mkt.market_events(), name) << endl; // need to track money spent
+        cout << "user " << name << " started at time " << flow_start_time_ << " and finished at time "
+        << get_last_packet_sent_time(mkt, name) << endl; // need to track money spent
 }
 
-void BasicUser::get_best_slots(deque<SingleSlot> &order_book, size_t num_packets_to_send)
+void BasicUser::get_best_slots(Market& mkt, size_t num_packets_to_send)
 {
+    auto & order_book = mkt.order_book();
     vector<size_t> idxs_to_buy;
     size_t cur_fct = order_book.empty() ? 0 : current_flow_completion_time(order_book, name);
     recursive_pick_best_slots(order_book, 0, num_packets_to_send, idxs_to_buy, cur_fct);
 
     for (auto i : idxs_to_buy)
     {
-        auto &slot = order_book.at(i);
-        BidOffer toAdd = { slot.best_offer().cost, name };
-        slot.add_bid( toAdd );
-        cout << name << " making bid of $" << toAdd.cost << " to idx " << i;
-        if (slot.owner == name)
+        mkt.add_bid_to_slot(i, { order_book.at(i).best_offer().cost, name } );
+
+        cout << name << " making bid to idx " << i;
+        if (order_book.at(i).owner == name)
         {
             cout << "... got slot!" << endl;
             //add_offer_to_slot(i);
@@ -144,7 +169,7 @@ void BasicUser::get_best_slots(deque<SingleSlot> &order_book, size_t num_packets
     cout << endl;
 }
 
-int BasicUser::recursive_pick_best_slots(deque<SingleSlot> &order_book, size_t start, size_t n,
+int BasicUser::recursive_pick_best_slots(const deque<SingleSlot> &order_book, size_t start, size_t n,
         vector<size_t> &idxs, size_t cur_fct)
 {
     int best_utility = -11111;
@@ -156,7 +181,7 @@ int BasicUser::recursive_pick_best_slots(deque<SingleSlot> &order_book, size_t s
 
     for (size_t i = start; i < order_book.size()-n; i++)
     {
-        SingleSlot &cur_slot = order_book.at(i);
+        const SingleSlot &cur_slot = order_book.at(i);
         if (cur_slot.owner != name and cur_slot.has_offers()) {
             vector<size_t> recursive_idxs = idxs; // hopefully copy
             recursive_idxs.emplace_back(i);
@@ -164,7 +189,7 @@ int BasicUser::recursive_pick_best_slots(deque<SingleSlot> &order_book, size_t s
             int utility;
             // base case
             if (n == 1) {
-//                int flow_length =  - flow_start_time;
+//                int flow_length =  - flow_start_time_;
                 utility = -cur_slot.best_offer().cost - max(i, cur_fct);
             } else {
                 utility = -cur_slot.best_offer().cost 

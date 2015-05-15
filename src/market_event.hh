@@ -23,6 +23,7 @@ struct MoneyExchanged
     }
 };
 
+/*
 struct MarketEvent
 {
     enum {PACKET_SENT, MONEY_EXCHANGED} type;
@@ -41,5 +42,6 @@ struct MarketEvent
         return true;
     }
 };
+*/
 
 #endif /* MARKET_EVENT_HH */

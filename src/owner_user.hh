@@ -21,7 +21,7 @@ class OwnerUser : public AbstractUser
 
     void take_actions(Market& mkt);
 
-    void print_stats(Market& mkt) const;
+    void print_stats(const Market& mkt) const;
 };
 
 #endif /* OWNER_USER */

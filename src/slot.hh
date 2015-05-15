@@ -11,6 +11,8 @@
 #include <memory>
 #include <functional>
 
+#include "market_event.hh"
+
 struct BidOffer {
     uint32_t cost;
     std::string owner;
@@ -23,11 +25,11 @@ struct BidOffer {
 // template <size_t size> XXX later
 class Slot {
     public: // temp
-    std::deque<struct BidOffer> bids = {};
-    std::deque<struct BidOffer> offers = {};
+    std::deque<BidOffer> bids = {};
+    std::deque<BidOffer> offers = {};
 
     public:
-    //std::array<std::string, size> owners;
+    //std::array<std::string, size> owners; TODO
     std::string owner;
     uint64_t time; //const
 
@@ -35,11 +37,11 @@ class Slot {
 
     private:
     bool market_crossed();
-    void settle_slot();
+    std::deque<MoneyExchanged> settle_slot();
 
     public:
-    void add_bid(struct BidOffer bid);
-    void add_offer(struct BidOffer offer);
+    std::deque<MoneyExchanged> add_bid(struct BidOffer bid);
+    std::deque<MoneyExchanged> add_offer(struct BidOffer offer);
 
     bool has_offers() const;
     bool has_bids() const;

@@ -30,8 +30,11 @@ class Market {
         void advance_time();
         void owner_add_to_order_book(const std::string &name, uint64_t next_time);
 
-        void add_offer_to_slot(const size_t slot_idx, BidOffer offer);
-        void add_bid_to_slot(const size_t slot_idx, BidOffer bid);
+        void add_offer_to_slot(size_t slot_idx, BidOffer &&offer);
+        void add_bid_to_slot(size_t slot_idx, BidOffer &&bid);
+
+        void clear_offers_from_slot(size_t slot_idx, const std::string &name);
+        void clear_bids_from_slot(size_t slot_idx, const std::string &name);
 
         inline bool operator==(const Market& rhs) const {
             return order_book_ == rhs.order_book_ and packets_sent_ == rhs.packets_sent_

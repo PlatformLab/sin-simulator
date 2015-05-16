@@ -25,14 +25,24 @@ void Market::owner_add_to_order_book(const std::string &name, uint64_t next_time
     order_book_.push_back( {name, next_time} );
 }
 
-void Market::add_offer_to_slot(const size_t slot_idx, BidOffer offer)
+void Market::add_offer_to_slot(size_t slot_idx, BidOffer &&offer)
 {
     auto transactions = order_book_.at(slot_idx).add_offer(offer);
     money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
 }
 
-void Market::add_bid_to_slot(const size_t slot_idx, BidOffer bid)
+void Market::add_bid_to_slot(size_t slot_idx, BidOffer &&bid)
 {
     auto transactions = order_book_.at(slot_idx).add_bid(bid);
     money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
+}
+
+void Market::clear_offers_from_slot(size_t slot_idx, const std::string &name)
+{
+    order_book_.at(slot_idx).clear_all_offers(name);
+}
+
+void Market::clear_bids_from_slot(size_t slot_idx, const std::string &name)
+{
+    order_book_.at(slot_idx).clear_all_bids(name);
 }

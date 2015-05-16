@@ -4,7 +4,7 @@
 
 using namespace std;
 
-bool Slot::market_crossed()
+bool Slot::market_crossed() const
 {
     return not bids.empty() and not offers.empty() and
             best_bid().cost >= best_offer().cost;

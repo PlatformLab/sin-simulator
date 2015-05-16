@@ -18,8 +18,6 @@ class MarketEmulator {
     Market mkt_;
     std::vector<std::unique_ptr<AbstractUser>> users_;
 
-    bool all_users_finished();
-
     public:
     MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
 

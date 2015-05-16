@@ -5,7 +5,7 @@
 
 using namespace std;
 
-static void settle_money(const std::deque<MoneyExchanged> &transactions) 
+static void settle_money_printout(const std::deque<MoneyExchanged> &transactions) 
 {
     //unordered_map<pair<string, string>, uint32_t> money_owed;
     unordered_map<string, uint32_t> money_owed;
@@ -48,5 +48,5 @@ void MarketEmulator::run_to_completion()
         u->print_stats(mkt_);
     }
 
-    settle_money(mkt_.money_exchanged());
+    settle_money_printout(mkt_.money_exchanged());
 }

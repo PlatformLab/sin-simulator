@@ -36,7 +36,7 @@ class Slot {
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
 
     private:
-    bool market_crossed();
+    bool market_crossed() const;
     std::deque<MoneyExchanged> settle_slot();
 
     public:

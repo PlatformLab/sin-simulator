@@ -19,7 +19,7 @@ list<list<size_t>> BruteForceUser::potential_idxs(const deque<SingleSlot> &order
 
     list<list<size_t>> toRet = {};
     for (size_t i = start; i < order_book.size(); i++) {
-        if (order_book.at(i).owner != name_) {
+        if (order_book.at(i).owner != name_ and not order_book.at(i).offers.empty()) {
                 for (list<size_t> &vec : potential_idxs(order_book, i+1, len-1)) {
                     vec.emplace_front(i);
                     toRet.emplace_back(vec);
@@ -50,13 +50,25 @@ size_t num_owned_in_deque(deque<T> deque, const string &name)
     return toRet;
 }
 
+list<size_t> idxs_owned(deque<SingleSlot> order_book, const string &name)
+{
+    list<size_t> toRet {};
+    for (size_t i = 0; i < order_book.size(); i++)
+    {
+        if (order_book.at(i).owner == name) {
+            toRet.emplace_back(i);
+        }
+    }
+    return toRet;
+}
+
 void BruteForceUser::take_actions(Market& mkt)
 {
     const deque<SingleSlot> &order_book = mkt.order_book();
     if (order_book.empty())
         return;
 
-    size_t num_packets_to_buy = num_packets_ - num_owned_in_deque(mkt.packets_sent(), name_) - num_owned_in_deque(order_book, name_); 
+    size_t num_packets_to_buy = num_packets_ - num_owned_in_deque(mkt.packets_sent(), name_) - idxs_owned(order_book, name_).size(); 
     list<size_t> best_idxs = {};
     int max_net_utility = INT_MIN;
     for (list<size_t> &idxs : potential_idxs(order_book, flow_start_time_, num_packets_to_buy))
@@ -68,7 +80,9 @@ void BruteForceUser::take_actions(Market& mkt)
         }
         cout << "]" << " costs " << cost_of_slots(order_book, idxs) << " and has utility " << utility_func_(idxs) <<  endl;
         */
-        int net_utility = utility_func_(idxs) - cost_of_slots(order_book, idxs);
+        auto idxs_for_utility_func = idxs_owned(order_book, name_);
+        idxs_for_utility_func.insert(idxs_for_utility_func.end(), idxs.begin(), idxs.end());
+        int net_utility = utility_func_(idxs_for_utility_func) - cost_of_slots(order_book, idxs);
         if (net_utility > max_net_utility) {
             max_net_utility = net_utility;
             best_idxs = idxs;

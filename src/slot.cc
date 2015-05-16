@@ -51,20 +51,26 @@ deque<MoneyExchanged> Slot::add_offer(BidOffer offer)
 bool Slot::has_offers() const { return not offers.empty(); }
 bool Slot::has_bids() const { return not bids.empty(); }
 
-bool Slot::has_offer(BidOffer bo) const
+bool Slot::has_offer(BidOffer &bo) const
 {
-  for(const BidOffer &t : offers)
+  for(const BidOffer &offer : offers)
   {
-    if(t == bo) return true;
+    if(offer == bo)
+    {
+      return true;
+    }
   }
   return false;
 }
 
-bool Slot::has_bid(BidOffer bo) const
+bool Slot::has_bid(BidOffer &bo) const
 {
-  for(const BidOffer &t : bids)
+  for(const BidOffer &bid : bids)
   {
-    if(t == bo) return true;
+    if(bid == bo)
+    {
+      return true;
+    }
   }
   return false;
 }

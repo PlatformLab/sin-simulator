@@ -46,8 +46,8 @@ class Slot {
     bool has_offers() const;
     bool has_bids() const;
 
-    bool has_offer(BidOffer bo) const;
-    bool has_bid(BidOffer bo) const;
+    bool has_offer(BidOffer &bo) const;
+    bool has_bid(BidOffer &bo) const;
 
     const struct BidOffer &best_bid() const;
     const struct BidOffer &best_offer() const;

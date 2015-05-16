@@ -1,3 +1,4 @@
+/* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include "brute_force_user.hh" 
 
@@ -19,18 +20,10 @@ list<list<size_t>> BruteForceUser::potential_idxs(const deque<SingleSlot> &order
     list<list<size_t>> toRet = {};
     for (size_t i = start; i < order_book.size(); i++) {
         if (order_book.at(i).owner != name_) {
-            /*
-            if (len == 1) {
-                list<size_t> v { i };
-                toRet.emplace_back( v );
-                cout << "this is what we get " << potential_idxs(order_book, i+1, len-1).size() << endl;
-            } else {
-                */
                 for (list<size_t> &vec : potential_idxs(order_book, i+1, len-1)) {
                     vec.emplace_front(i);
                     toRet.emplace_back(vec);
                 }
-            //}
         }
     }
     return toRet;
@@ -49,7 +42,7 @@ template <typename T>
 size_t num_owned_in_deque(deque<T> deque, const string &name)
 {
     size_t toRet = 0;
-    for (T& t : deque) {
+    for (T &t : deque) {
         if (t.owner == name) {
             toRet++;
         }

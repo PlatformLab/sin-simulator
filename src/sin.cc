@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <climits>
 #include "abstract_user.hh"
 #include "basic_user.hh"
 #include "noop_user.hh"
@@ -11,14 +12,23 @@
 #include "market.hh"
 
 //using namespace std;
+int utility_func(std::list<size_t>& lst)
+{
+    auto max_it = std::max_element(lst.begin(), lst.end());
+    if (max_it == lst.end()) {
+        return INT_MIN;
+    } else {
+        return - *max_it;
+    }
+}
 
 int main(){
     std::cout << "hello world" << std::endl;
 
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 5, 3 ));
+    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 0, 3, utility_func ));
     //usersToEmulate.emplace_back(std::make_unique<NoopUser>( "larry" ));
-    //usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 5, 2 ));
+    usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 1, 2 ));
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));

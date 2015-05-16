@@ -10,7 +10,7 @@ static void settle_money(const std::deque<MoneyExchanged> &transactions)
     //unordered_map<pair<string, string>, uint32_t> money_owed;
     unordered_map<string, uint32_t> money_owed;
     for ( auto &transaction : transactions ) {
-        auto pair = transaction.from + transaction.to;
+        auto pair = transaction.from + " to " + transaction.to;
         if (money_owed.count(pair) == 0){
             money_owed[pair] = 0;
         }

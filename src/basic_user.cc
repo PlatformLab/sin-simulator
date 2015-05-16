@@ -115,10 +115,12 @@ static size_t num_packets_sent(Market &mkt, const string &name)
 
 void BasicUser::take_actions(Market& mkt)
 {
+    const deque<SingleSlot> &order_book = mkt.order_book();
+    if (order_book.empty() or order_book.front().time < flow_start_time_)
+        return;
+
     size_t packets_sent = num_packets_sent(mkt, name_);
     size_t num_packets_left_to_send = num_packets_ - packets_sent;
-
-    const deque<SingleSlot> &order_book = mkt.order_book();
 
     if (num_packets_left_to_send > 0) {
         size_t slots_owned = num_slots_owned(mkt.order_book(), name_);

@@ -27,7 +27,7 @@ deque<MoneyExchanged> Slot::settle_slot()
     while ( market_crossed() ) {
         uint32_t sale_price = median(best_offer().cost, best_bid().cost);
 
-        transactions.push_back({ best_offer().owner, best_bid().owner, sale_price, time });
+        transactions.push_back({ best_bid().owner, best_offer().owner, sale_price, time });
 
         owner = best_bid().owner;
         offers.clear();

@@ -49,4 +49,9 @@ void MarketEmulator::run_to_completion()
     }
 
     settle_money_printout(mkt_.money_exchanged());
+    cout << "[ ";
+    for (auto & pkt : mkt_.packets_sent()){
+        cout << pkt.time << ". " << pkt.owner << "| ";
+    }
+    cout << "]" << endl;
 }

@@ -64,10 +64,10 @@ static pair<list<size_t>, int> best_slots(const deque<SingleSlot> &order_book, c
 }
 
 template <typename T>
-static size_t num_owned_in_deque(deque<T> deque, const string &name)
+static size_t num_owned_in_deque(const deque<T> deque, const string &name)
 {
     size_t toRet = 0;
-    for (T &t : deque) {
+    for (const T &t : deque) {
         if (t.owner == name) {
             toRet++;
         }
@@ -106,16 +106,21 @@ void BruteForceUser::take_actions(Market& mkt)
 
     cout << "making offers for slots ";
     for (size_t i : idxs_owned(order_book, name_)) {
-        auto cur_idxs_owned = idxs_owned(order_book, name_);
-        //int utility = utility_func_(idxs);
+        if (order_book.at(i).has_offers()) //TODO this hack
+        {
+            auto cur_idxs_owned = idxs_owned(order_book, name_);
+            //int utility = utility_func_(idxs);
 
-        remove_if( cur_idxs_owned.begin(), cur_idxs_owned.end(), [i](size_t elem){return elem == i;} );
+            remove_if( cur_idxs_owned.begin(), cur_idxs_owned.end(), [i](size_t elem){return elem == i;} );
 
-        auto best_backup_slot = best_slots(order_book, name_, cur_idxs_owned, flow_start_time_, 1, utility_func_);
-        assert(best_backup_slot.first.size() == 1);
-        int utility_delta_to_move_slots = best_backup_slot.second;
-        assert(utility_delta_to_move_slots >= 0);
-        mkt.add_offer_to_slot( i , { (uint32_t) utility_delta_to_move_slots + 1, name_ } );
+            auto best_backup_slot = best_slots(order_book, name_, cur_idxs_owned, flow_start_time_, 1, utility_func_);
+            assert(best_backup_slot.first.size() == 1);
+            int utility_delta_to_move_slots = best_backup_slot.second;
+            //assert(utility_delta_to_move_slots <= 0);
+            cout << "pricing slot " << i << " at " <<(-utility_delta_to_move_slots) + 1 << endl; 
+            mkt.add_offer_to_slot( i , { (uint32_t) (-utility_delta_to_move_slots) + 1, name_ } );
+        }
+        cout << "not adding offers to slot " << i << endl;
     }
 }
 

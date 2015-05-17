@@ -26,7 +26,7 @@ int main(){
     std::cout << "hello world" << std::endl;
 
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
-    usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 0, 6 ));
+    //usersToEmulate.emplace_back(std::make_unique<BasicUser>( "keith", 0, 6 ));
     usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 0, 2, utility_func ));
     //usersToEmulate.emplace_back(std::make_unique<NoopUser>( "larry" ));
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));

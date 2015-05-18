@@ -71,6 +71,7 @@ const BidOffer &Slot::best_offer() const
 void filter_user_bidoffers(const string &user_name, deque<BidOffer> &from)
 {
     remove_if( from.begin(), from.end(), [&](BidOffer x){return x.owner == user_name;} );
+    from.shrink_to_fit(); // TODO remove-if has weird semantics, not sure this fixes
 }
 
 void Slot::clear_all_bids(const string &user_name)

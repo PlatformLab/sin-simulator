@@ -7,6 +7,7 @@ using namespace std;
 
 static void settle_money_printout(const std::deque<MoneyExchanged> &transactions) 
 {
+    cout << "final money owed: " << endl;
     //unordered_map<pair<string, string>, uint32_t> money_owed;
     unordered_map<string, uint32_t> money_owed;
     for ( auto &transaction : transactions ) {

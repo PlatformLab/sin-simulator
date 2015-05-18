@@ -4,7 +4,7 @@
 
 using namespace std;
 
-BruteForceUser::BruteForceUser(const std::string &name, const size_t flow_start_time, const size_t num_packets, std::function<int(std::list<size_t>&)> utility_func)
+BruteForceUser::BruteForceUser(const std::string &name, const size_t flow_start_time, const size_t num_packets, std::function<int(std::list<size_t>&, size_t)> utility_func)
 : AbstractUser(name),
     flow_start_time_(flow_start_time),
     num_packets_(num_packets),
@@ -39,7 +39,7 @@ static uint32_t cost_of_slots(const deque<SingleSlot> &order_book, const list<si
 }
 
 
-static pair<list<size_t>, int> best_slots(const deque<SingleSlot> &order_book, const string &name, const list<size_t> idxs_for_utility_func, size_t start, size_t num_packets, function<int(list<size_t>&)> utility_func)
+static pair<list<size_t>, int> best_slots(const deque<SingleSlot> &order_book, const string &name, const list<size_t> idxs_for_utility_func, size_t start, size_t num_packets, function<int(list<size_t>&, size_t)> utility_func)
 {
     list<size_t> best_idxs = {};
     int max_net_utility = INT_MIN;
@@ -54,7 +54,7 @@ static pair<list<size_t>, int> best_slots(const deque<SingleSlot> &order_book, c
         */
         list<size_t> combined_idxs_for_utility_func = idxs_for_utility_func;
         combined_idxs_for_utility_func.insert(combined_idxs_for_utility_func.end(), idxs.begin(), idxs.end());
-        int net_utility = utility_func(combined_idxs_for_utility_func) - cost_of_slots(order_book, idxs);
+        int net_utility = utility_func(combined_idxs_for_utility_func, start) - cost_of_slots(order_book, idxs);
         if (net_utility > max_net_utility) {
             max_net_utility = net_utility;
             best_idxs = idxs;
@@ -104,24 +104,27 @@ void BruteForceUser::take_actions(Market& mkt)
     }
     cout << endl;
 
-    cout << "making offers for slots ";
+    cout << name_ << " making offers for slots:" << endl;
     for (size_t i : idxs_owned(order_book, name_)) {
-        if (order_book.at(i).has_offers()) //TODO this hack
+        if (not order_book.at(i).has_offers()) //TODO this hack
         {
             auto cur_idxs_owned = idxs_owned(order_book, name_);
-            //int utility = utility_func_(idxs);
-
-            remove_if( cur_idxs_owned.begin(), cur_idxs_owned.end(), [i](size_t elem){return elem == i;} );
+            int old_utility = utility_func_(cur_idxs_owned, flow_start_time_);
+            //cout << "old_utility " << old_utility  << endl;
+            cur_idxs_owned.remove_if([i](size_t elem){return elem == i;});
 
             auto best_backup_slot = best_slots(order_book, name_, cur_idxs_owned, flow_start_time_, 1, utility_func_);
             assert(best_backup_slot.first.size() == 1);
-            int utility_delta_to_move_slots = best_backup_slot.second;
+            int utility_delta_to_move_slots = best_backup_slot.second - old_utility;
+            cout << "best backup " << best_backup_slot.first.front() << " and util delta " << utility_delta_to_move_slots << endl;
             //assert(utility_delta_to_move_slots <= 0);
             cout << "pricing slot " << i << " at " <<(-utility_delta_to_move_slots) + 1 << endl; 
             mkt.add_offer_to_slot( i , { (uint32_t) (-utility_delta_to_move_slots) + 1, name_ } );
+        } else {
+            cout << "not adding offers to slot " << i << endl;
         }
-        cout << "not adding offers to slot " << i << endl;
     }
+    cout << "done making offers for slots." << endl;
 }
 
 

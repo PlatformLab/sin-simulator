@@ -28,4 +28,13 @@ void OwnerUser::take_actions(Market& mkt)
     }
 }
 
+bool OwnerUser::done( const Market& mkt ) const 
+{
+    if ( only_add_once_ ) {
+        return added_before_ && mkt.order_book().empty();
+    } else {
+        return false;
+    }
+}
+
 void OwnerUser::print_stats(const Market& ) const {}

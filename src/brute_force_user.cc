@@ -127,6 +127,10 @@ void BruteForceUser::take_actions(Market& mkt)
     cout << "done making offers for slots." << endl;
 }
 
+bool BruteForceUser::done(const Market& mkt) const
+{
+    return num_packets_ == num_owned_in_deque(mkt.packets_sent(), name_);
+}
 
 void BruteForceUser::print_stats(const Market& ) const
 {

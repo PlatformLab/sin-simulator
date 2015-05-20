@@ -11,8 +11,10 @@
 #include "market.hh"
 
 //using namespace std;
+
 int utility_func(std::list<size_t>& lst, size_t flow_start_time)
 {
+    // take in size of flow and int min if they dont have full flow
     auto max_it = std::max_element(lst.begin(), lst.end());
     if (max_it == lst.end()) {
         return INT_MIN;
@@ -25,8 +27,10 @@ int main(){
     std::cout << "hello world" << std::endl;
 
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 1, 2, utility_func ));
     usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "keith", 0, 5, utility_func ));
+    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 1, 2, utility_func ));
+    //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 1, 2, utility_func ));
+
     //usersToEmulate.emplace_back(std::make_unique<NoopUser>( "larry" ));
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));
 

@@ -27,15 +27,15 @@ int main(){
     std::cout << "hello world" << std::endl;
 
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "keith", 0, 5, utility_func ));
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 1, 2, utility_func ));
-    //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "gregs", 1, 2, utility_func ));
+    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "A", 0, 2, utility_func ));
+    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "A", 3, 4, utility_func ));
+    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "C", 0, 2, utility_func ));
 
-    //usersToEmulate.emplace_back(std::make_unique<NoopUser>( "larry" ));
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
     emulated_market.run_to_completion();
+    emulated_market.print_packets_sent();
     return 1;
 }

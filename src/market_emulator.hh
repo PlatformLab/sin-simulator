@@ -22,6 +22,12 @@ class MarketEmulator {
     MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
 
     void run_to_completion();
+
+    void print_packets_sent();
+
+    void print_money_exchanged();
+
+    void print_user_stats();
 };
 
 #endif /* MARKET_EMULATOR_HH */

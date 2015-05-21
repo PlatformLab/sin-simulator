@@ -14,6 +14,7 @@ static bool all_users_done(const vector<std::unique_ptr<AbstractUser>> &users, c
 {
     for ( const auto & u : users ) {
         if (not u->done(mkt)) {
+//            cout << "not all users done" << endl;
             return false;
         }
     }
@@ -32,6 +33,7 @@ static void users_take_actions_until_finished(vector<std::unique_ptr<AbstractUse
         if (oldMkt == mkt) {
             break;
         }
+ //       cout << "market changed, taking user actions again" << endl;
     }
 }
 

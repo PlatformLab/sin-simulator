@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <climits>
+#include <map>
 #include "abstract_user.hh"
 #include "noop_user.hh"
 #include "owner_user.hh"
@@ -23,13 +24,20 @@ int utility_func(std::list<size_t>& lst, size_t flow_start_time)
     }
 }
 
-int main(){
-    std::cout << "hello world" << std::endl;
+struct brute_force_args {
+    std::string name;
+    size_t flow_start_time;
+    size_t num_packets;
+};
 
+void sim_brute_force_users(std::list<brute_force_args> user_args)
+{
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "A", 0, 2, utility_func ));
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "A", 3, 4, utility_func ));
-    usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( "C", 0, 2, utility_func ));
+    for (auto & u : user_args)
+    {
+        std::cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << std::endl;
+        usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func ));
+    }
 
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));
 
@@ -37,5 +45,19 @@ int main(){
 
     emulated_market.run_to_completion();
     emulated_market.print_packets_sent();
+    emulated_market.print_money_exchanged();
+}
+
+int main(){
+    std::cout << "hello world" << std::endl;
+
+    std::list<brute_force_args> usrs;
+    usrs.push_back({ "A", 0, 2 });
+    usrs.push_back({ "B", 0, 2 });
+    usrs.push_back({ "C", 2, 4 });
+
+    sim_brute_force_users(usrs);
+    usrs.reverse();
+    sim_brute_force_users(usrs);
     return 1;
 }

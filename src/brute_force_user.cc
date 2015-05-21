@@ -97,14 +97,14 @@ void BruteForceUser::take_actions(Market& mkt)
 
     list<size_t> best_idxs = best_slots(order_book, name_, idxs_owned(order_book, name_), flow_start_time_, num_packets_to_buy, utility_func_).first;
 
-    cout << "buying slots ";
+    //cout << name_ << " buying slots ";
     for (size_t i : best_idxs) {
-        cout << i << ", ";
+    //    cout << i << ", ";
         mkt.add_bid_to_slot( i, { order_book.at(i).best_offer().cost, name_ } );
     }
-    cout << endl;
+   // cout << endl;
 
-    cout << name_ << " making offers for slots:" << endl;
+    //cout << name_ << " making offers for slots:" << endl;
     for (size_t i : idxs_owned(order_book, name_)) {
         if (not order_book.at(i).has_offers()) //TODO this hack
         {
@@ -116,19 +116,20 @@ void BruteForceUser::take_actions(Market& mkt)
             auto best_backup_slot = best_slots(order_book, name_, cur_idxs_owned, flow_start_time_, 1, utility_func_);
             assert(best_backup_slot.first.size() == 1);
             int utility_delta_to_move_slots = best_backup_slot.second - old_utility;
-            cout << "best backup " << best_backup_slot.first.front() << " and util delta " << utility_delta_to_move_slots << endl;
+    //        cout << "best backup " << best_backup_slot.first.front() << " and util delta " << utility_delta_to_move_slots << endl;
             //assert(utility_delta_to_move_slots <= 0);
-            cout << "pricing slot " << i << " at " <<(-utility_delta_to_move_slots) + 1 << endl; 
+   //         cout << "pricing slot " << i << " at " <<(-utility_delta_to_move_slots) + 1 << endl; 
             mkt.add_offer_to_slot( i , { (uint32_t) (-utility_delta_to_move_slots) + 1, name_ } );
         } else {
-            cout << "not adding offers to slot " << i << endl;
+  //          cout << "not adding offers to slot " << i << endl;
         }
     }
-    cout << "done making offers for slots." << endl;
+ //   cout << "done making offers for slots." << endl;
 }
 
 bool BruteForceUser::done(const Market& mkt) const
 {
+//    cout << "num packets for " << name_ << " is " << num_packets_ << " and have sent " << num_owned_in_deque(mkt.packets_sent(), name_) << endl;
     return num_packets_ == num_owned_in_deque(mkt.packets_sent(), name_);
 }
 

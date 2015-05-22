@@ -81,6 +81,7 @@ void MarketEmulator::print_slots()
 
 void MarketEmulator::print_packets_sent()
 {
+    cout << "Final packets sent are:" << endl;
     cout << "[ ";
     for (auto & pkt : mkt_.packets_sent()){
         cout << pkt.time << ". " << pkt.owner << "| ";

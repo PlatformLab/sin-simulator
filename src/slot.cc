@@ -10,7 +10,8 @@ bool Slot::market_crossed() const
             best_bid().cost >= best_offer().cost;
 }
 
-static uint32_t median(const uint32_t a, const uint32_t b)
+// TODO double check
+static double median(const double a, const double b)
 {
     if (a > b) {
         return b + ((a-b)/2);
@@ -25,7 +26,7 @@ deque<MoneyExchanged> Slot::settle_slot()
 
     // only single loop for now because we clear bids
     while ( market_crossed() ) {
-        uint32_t sale_price = median(best_offer().cost, best_bid().cost);
+        double sale_price = median(best_offer().cost, best_bid().cost);
 
         transactions.push_back({ best_bid().owner, best_offer().owner, sale_price, time });
 

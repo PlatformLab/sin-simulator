@@ -10,7 +10,7 @@ MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users)
 {
 }
 
-static bool all_users_done(const vector<std::unique_ptr<AbstractUser>> &users, const Market &mkt)
+static bool all_users_done(const vector<unique_ptr<AbstractUser>> &users, const Market &mkt)
 {
     for ( const auto & u : users ) {
         if (not u->done(mkt)) {
@@ -21,16 +21,18 @@ static bool all_users_done(const vector<std::unique_ptr<AbstractUser>> &users, c
     return true;
 }
 
-static void users_take_actions_until_finished(vector<std::unique_ptr<AbstractUser>> &users, Market &mkt)
+void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<AbstractUser>> &users, Market &mkt)
 {
     while (true) {
         Market oldMkt = mkt;
 
         for ( auto & u : users ) {
             u->take_actions(mkt);
+            print_slots();
         }
 
         if (oldMkt == mkt) {
+            cout << "advancing time" << endl << endl;
             break;
         }
  //       cout << "market changed, taking user actions again" << endl;
@@ -49,10 +51,29 @@ void MarketEmulator::run_to_completion()
 void MarketEmulator::print_slots()
 {
     cout << "[ ";
-    for (auto & pkt : mkt_.packets_sent()){
-        cout << pkt.time << ". " << pkt.owner << "| ";
+    bool is_first = true;
+    for (const SingleSlot &slot : mkt_.order_book())
+    {
+        if (is_first) {
+            is_first = false;
+        } else {
+            cout << " | ";
+        }
+        cout << slot.time << ". ";
+
+        if (slot.owner != "")
+            cout << slot.owner;
+        else
+            cout << "null";
+
+        cout << " $";
+        if (slot.has_offers())
+            cout << slot.best_offer().cost;
+        else
+            cout << "null";
     }
-    cout << "]" << endl;
+
+    cout << " ]" << endl;
 }
 
 void MarketEmulator::print_packets_sent()
@@ -67,8 +88,7 @@ void MarketEmulator::print_packets_sent()
 void MarketEmulator::print_money_exchanged()
 {
     cout << "final money owed: " << endl;
-    //unordered_map<pair<string, string>, uint32_t> money_owed;
-    unordered_map<string, uint32_t> money_owed;
+    unordered_map<string, double> money_owed;
     for ( auto &transaction : mkt_.money_exchanged() ) {
         auto pair = transaction.from + " to " + transaction.to;
         if (money_owed.count(pair) == 0){

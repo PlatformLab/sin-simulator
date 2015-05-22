@@ -17,11 +17,14 @@
 class MarketEmulator {
     Market mkt_;
     std::vector<std::unique_ptr<AbstractUser>> users_;
+    void users_take_actions_until_finished(std::vector<std::unique_ptr<AbstractUser>> &users, Market &mkt);// TODO change back to static
 
     public:
     MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
 
     void run_to_completion();
+
+    void print_slots();
 
     void print_packets_sent();
 

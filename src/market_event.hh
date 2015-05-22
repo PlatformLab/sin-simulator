@@ -17,7 +17,7 @@ struct MoneyExchanged
 {
     std::string from;
     std::string to;
-    uint32_t amount;
+    double amount;
     uint64_t time;
 
     inline bool operator==( const MoneyExchanged& rhs ) const {

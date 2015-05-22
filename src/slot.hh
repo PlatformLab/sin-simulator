@@ -14,7 +14,7 @@
 #include "market_event.hh"
 
 struct BidOffer {
-    uint32_t cost;
+    double cost;
     std::string owner;
 
     inline bool operator==(const BidOffer& rhs) const {

@@ -29,9 +29,9 @@ static list<list<size_t>> potential_idxs(const deque<SingleSlot> &order_book, co
     return toRet;
 }
 
-static uint32_t cost_of_slots(const deque<SingleSlot> &order_book, const list<size_t> &idxs)
+static double cost_of_slots(const deque<SingleSlot> &order_book, const list<size_t> &idxs)
 {
-    uint32_t toRet = 0;
+    double toRet = 0;
     for (size_t i : idxs) {
         toRet += order_book.at(i).best_offer().cost;
     }
@@ -111,7 +111,7 @@ void BruteForceUser::take_actions(Market& mkt)
             auto cur_idxs_owned = idxs_owned(order_book, name_);
             int old_utility = utility_func_(cur_idxs_owned, flow_start_time_);
             //cout << "old_utility " << old_utility  << endl;
-            cur_idxs_owned.remove_if([i](size_t elem){return elem == i;});
+            cur_idxs_owned.remove_if([i](size_t elem){ return elem == i; });
 
             auto best_backup_slot = best_slots(order_book, name_, cur_idxs_owned, flow_start_time_, 1, utility_func_);
             assert(best_backup_slot.first.size() == 1);
@@ -119,7 +119,7 @@ void BruteForceUser::take_actions(Market& mkt)
     //        cout << "best backup " << best_backup_slot.first.front() << " and util delta " << utility_delta_to_move_slots << endl;
             //assert(utility_delta_to_move_slots <= 0);
    //         cout << "pricing slot " << i << " at " <<(-utility_delta_to_move_slots) + 1 << endl; 
-            mkt.add_offer_to_slot( i , { (uint32_t) (-utility_delta_to_move_slots) + 1, name_ } );
+            mkt.add_offer_to_slot( i , { ((double) -utility_delta_to_move_slots) + .1, name_ } );
         } else {
   //          cout << "not adding offers to slot " << i << endl;
         }

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-    OwnerUser::OwnerUser(const std::string &name, const uint32_t default_slot_offer, const size_t total_num_slots, const bool only_add_once)
+    OwnerUser::OwnerUser(const std::string &name, const double default_slot_offer, const size_t total_num_slots, const bool only_add_once)
 : AbstractUser( name ),
     default_slot_offer_(default_slot_offer),
     total_num_slots_(total_num_slots),

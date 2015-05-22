@@ -46,6 +46,15 @@ void MarketEmulator::run_to_completion()
     }
 }
 
+void MarketEmulator::print_slots()
+{
+    cout << "[ ";
+    for (auto & pkt : mkt_.packets_sent()){
+        cout << pkt.time << ". " << pkt.owner << "| ";
+    }
+    cout << "]" << endl;
+}
+
 void MarketEmulator::print_packets_sent()
 {
     cout << "[ ";

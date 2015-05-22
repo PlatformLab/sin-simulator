@@ -51,13 +51,30 @@ void sim_brute_force_users(std::list<brute_force_args> user_args)
 int main(){
     std::cout << "hello world" << std::endl;
 
-    std::list<brute_force_args> usrs;
-    usrs.push_back({ "A", 0, 2 });
-    usrs.push_back({ "B", 0, 2 });
-    usrs.push_back({ "C", 2, 4 });
+//    std::list<brute_force_args> usrs = { { "A", 0, 2 }, { "B", 0, 2 }, { "C", 3, 3 } };
+    std::list<brute_force_args> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
+    sim_brute_force_users(usrs);
 
+    /*
+    usrs =
+    { { "A", 0, 2 },
+      { "B", 2, 2 },
+      { "C", 4, 2 },
+      { "D", 6, 2 },
+      { "E", 8, 2 },
+      { "F", 10, 2 },
+      { "G", 12, 2 },
+      { "Long", 0, 8 } };
+      */
+    /*
+    usrs =
+    { { "A", 0, 2 },
+      { "B", 2, 2 },
+      { "C", 4, 2 }
+    }
     sim_brute_force_users(usrs);
     usrs.reverse();
     sim_brute_force_users(usrs);
+    */
     return 1;
 }

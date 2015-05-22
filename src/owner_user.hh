@@ -19,11 +19,11 @@ class OwnerUser : public AbstractUser
     public:
     OwnerUser(const std::string &name, const double default_slot_offer, const size_t total_num_slots, const bool add_once);
 
-    void take_actions(Market& mkt);
+    void take_actions(Market& mkt) override;
 
-    bool done( const Market& mkt ) const;
+    bool done( const Market& mkt ) const override;
 
-    void print_stats(const Market& mkt) const;
+    void print_stats(const Market& mkt) const override;
 };
 
 #endif /* OWNER_USER */

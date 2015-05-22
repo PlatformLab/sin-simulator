@@ -17,13 +17,13 @@ class BruteForceUser : public AbstractUser
     std::function<int(std::list<size_t>&, size_t)> utility_func_;
 
     public:
-    BruteForceUser(const std::string &name, const size_t flow_start_time, const size_t num_packets, std::function<int(std::list<size_t>&, size_t)> utility_func);
+    BruteForceUser( const std::string &name, const size_t flow_start_time, const size_t num_packets, std::function<int(std::list<size_t>&, size_t)> utility_func );
 
-    void take_actions(Market& mkt);
+    void take_actions( Market& mkt ) override;
 
-    bool done(const Market& mkt) const;
+    bool done( const Market& mkt ) const override;
 
-    void print_stats(const Market& mkt) const;
+    void print_stats( const Market& mkt ) const override;
 };
 
 #endif /* BRUTE_FORCE_USER */

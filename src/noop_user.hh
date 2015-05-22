@@ -9,11 +9,13 @@
 class NoopUser : public AbstractUser
 {
     public:
-    NoopUser(const std::string &name) : AbstractUser(name) { };
+    NoopUser( const std::string &name ) : AbstractUser( name ) { };
 
-    void take_actions(Market& ) { std::cout << "noop" << std::endl; }
+    void take_actions( Market& ) override { std::cout << "noop" << std::endl; }
 
-    void print_stats(const Market& ) const { std::cout << "noop stats" << std::endl; }
+    bool done( const Market& ) const override { return true; };
+
+    void print_stats( const Market& ) const override { std::cout << "noop stats" << std::endl; }
 };
 
 #endif /* NOOP_USER */

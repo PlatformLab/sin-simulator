@@ -6,7 +6,6 @@
 #include <iostream>
 #include <deque>
 #include <list>
-#include <climits>
 #include "abstract_user.hh"
 #include "market.hh"
 

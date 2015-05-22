@@ -42,7 +42,7 @@ static double cost_of_slots(const deque<SingleSlot> &order_book, const list<size
 static pair<list<size_t>, int> best_slots(const deque<SingleSlot> &order_book, const string &name, const list<size_t> idxs_for_utility_func, size_t start, size_t num_packets, function<int(list<size_t>&, size_t)> utility_func)
 {
     list<size_t> best_idxs = {};
-    int max_net_utility = INT_MIN;
+    int max_net_utility = std::numeric_limits<int>::min();
     for (list<size_t> &idxs : potential_idxs(order_book, name, start, num_packets))
     {
         /*

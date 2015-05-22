@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <cassert>
-#include <climits>
 #include <map>
 #include "abstract_user.hh"
 #include "noop_user.hh"
@@ -18,7 +17,7 @@ int utility_func(std::list<size_t>& lst, size_t flow_start_time)
     // take in size of flow and int min if they dont have full flow
     auto max_it = std::max_element(lst.begin(), lst.end());
     if (max_it == lst.end()) {
-        return INT_MIN;
+        return std::numeric_limits<int>::min();
     } else {
         return - (*max_it - flow_start_time);
     }

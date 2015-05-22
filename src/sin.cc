@@ -49,6 +49,7 @@ int main(){
 //    std::list<flow> usrs = { { "A", 0, 2 }, { "B", 0, 2 }, { "C", 3, 3 } };
     std::list<flow> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
     sim_brute_force_users(usrs);
+    std::cout << "shortest remaining time first was:" << std::endl;
     simulate_shortest_remaining_time_first(usrs);
 
     /*

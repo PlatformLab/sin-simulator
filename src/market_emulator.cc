@@ -27,8 +27,11 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
         Market oldMkt = mkt;
 
         for ( auto & u : users ) {
+
+            Market oldMkt2 = mkt;
             u->take_actions(mkt);
-            print_slots();
+            if (oldMkt2  != mkt) // they actually did something
+                print_slots();
         }
 
         if (oldMkt == mkt) {
@@ -59,7 +62,7 @@ void MarketEmulator::print_slots()
         } else {
             cout << " | ";
         }
-        cout << slot.time << ". ";
+        //cout << slot.time << ". ";
 
         if (slot.owner != "")
             cout << slot.owner;

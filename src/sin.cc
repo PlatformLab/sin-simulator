@@ -39,7 +39,7 @@ void sim_brute_force_users(std::list<brute_force_args> user_args)
         usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func ));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 10, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 8, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
@@ -52,7 +52,7 @@ int main(){
     std::cout << "hello world" << std::endl;
 
 //    std::list<brute_force_args> usrs = { { "A", 0, 2 }, { "B", 0, 2 }, { "C", 3, 3 } };
-    std::list<brute_force_args> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
+    std::list<brute_force_args> usrs = { { "A", 0, 3 }, { "B", 0, 2 }/*, { "C", 0, 2 }*/ };
     sim_brute_force_users(usrs);
 
     /*

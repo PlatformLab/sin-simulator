@@ -119,7 +119,7 @@ void BruteForceUser::take_actions( Market& mkt )
     //        cout << "best backup " << best_backup_slot.first.front() << " and util delta " << utility_delta_to_move_slots << endl;
             //assert( utility_delta_to_move_slots <= 0 );
    //         cout << "pricing slot " << i << " at " <<( -utility_delta_to_move_slots ) + 1 << endl; 
-            mkt.add_offer_to_slot( i , { ( (double) -utility_delta_to_move_slots ) + .1, name_ } );
+            mkt.add_offer_to_slot( i , { ( (double) -utility_delta_to_move_slots ) + .5, name_ } );
         } else {
   //          cout << "not adding offers to slot " << i << endl;
         }

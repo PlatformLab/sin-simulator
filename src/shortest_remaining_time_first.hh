@@ -51,7 +51,7 @@ void simulate_shortest_remaining_time_first( std::list<flow> flows )
 
     // now print results
     std::cout << "[ ";
-    for (auto & pkt : schedule){
+    for (auto & pkt : final_schedule){
         std::cout << pkt.time << ". " << pkt.owner << "| ";
     }
     std::cout << "]" << std::endl;

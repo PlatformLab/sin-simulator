@@ -27,11 +27,11 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
         Market oldMkt = mkt;
 
         for ( auto & u : users ) {
-
-            Market oldMkt2 = mkt;
+            Market beforeMkt = mkt;
             u->take_actions(mkt);
-            if (oldMkt2  != mkt) // they actually did something
+            if (beforeMkt != mkt) { // they actually did something
                 print_slots();
+            }
         }
 
         if (oldMkt == mkt) {
@@ -48,6 +48,9 @@ void MarketEmulator::run_to_completion()
     {
         users_take_actions_until_finished( users_, mkt_ );
         mkt_.advance_time();
+        if ( mkt_.order_book().empty() ){
+            return;
+        }
     }
 }
 

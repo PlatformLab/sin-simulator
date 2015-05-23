@@ -34,7 +34,7 @@ void sim_brute_force_users(std::list<flow> user_args)
         usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func ));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccast", 1, 8, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "~", .01, 10, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
@@ -43,35 +43,24 @@ void sim_brute_force_users(std::list<flow> user_args)
     emulated_market.print_money_exchanged();
 }
 
+std::list<flow> random_users(size_t number)
+{
+    std::list<flow> toRet { };
+    for (size_t i = 0; i < number; i ++)
+    {
+        toRet.push_back( { std::string(1,'A'+i), 0, (size_t) (rand() % 4) + 1 } );
+    }
+    return toRet;
+}
+
 int main(){
     std::cout << "hello world" << std::endl;
 
-//    std::list<flow> usrs = { { "A", 0, 2 }, { "B", 0, 2 }, { "C", 3, 3 } };
-    std::list<flow> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
+    //std::list<flow> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
+    std::list<flow> usrs = random_users(3);
     sim_brute_force_users(usrs);
     std::cout << "shortest remaining time first was:" << std::endl;
     simulate_shortest_remaining_time_first(usrs);
 
-    /*
-    usrs =
-    { { "A", 0, 2 },
-      { "B", 2, 2 },
-      { "C", 4, 2 },
-      { "D", 6, 2 },
-      { "E", 8, 2 },
-      { "F", 10, 2 },
-      { "G", 12, 2 },
-      { "Long", 0, 8 } };
-      */
-    /*
-    usrs =
-    { { "A", 0, 2 },
-      { "B", 2, 2 },
-      { "C", 4, 2 }
-    }
-    sim_brute_force_users(usrs);
-    usrs.reverse();
-    sim_brute_force_users(usrs);
-    */
     return 1;
 }

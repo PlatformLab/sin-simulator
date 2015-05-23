@@ -35,7 +35,7 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
         }
 
         if (oldMkt == mkt) {
-            cout << "advancing time" << endl << endl;
+            //cout << "advancing time" << endl << endl;
             break;
         }
  //       cout << "market changed, taking user actions again" << endl;

@@ -34,7 +34,7 @@ void sim_brute_force_users(std::list<flow> user_args)
         usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func ));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "~", .01, 10, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "~", 1, 10, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 

@@ -69,18 +69,12 @@ const BidOffer &Slot::best_offer() const
     return *min_element(offers.begin(), offers.end(), compare_two_bidoffers);
 }
 
-void filter_user_bidoffers(const string &user_name, deque<BidOffer> &from)
-{
-    remove_if( from.begin(), from.end(), [&](BidOffer x){return x.owner == user_name;} );
-    from.shrink_to_fit(); // TODO remove-if has weird semantics, not sure this fixes
-}
-
 void Slot::clear_all_bids(const string &user_name)
 {
-    filter_user_bidoffers(user_name, bids);
+    bids.remove_if( [&user_name](BidOffer x){ return x.owner == user_name; } );
 }
 
 void Slot::clear_all_offers(const string &user_name)
 {
-    filter_user_bidoffers(user_name, offers);
+    offers.remove_if( [&user_name](BidOffer x){ return x.owner == user_name; } );
 }

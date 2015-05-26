@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <deque>
+#include <list>
 #include <queue>
 #include <algorithm>
 #include <cassert>
@@ -25,8 +26,8 @@ struct BidOffer {
 // template <size_t size> XXX later
 class Slot {
     public: // temp
-    std::deque<BidOffer> bids = {};
-    std::deque<BidOffer> offers = {};
+    std::list<BidOffer> bids = {};
+    std::list<BidOffer> offers = {};
 
     public:
     //std::array<std::string, size> owners; TODO

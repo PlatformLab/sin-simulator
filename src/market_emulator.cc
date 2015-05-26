@@ -96,15 +96,25 @@ void MarketEmulator::print_money_exchanged()
 {
     cout << "final money owed: " << endl;
     unordered_map<string, double> money_owed;
+    // track money owed in both directions (a to b $1 and b to a $-1 i.e.)
+    // print one that is net positive at end
     for ( auto &transaction : mkt_.money_exchanged() ) {
-        auto pair = transaction.from + " to " + transaction.to;
-        if (money_owed.count(pair) == 0){
-            money_owed[pair] = 0;
+        string pair1 = transaction.from + " to " + transaction.to;
+        string pair2 = transaction.to + " to " + transaction.from;
+
+        if (money_owed.count(pair1) == 0){
+            money_owed[pair1] = 0;
         }
-        money_owed[pair] += transaction.amount;
+        if (money_owed.count(pair2) == 0){
+            money_owed[pair2] = 0;
+        }
+        money_owed[pair1] += transaction.amount;
+        money_owed[pair2] -= transaction.amount;
     }
     for ( auto &pair : money_owed ) {
-        cout << pair.first << " $" << pair.second << endl;
+        if (pair.second > 0) {
+            cout << pair.first << " $" << pair.second << endl;
+        }
     }
 }
 

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <deque>
 #include <queue>
+#include <list>
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -26,6 +27,7 @@ class MarketEmulator {
 
     void print_slots();
 
+    const std::list<PacketSent> &packets_sent() const { return mkt_.packets_sent(); };
     void print_packets_sent();
 
     void print_money_exchanged();

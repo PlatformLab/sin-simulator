@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "market_event.hh"
+#include "pretty_print.hh"
 
 struct flow {
     std::string name;
@@ -13,7 +14,7 @@ struct flow {
     size_t num_packets;
 };
 
-void simulate_shortest_remaining_time_first( std::list<flow> flows )
+const std::list<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
 {
     std::list<PacketSent> final_schedule;
     uint64_t cur_time = 0;
@@ -50,11 +51,8 @@ void simulate_shortest_remaining_time_first( std::list<flow> flows )
     }
 
     // now print results
-    std::cout << "[ ";
-    for (auto & pkt : final_schedule){
-        std::cout << pkt.time << ". " << pkt.owner << "| ";
-    }
-    std::cout << "]" << std::endl;
+//    printPacketsSent(final_schedule);
+    return final_schedule;
 }
 
 #endif /* SRTF_HH */

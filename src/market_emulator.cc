@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include "market_emulator.hh"
+#include "pretty_print.hh"
 
 using namespace std;
 
@@ -30,7 +31,7 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
             Market beforeMkt = mkt;
             u->take_actions(mkt);
             if (beforeMkt != mkt) { // they actually did something
-                print_slots();
+                //print_slots();
             }
         }
 
@@ -56,40 +57,13 @@ void MarketEmulator::run_to_completion()
 
 void MarketEmulator::print_slots()
 {
-    cout << "[ ";
-    bool is_first = true;
-    for (const SingleSlot &slot : mkt_.order_book())
-    {
-        if (is_first) {
-            is_first = false;
-        } else {
-            cout << " | ";
-        }
-        //cout << slot.time << ". ";
-
-        if (slot.owner != "")
-            cout << slot.owner;
-        else
-            cout << "null";
-
-        cout << " $";
-        if (slot.has_offers())
-            cout << slot.best_offer().cost;
-        else
-            cout << "null";
-    }
-
-    cout << " ]" << endl;
+    printOrderBook(mkt_.order_book());
 }
 
 void MarketEmulator::print_packets_sent()
 {
     cout << "Final packets sent are:" << endl;
-    cout << "[ ";
-    for (auto & pkt : mkt_.packets_sent()){
-        cout << pkt.time << ". " << pkt.owner << "| ";
-    }
-    cout << "]" << endl;
+    printPacketsSent(mkt_.packets_sent());
 }
 
 void MarketEmulator::print_money_exchanged()

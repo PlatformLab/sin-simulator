@@ -37,7 +37,7 @@ std::function<int(std::list<size_t>&, size_t, size_t)> get_utility_func(size_t n
     };
 }
 
-void sim_brute_force_users(std::list<flow> user_args)
+const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
 {
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : user_args)
@@ -47,13 +47,16 @@ void sim_brute_force_users(std::list<flow> user_args)
         //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 12, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "cc", 1, 25, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
     emulated_market.run_to_completion();
-    emulated_market.print_money_exchanged();
-    emulated_market.print_packets_sent();
+    //emulated_market.print_money_exchanged();
+    //emulated_market.print_packets_sent();
+    std::list<PacketSent> packets_sent_copy = emulated_market.packets_sent();
+    packets_sent_copy.remove_if([](PacketSent ps) { return ps.owner == "cc"; } );
+    return packets_sent_copy;
 }
 
 std::list<flow> random_users(size_t number)
@@ -61,7 +64,7 @@ std::list<flow> random_users(size_t number)
     std::list<flow> toRet { };
     for (size_t i = 0; i < number; i ++)
     {
-        toRet.push_back( { std::string(1,'A'+i), 0, (size_t) (rand() % 4) + 1 } );
+        toRet.push_back( { std::string(1,'A'+i), (size_t) (rand() % 6), (size_t) (rand() % 5) + 1 } );
     }
     return toRet;
 }
@@ -70,10 +73,22 @@ int main(){
     std::cout << "hello world" << std::endl;
 
     //std::list<flow> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
-    std::list<flow> usrs = random_users(3);
-    sim_brute_force_users(usrs);
-    std::cout << "shortest remaining time first was:" << std::endl;
-    simulate_shortest_remaining_time_first(usrs);
+    //std::list<flow> usrs = random_users(3); // TODO this an interesting one
+    for (int i = 0; i < 60; i++)
+    {
+        std::list<flow> usrs = random_users(rand() % 4 + 1); // this an interesting one
+        auto market = sim_brute_force_users(usrs);
+        auto srtf = simulate_shortest_remaining_time_first(usrs);
+        if (market == srtf)
+        {
+            std::cout << "market matched srtf results!" << std::endl;
+        } else {
+            std::cout << "market didnt match srtf! Market:"<< std::endl;
+            printPacketsSent(market);
+            std::cout << "and srtf:" << std::endl;
+            printPacketsSent(srtf);
+        }
+    }
 
     return 1;
 }

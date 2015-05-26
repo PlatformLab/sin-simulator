@@ -67,10 +67,10 @@ static pair<list<size_t>, double> best_slots( const deque<SingleSlot> &order_boo
 }
 
 template <typename T>
-static size_t num_owned_in_deque( const deque<T> deque, const string &name )
+static size_t num_owned_in_deque( const T deque, const string &name )
 {
     size_t toRet = 0;
-    for ( const T &t : deque ) {
+    for ( const auto &t : deque ) {
         if ( t.owner == name ) {
             toRet++;
         }
@@ -104,7 +104,7 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
             cur_idxs_owned.remove_if( [i] ( size_t elem ){ return elem == i; } );
 
             auto best_backup_slot = best_slots( order_book, name_, cur_idxs_owned, flow_start_time_, 1, num_packets_already_sent, utility_func_ );
-            assert( best_backup_slot.first.size() == 1 );
+            assert( best_backup_slot.first.size() == 1 && "no other slots to buy" );
             double utility_delta_to_move_slots = best_backup_slot.second - cur_utility;
             //cout << "best backup " << best_backup_slot.first.front() << " and util delta " << utility_delta_to_move_slots << endl;
             //assert( utility_delta_to_move_slots <= 0 );

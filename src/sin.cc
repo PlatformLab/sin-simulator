@@ -14,7 +14,7 @@
 
 //using namespace std;
 
-int utility_func(std::list<size_t>& lst, size_t flow_start_time)
+int utility_func(std::list<size_t>& lst, size_t flow_start_time, size_t)
 {
     // take in size of flow and int min if they dont have full flow
     auto max_it = std::max_element(lst.begin(), lst.end());
@@ -25,11 +25,11 @@ int utility_func(std::list<size_t>& lst, size_t flow_start_time)
     }
 }
 
-std::function<int(std::list<size_t>&, size_t)> get_utility_func(size_t num_packets)
+std::function<int(std::list<size_t>&, size_t, size_t)> get_utility_func(size_t num_packets)
 {
-    return [num_packets] ( std::list<size_t>& lst, size_t flow_start_time )
+    return [num_packets] ( std::list<size_t>& lst, size_t flow_start_time, size_t packets_already_sent )
     {
-        if (lst.size() != num_packets) {
+        if ( (lst.size() + packets_already_sent) < num_packets ) {
             return std::numeric_limits<int>::min();
         } else {
             return - (int) (*std::max_element(lst.begin(), lst.end()) - flow_start_time);
@@ -43,16 +43,17 @@ void sim_brute_force_users(std::list<flow> user_args)
     for (auto & u : user_args)
     {
         std::cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << std::endl;
-        usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));
+        usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));// TODO fix to include packets already sent
+        //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "~", 1, 10, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 12, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
     emulated_market.run_to_completion();
-    emulated_market.print_packets_sent();
     emulated_market.print_money_exchanged();
+    emulated_market.print_packets_sent();
 }
 
 std::list<flow> random_users(size_t number)

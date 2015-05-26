@@ -25,13 +25,25 @@ int utility_func(std::list<size_t>& lst, size_t flow_start_time)
     }
 }
 
+std::function<int(std::list<size_t>&, size_t)> get_utility_func(size_t num_packets)
+{
+    return [num_packets] ( std::list<size_t>& lst, size_t flow_start_time )
+    {
+        if (lst.size() != num_packets) {
+            return std::numeric_limits<int>::min();
+        } else {
+            return - (int) (*std::max_element(lst.begin(), lst.end()) - flow_start_time);
+        }
+    };
+}
+
 void sim_brute_force_users(std::list<flow> user_args)
 {
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : user_args)
     {
         std::cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << std::endl;
-        usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func ));
+        usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));
     }
 
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "~", 1, 10, true ));

@@ -47,7 +47,8 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
         //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "cc", 1, 25, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 25, true ));
+ //   usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 10, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
@@ -55,7 +56,7 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
     //emulated_market.print_money_exchanged();
     //emulated_market.print_packets_sent();
     std::list<PacketSent> packets_sent_copy = emulated_market.packets_sent();
-    packets_sent_copy.remove_if([](PacketSent ps) { return ps.owner == "cc"; } );
+    packets_sent_copy.remove_if([](PacketSent ps) { return ps.owner == "ccst"; } );
     return packets_sent_copy;
 }
 
@@ -89,6 +90,5 @@ int main(){
             printPacketsSent(srtf);
         }
     }
-
     return 1;
 }

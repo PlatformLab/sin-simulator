@@ -30,7 +30,7 @@ void printOrderBook(T& container)
         if (not is_first) {
             std::cout << " | ";
         }
-
+        std::cout << slot.time << ". ";
         if (slot.owner != "") {
             std::cout << slot.owner;
         } else {

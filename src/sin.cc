@@ -75,20 +75,25 @@ int main(){
 
     //std::list<flow> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
     //std::list<flow> usrs = random_users(3); // TODO this an interesting one
-    for (int i = 0; i < 60; i++)
+    size_t num_matched = 0;
+    size_t num_didnt_match = 0;
+    for (int i = 0; i < 1; i++)
     {
         std::list<flow> usrs = random_users(rand() % 4 + 1); // this an interesting one
         auto market = sim_brute_force_users(usrs);
         auto srtf = simulate_shortest_remaining_time_first(usrs);
         if (market == srtf)
         {
-            std::cout << "market matched srtf results!" << std::endl;
+            num_matched++;
+            std::cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         } else {
+            num_didnt_match++;
             std::cout << "market didnt match srtf! Market:"<< std::endl;
             printPacketsSent(market);
             std::cout << "and srtf:" << std::endl;
             printPacketsSent(srtf);
         }
     }
+    std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
     return 1;
 }

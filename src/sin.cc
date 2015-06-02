@@ -48,12 +48,12 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
     }
 
     usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 25, true ));
- //   usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 10, true ));
+   // usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 20, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate));
 
     emulated_market.run_to_completion();
-    //emulated_market.print_money_exchanged();
+    emulated_market.print_money_exchanged();
     //emulated_market.print_packets_sent();
     std::list<PacketSent> packets_sent_copy = emulated_market.packets_sent();
     packets_sent_copy.remove_if([](PacketSent ps) { return ps.owner == "ccst"; } );
@@ -77,7 +77,7 @@ int main(){
     //std::list<flow> usrs = random_users(3); // TODO this an interesting one
     size_t num_matched = 0;
     size_t num_didnt_match = 0;
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 500; i++)
     {
         std::list<flow> usrs = random_users(rand() % 4 + 1); // this an interesting one
         auto market = sim_brute_force_users(usrs);

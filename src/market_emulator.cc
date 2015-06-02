@@ -31,7 +31,7 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
             Market beforeMkt = mkt;
             u->take_actions(mkt);
             if (beforeMkt != mkt) { // they actually did something
-                print_slots();
+                //print_slots();
             }
         }
 

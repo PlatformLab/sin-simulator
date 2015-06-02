@@ -127,12 +127,16 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
 void BruteForceUser::take_actions( Market& mkt )
 {
     const deque<SingleSlot> &order_book = mkt.order_book();
-    if ( order_book.empty() )
+    if ( order_book.empty() or order_book.front().time < flow_start_time_)
+    {
         return;
+    }
 
     size_t num_packets_to_buy = num_packets_ - num_owned_in_deque( mkt.packets_sent(), name_ ) - idxs_owned( order_book, name_ ).size(); 
 
-    list<size_t> best_idxs = best_slots( order_book, name_, idxs_owned( order_book, name_ ), flow_start_time_, num_packets_to_buy, num_owned_in_deque( mkt.packets_sent(), name_ ), utility_func_ ).first;
+    size_t first_idx_can_buy = flow_start_time_ < order_book.front().time ? 0 : order_book.front().time - flow_start_time_;
+
+    list<size_t> best_idxs = best_slots( order_book, name_, idxs_owned( order_book, name_ ), first_idx_can_buy, num_packets_to_buy, num_owned_in_deque( mkt.packets_sent(), name_ ), utility_func_ ).first;
 
     //cout << name_ << " buying slots ";
     for ( size_t i : best_idxs ) {

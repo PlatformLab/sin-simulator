@@ -93,6 +93,9 @@ int main(){
             std::cout << "and srtf:" << std::endl;
             printPacketsSent(srtf);
         }
+        std::cout << "flow was srtf compatible = " << is_shortest_remaining_time_first( usrs, market ) << " and def should return true = " << is_shortest_remaining_time_first( usrs, market ) << std::endl;
+
+        assert(is_shortest_remaining_time_first( usrs, market ));
     }
     std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
     return 1;

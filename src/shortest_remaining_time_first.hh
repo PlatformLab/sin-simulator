@@ -14,6 +14,57 @@ struct flow {
     size_t num_packets;
 };
 
+// figures out if a schedule is compatible with shortest remaining time first depending on tie breaking
+bool is_shortest_remaining_time_first( std::list<flow> flows, std::list<PacketSent> schedule )
+{
+    while ( not schedule.empty() )
+    {
+        std::list<std::list<flow>::iterator> shortest_remaining_time_flows = {};
+        bool a_flow_can_send = false;
+        for (auto it = flows.begin(); it != flows.end();  ++it )
+        {
+            // we can schedule this flow at this time
+            if (it->flow_start_time <= schedule.front().time)
+            {
+                a_flow_can_send = true;
+
+                if (shortest_remaining_time_flows.size() == 0
+                        || it->num_packets < shortest_remaining_time_flows.front()->num_packets)
+                {
+                    // a new shortest remaining time
+                    shortest_remaining_time_flows = {it};
+                } else if (shortest_remaining_time_flows.size() != 0 &&
+                        it->num_packets == shortest_remaining_time_flows.front()->num_packets) {
+                    // a tie
+                    shortest_remaining_time_flows.push_back(it);
+                }
+            }
+        }
+        // see if next packet sent was tied for shortest remainign time
+        bool next_packet_good = false;
+        for (auto flow : shortest_remaining_time_flows){
+            if (flow->name == schedule.front().owner) {
+                flow->num_packets--;
+                if (flow->num_packets == 0)
+                {
+                    flows.erase(flow);
+                }
+                next_packet_good = true;
+            }
+        }
+        if (next_packet_good || not a_flow_can_send) {
+            schedule.pop_front();
+        } else {
+            std::cout << "got next packet " << schedule.front().owner << " instead of: ";
+            for (auto flow : shortest_remaining_time_flows)
+                std::cout << flow->name << " with remaining time " << flow->num_packets << " or ";
+            std::cout << " at time " << schedule.front().time << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 const std::list<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
 {
     std::list<PacketSent> final_schedule;

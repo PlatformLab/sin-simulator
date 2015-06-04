@@ -37,7 +37,7 @@ std::function<int(std::list<size_t>&, size_t, size_t)> get_utility_func(size_t n
     };
 }
 
-const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
+const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args, const bool print_order_book_when_changed)
 {
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : user_args)
@@ -47,10 +47,10 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
         //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 25, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 21, true ));
    // usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 20, true ));
 
-    MarketEmulator emulated_market(move(usersToEmulate));
+    MarketEmulator emulated_market(move(usersToEmulate), print_order_book_when_changed);
 
     emulated_market.run_to_completion();
     emulated_market.print_money_exchanged();
@@ -59,30 +59,32 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args)
     packets_sent_copy.remove_if([](PacketSent ps) { return ps.owner == "ccst"; } );
     return packets_sent_copy;
 }
+size_t dice_roll() {
+    return (rand() % 6) + 1;
+}
 
 std::list<flow> random_users(size_t number)
 {
     std::list<flow> toRet { };
     for (size_t i = 0; i < number; i ++)
     {
-        toRet.push_back( { std::string(1,'A'+i), (size_t) (rand() % 6), (size_t) (rand() % 5) + 1 } );
+        toRet.push_back( { std::string(1,'A'+i), dice_roll(), dice_roll() } );
     }
     return toRet;
 }
 
 int main(){
-    std::cout << "hello world" << std::endl;
-
-    //std::list<flow> usrs = { { "A", 0, 3 }, { "B", 0, 2 }, { "C", 0, 2 } };
-    //std::list<flow> usrs = random_users(3); // TODO this an interesting one
     size_t num_matched = 0;
     size_t num_didnt_match = 0;
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 100; i++)
     {
-        std::list<flow> usrs = random_users(rand() % 4 + 1); // this an interesting one
-        auto market = sim_brute_force_users(usrs);
+        std::list<flow> usrs = random_users( 3 );
+        auto market = sim_brute_force_users(usrs, true);
         auto srtf = simulate_shortest_remaining_time_first(usrs);
-        if (market == srtf)
+        usrs.reverse();
+        assert(has_minimum_queueing_time( usrs, srtf ));
+        usrs.reverse();
+        if (has_minimum_queueing_time( usrs, market ))
         {
             num_matched++;
             std::cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -93,9 +95,6 @@ int main(){
             std::cout << "and srtf:" << std::endl;
             printPacketsSent(srtf);
         }
-        std::cout << "flow was srtf compatible = " << is_shortest_remaining_time_first( usrs, market ) << " and def should return true = " << is_shortest_remaining_time_first( usrs, market ) << std::endl;
-
-        assert(is_shortest_remaining_time_first( usrs, market ));
     }
     std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
     return 1;

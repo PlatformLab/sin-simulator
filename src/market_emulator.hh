@@ -18,10 +18,12 @@
 class MarketEmulator {
     Market mkt_;
     std::vector<std::unique_ptr<AbstractUser>> users_;
+    const bool print_order_book_when_changed_;
+
     void users_take_actions_until_finished(std::vector<std::unique_ptr<AbstractUser>> &users, Market &mkt);// TODO change back to static
 
     public:
-    MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
+    MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users, bool print_order_book_when_changed );
 
     void run_to_completion();
 

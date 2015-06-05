@@ -133,6 +133,7 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
             assert( best_backup_slot.first.size() == 1 && "no other slots to buy" );
         }
         double utility_delta_to_move_slots = best_backup_slot.second - cur_utility;
+        /*
         if (utility_delta_to_move_slots > 0)
         {
             size_t idx_to_buy = best_backup_slot.first.front();
@@ -141,6 +142,8 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
             makeOffersForOwnedSlots( mkt ); // start over
             return;
         }
+        */
+        utility_delta_to_move_slots = min ( 0., utility_delta_to_move_slots );
         //cout << " adding offer of $" << ((double) -utility_delta_to_move_slots ) + .01 << " to slot at time " << time << endl;
         mkt.add_offer_to_slot( idx_of_time(time, order_book) , { ( (double) -utility_delta_to_move_slots ) + .01, name_ } );
     }

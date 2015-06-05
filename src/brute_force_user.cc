@@ -12,16 +12,16 @@ BruteForceUser::BruteForceUser( const std::string &name, const size_t flow_start
 {
 }
 
-static list<list<size_t>> potential_idxs( const deque<SingleSlot> &order_book, const string &name, size_t start_idx, size_t num_packets )
+static vector<vector<size_t>> potential_idxs( const deque<SingleSlot> &order_book, const string &name, size_t start_idx, size_t num_packets )
 {
     if ( num_packets == 0 )
         return {{}};
 
-    list<list<size_t>> toRet = {};
+    vector<vector<size_t>> toRet = {};
     for ( size_t i = start_idx; i < order_book.size(); i++ ) {
         if ( order_book.at( i ).owner != name and not order_book.at( i ).offers.empty()) {
-            for ( list<size_t> &vec : potential_idxs( order_book, name, i+1, num_packets-1 ) ) {
-                vec.emplace_front( i );
+            for ( vector<size_t> &vec : potential_idxs( order_book, name, i+1, num_packets-1 ) ) {
+                vec.emplace_back( i );
                 toRet.emplace_back( vec );
             }
         }
@@ -29,7 +29,9 @@ static list<list<size_t>> potential_idxs( const deque<SingleSlot> &order_book, c
     return toRet;
 }
 
-static double cost_of_slots( const deque<SingleSlot> &order_book, const list<size_t> &idxs )
+
+template <typename T>
+static double cost_of_slots( const deque<SingleSlot> &order_book, const T &idxs )
 {
     double toRet = 0;
     for ( size_t i : idxs ) {
@@ -40,12 +42,12 @@ static double cost_of_slots( const deque<SingleSlot> &order_book, const list<siz
 
 
 // returns a list of best idxs and the utility - cost to get those slots
-static pair<list<size_t>, double> best_slots( const deque<SingleSlot> &order_book, const string &name, const list<size_t> times_already_owned, size_t start_time, size_t num_packets, size_t num_packets_already_sent, function<int(const list<size_t>&, size_t, size_t)> utility_func )
+static pair<vector<size_t>, double> best_slots( const deque<SingleSlot> &order_book, const string &name, const list<size_t> times_already_owned, size_t start_time, size_t num_packets, size_t num_packets_already_sent, function<int(const list<size_t>&, size_t, size_t)> utility_func )
 {
-    list<size_t> best_idxs = {};
+    vector<size_t> best_idxs = {};
     double max_net_utility = std::numeric_limits<double>::lowest();
     size_t start_idx = start_time < order_book.front().time ? 0 : order_book.front().time - start_time;
-    for ( list<size_t> &idxs_could_buy : potential_idxs( order_book, name, start_idx, num_packets ) )
+    for ( vector<size_t> &idxs_could_buy : potential_idxs( order_book, name, start_idx, num_packets ) )
     {
         assert(not idxs_could_buy.empty());
         list<size_t> times_would_own_if_bought_idxs_could_buy = times_already_owned;
@@ -151,12 +153,13 @@ void BruteForceUser::take_actions( Market& mkt )
         return;
     }
 
+    assert( not times_owned( order_book, "ccst" ).empty() && " HACK: no owner slots left");
     size_t num_packets_sent = times_owned( mkt.packets_sent(), name_ ).size();
     size_t num_order_book_slots_owned = times_owned( order_book, name_ ).size();
     assert (num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ));
     size_t num_packets_to_buy = num_packets_ - num_packets_sent - num_order_book_slots_owned; 
     if (num_packets_to_buy > 0) {
-        list<size_t> best_idxs = best_slots( order_book, name_, times_owned( order_book, name_ ), flow_start_time_, num_packets_to_buy, num_packets_sent, utility_func_ ).first;
+        vector<size_t> best_idxs = best_slots( order_book, name_, times_owned( order_book, name_ ), flow_start_time_, num_packets_to_buy, num_packets_sent, utility_func_ ).first;
 
         //cout << name_ << " buying slots ";
         for ( size_t i : best_idxs ) {

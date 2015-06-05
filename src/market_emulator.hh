@@ -29,7 +29,7 @@ class MarketEmulator {
 
     void print_slots();
 
-    const std::list<PacketSent> &packets_sent() const { return mkt_.packets_sent(); };
+    const std::vector<PacketSent> &packets_sent() const { return mkt_.packets_sent(); };
     void print_packets_sent();
 
     void print_money_exchanged();

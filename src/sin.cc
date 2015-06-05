@@ -20,8 +20,8 @@ std::function<int(const std::list<size_t>&, size_t, size_t)> get_utility_func(si
     {
         if (packets_already_sent >= num_packets)
         {
-        std::cout << "BIIG prob: packets_already_sent " << packets_already_sent  << " num_packets " << num_packets;
-        std::cout << " flow start time " << flow_start_time << " times coud own size " <<  times_could_own.size() << std::endl;
+            std::cout << "BIIG prob: packets_already_sent " << packets_already_sent  << " num_packets " << num_packets;
+            std::cout << " flow start time " << flow_start_time << " times coud own size " <<  times_could_own.size() << std::endl;
         }
         assert(packets_already_sent < num_packets);
         if ( (times_could_own.size() + packets_already_sent) < num_packets ) {
@@ -34,7 +34,7 @@ std::function<int(const std::list<size_t>&, size_t, size_t)> get_utility_func(si
     };
 }
 
-const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args, const bool print_order_book_when_changed)
+const std::vector<PacketSent> sim_brute_force_users(std::list<flow> user_args, const bool print_order_book_when_changed)
 {
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : user_args)
@@ -44,7 +44,7 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args, con
         //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 21, true ));
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 24, true ));
    // usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 20, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate), print_order_book_when_changed);
@@ -52,9 +52,14 @@ const std::list<PacketSent> sim_brute_force_users(std::list<flow> user_args, con
     emulated_market.run_to_completion();
     emulated_market.print_money_exchanged();
     //emulated_market.print_packets_sent();
-    std::list<PacketSent> packets_sent_copy = emulated_market.packets_sent();
-    packets_sent_copy.remove_if([](PacketSent ps) { return ps.owner == "ccst"; } );
-    return packets_sent_copy;
+
+    std::vector<PacketSent> toRet = {};
+    for (auto &ps : emulated_market.packets_sent()) {
+        if (ps.owner != "ccst") {
+            toRet.emplace_back(ps);
+        }
+    }
+    return toRet;
 }
 size_t dice_roll() {
     return (rand() % 6) + 1;

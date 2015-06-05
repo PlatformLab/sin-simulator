@@ -71,7 +71,7 @@ static pair<vector<size_t>, double> best_slots( const deque<SingleSlot> &order_b
 }
 
 template <typename T>
-static list<size_t> times_owned( const T collection, const string &name )
+static list<size_t> times_owned( const T &collection, const string &name )
 {
     list<size_t> toRet {};
     for (auto & item : collection)
@@ -82,7 +82,9 @@ static list<size_t> times_owned( const T collection, const string &name )
     }
     return toRet;
 }
-size_t idx_of_time(size_t time, const deque<SingleSlot> &order_book) {
+
+template <typename T>
+static size_t idx_of_time(size_t time, const T &order_book) {
     for (size_t i = 0; i < order_book.size(); i++) {
         if (order_book.at(i).time == time) {
             return i;
@@ -94,7 +96,7 @@ size_t idx_of_time(size_t time, const deque<SingleSlot> &order_book) {
 
 void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
 {
-    const deque<SingleSlot> &order_book = mkt.order_book();
+    auto &order_book = mkt.order_book();
     if (times_owned( order_book, name_ ).empty()) {
         return;
     }
@@ -147,7 +149,7 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
 
 void BruteForceUser::take_actions( Market& mkt )
 {
-    const deque<SingleSlot> &order_book = mkt.order_book();
+    auto &order_book = mkt.order_book();
     if ( order_book.empty() or order_book.front().time < flow_start_time_)
     {
         return;

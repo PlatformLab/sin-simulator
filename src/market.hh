@@ -19,13 +19,13 @@
 class Market {
     private:
         std::deque<SingleSlot> order_book_ = {};
-        std::list<PacketSent> packets_sent_ = {};
-        std::list<MoneyExchanged> money_exchanged_ = {};
+        std::vector<PacketSent> packets_sent_ = {};
+        std::vector<MoneyExchanged> money_exchanged_ = {};
 
     public:
         const std::deque<SingleSlot> &order_book() const { return order_book_; }
-        const std::list<PacketSent> &packets_sent() const { return packets_sent_; };
-        const std::list<MoneyExchanged> &money_exchanged() const { return money_exchanged_; };
+        const std::vector<PacketSent> &packets_sent() const { return packets_sent_; };
+        const std::vector<MoneyExchanged> &money_exchanged() const { return money_exchanged_; };
 
         void advance_time();
         void owner_add_to_order_book(const std::string &name, uint64_t next_time);

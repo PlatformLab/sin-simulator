@@ -15,9 +15,9 @@ struct flow {
     size_t num_packets;
 };
 
-const std::list<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
+const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
 {
-    std::list<PacketSent> final_schedule;
+    std::vector<PacketSent> final_schedule;
     uint64_t cur_time = 0;
 
     while ( not flows.empty() )
@@ -57,7 +57,7 @@ const std::list<PacketSent> simulate_shortest_remaining_time_first( std::list<fl
 }
 
 // figures out if a schedule is compatible with shortest remaining time first depending on tie breaking
-bool has_minimum_queueing_time( std::list<flow> flows, std::list<PacketSent> schedule )
+bool has_minimum_queueing_time( std::list<flow> flows, std::vector<PacketSent> schedule )
 {
     std::unordered_map<std::string, size_t> schedule_flow_completion_times;
     for (auto & packet_sent : schedule) {

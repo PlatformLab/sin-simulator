@@ -90,10 +90,10 @@ void MarketEmulator::print_money_exchanged()
         money_owed[pair2] -= transaction.amount;
 
         if (money_total.count(transaction.to) == 0){
-            money_total[transaction.to] = 10;
+            money_total[transaction.to] = 0;
         }
         if (money_total.count(transaction.from) == 0){
-            money_total[transaction.from] = 10;
+            money_total[transaction.from] = 0;
         }
         money_total[transaction.to] += transaction.amount;
         money_total[transaction.from] -= transaction.amount;
@@ -105,7 +105,7 @@ void MarketEmulator::print_money_exchanged()
         }
     }
 
-    cout << "balance after (started with 10 each): " << endl;
+    cout << "net balance: " << endl;
     for ( auto &pair : money_total ) {
             cout << pair.first << " $" << pair.second << endl;
     }

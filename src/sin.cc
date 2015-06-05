@@ -34,18 +34,18 @@ std::function<int(const std::list<size_t>&, size_t, size_t)> get_utility_func(si
     };
 }
 
-const std::vector<PacketSent> sim_brute_force_users(std::list<flow> user_args, const bool print_order_book_when_changed)
+const std::vector<PacketSent> sim_brute_force_users(std::list<flow> usr_args, const bool print_order_book_when_changed)
 {
     std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
-    for (auto & u : user_args)
+    for (auto & u : usr_args)
     {
         std::cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << std::endl;
         usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));
         //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 24, true ));
-   // usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, 20, true ));
+    size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2; // also hack
+    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate), print_order_book_when_changed);
 
@@ -80,22 +80,19 @@ int main(){
     size_t num_didnt_match = 0;
     for (int i = 0; i < 100; i++)
     {
-        std::list<flow> usrs = random_users( 3 );
-        auto market = sim_brute_force_users(usrs, false);
-        auto srtf = simulate_shortest_remaining_time_first(usrs);
-        usrs.reverse();
-        assert(has_minimum_queueing_time( usrs, srtf ));
-        usrs.reverse();
-        if (has_minimum_queueing_time( usrs, market ))
+        std::list<flow> usr_args = random_users( 4 );
+        auto market = sim_brute_force_users(usr_args, false);
+        if (has_minimum_queueing_time( usr_args, market ))
         {
             num_matched++;
             std::cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         } else {
             num_didnt_match++;
+
             std::cout << "market didnt match srtf! Market:"<< std::endl;
             printPacketsSent(market);
             std::cout << "and srtf:" << std::endl;
-            printPacketsSent(srtf);
+            printPacketsSent(simulate_shortest_remaining_time_first(usr_args));
         }
     }
     std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;

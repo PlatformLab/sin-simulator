@@ -93,9 +93,9 @@ int main(){
     size_t round_robin_num_didnt_match = 0;
     size_t round_robin_total_excess_delay = 0;
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 1000; i++)
     {
-        std::list<flow> usr_args = random_users( 3 );
+        std::list<flow> usr_args = random_users( 4 );
         auto market = sim_brute_force_users(usr_args, false);
         size_t excess_delay = queueing_delay_over_optimal( usr_args, market );
         if (excess_delay == 0)
@@ -123,7 +123,6 @@ int main(){
             round_robin_total_excess_delay += round_robin_excess_delay;
             std::cout << "round robin didn't match" << std::endl;
         }
-        printPacketsSent(round_robin);
     }
     std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
     std::cout << "average excess delay " << ((double) total_excess_delay / (double) (num_matched + num_didnt_match)) << std::endl;

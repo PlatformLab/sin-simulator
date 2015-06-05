@@ -78,11 +78,13 @@ std::list<flow> random_users(size_t number)
 int main(){
     size_t num_matched = 0;
     size_t num_didnt_match = 0;
+    size_t total_excess_delay = 0;
     for (int i = 0; i < 100; i++)
     {
-        std::list<flow> usr_args = random_users( 4 );
+        std::list<flow> usr_args = random_users( 6 );
         auto market = sim_brute_force_users(usr_args, false);
-        if (has_minimum_queueing_time( usr_args, market ))
+        size_t excess_delay = queueing_delay_over_optimal( usr_args, market );
+        if (excess_delay == 0)
         {
             num_matched++;
             std::cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -93,8 +95,11 @@ int main(){
             printPacketsSent(market);
             std::cout << "and srtf:" << std::endl;
             printPacketsSent(simulate_shortest_remaining_time_first(usr_args));
+            std::cout << "market had " << excess_delay << " more queuing delay" << std::endl;
+            total_excess_delay += excess_delay;
         }
     }
     std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
+    std::cout << "average excess delay " << ((double) total_excess_delay / (double) num_didnt_match) << std::endl;
     return 1;
 }

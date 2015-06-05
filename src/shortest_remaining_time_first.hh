@@ -56,8 +56,8 @@ const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<
     return final_schedule;
 }
 
-// figures out if a schedule is compatible with shortest remaining time first depending on tie breaking
-bool has_minimum_queueing_time( std::list<flow> flows, std::vector<PacketSent> schedule )
+// figures out how much extra queuing time a schedule has over optimal
+size_t queueing_delay_over_optimal( std::list<flow> flows, std::vector<PacketSent> schedule )
 {
     std::unordered_map<std::string, size_t> schedule_flow_completion_times;
     for (auto & packet_sent : schedule) {
@@ -76,7 +76,7 @@ bool has_minimum_queueing_time( std::list<flow> flows, std::vector<PacketSent> s
         srtf_queuing_delay += srtf_flow_completion_times[flow.name] - flow.flow_start_time;
     }
     assert (shedule_queuing_delay >= srtf_queuing_delay);
-    return shedule_queuing_delay == srtf_queuing_delay;
+    return shedule_queuing_delay - srtf_queuing_delay;
 }
 
 #endif /* SRTF_HH */

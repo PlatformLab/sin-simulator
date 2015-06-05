@@ -7,6 +7,7 @@
 #include <deque>
 #include <list>
 #include "abstract_user.hh"
+#include "pretty_print.hh"
 #include "market.hh"
 
 class BruteForceUser : public AbstractUser
@@ -14,11 +15,11 @@ class BruteForceUser : public AbstractUser
     private:
     const size_t flow_start_time_;
     const size_t num_packets_;
-    std::function<int(std::list<size_t>&, size_t, size_t)> utility_func_;
+    std::function<int(const std::list<size_t>&, size_t, size_t)> utility_func_;
     void makeOffersForOwnedSlots( Market& mkt );
 
     public:
-    BruteForceUser( const std::string &name, const size_t flow_start_time, const size_t num_packets, std::function<int(std::list<size_t>&, size_t, size_t)> utility_func );
+    BruteForceUser( const std::string &name, const size_t flow_start_time, const size_t num_packets, std::function<int(const std::list<size_t>&, size_t, size_t)> utility_func );
 
     void take_actions( Market& mkt ) override;
 

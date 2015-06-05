@@ -14,25 +14,22 @@
 
 //using namespace std;
 
-int utility_func(std::list<size_t>& lst, size_t flow_start_time, size_t)
+std::function<int(const std::list<size_t>&, size_t, size_t)> get_utility_func(size_t num_packets)
 {
-    // take in size of flow and int min if they dont have full flow
-    auto max_it = std::max_element(lst.begin(), lst.end());
-    if (max_it == lst.end()) {
-        return std::numeric_limits<int>::min();
-    } else {
-        return - (*max_it - flow_start_time);
-    }
-}
-
-std::function<int(std::list<size_t>&, size_t, size_t)> get_utility_func(size_t num_packets)
-{
-    return [num_packets] ( std::list<size_t>& lst, size_t flow_start_time, size_t packets_already_sent )
+    return [num_packets] ( const std::list<size_t>& times_could_own, size_t flow_start_time, size_t packets_already_sent )
     {
-        if ( (lst.size() + packets_already_sent) < num_packets ) {
+        if (packets_already_sent >= num_packets)
+        {
+        std::cout << "BIIG prob: packets_already_sent " << packets_already_sent  << " num_packets " << num_packets;
+        std::cout << " flow start time " << flow_start_time << " times coud own size " <<  times_could_own.size() << std::endl;
+        }
+        assert(packets_already_sent < num_packets);
+        if ( (times_could_own.size() + packets_already_sent) < num_packets ) {
             return std::numeric_limits<int>::min();
         } else {
-            return - (int) (*std::max_element(lst.begin(), lst.end()) - flow_start_time);
+            assert(not times_could_own.empty());
+            assert(std::max_element(times_could_own.begin(), times_could_own.end()) != times_could_own.end());
+            return - (int) (*std::max_element(times_could_own.begin(), times_could_own.end()) - flow_start_time);
         }
     };
 }
@@ -79,7 +76,7 @@ int main(){
     for (int i = 0; i < 100; i++)
     {
         std::list<flow> usrs = random_users( 3 );
-        auto market = sim_brute_force_users(usrs, true);
+        auto market = sim_brute_force_users(usrs, false);
         auto srtf = simulate_shortest_remaining_time_first(usrs);
         usrs.reverse();
         assert(has_minimum_queueing_time( usrs, srtf ));

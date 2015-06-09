@@ -13,40 +13,40 @@
 #include "shortest_remaining_time_first.hh"
 #include "round_robin.hh"
 
-//using namespace std;
+using namespace std;
 
-std::function<int(const std::list<size_t>&, size_t, size_t)> get_utility_func(size_t num_packets)
+function<int(const list<size_t>&, size_t, size_t)> get_utility_func(size_t num_packets)
 {
-    return [num_packets] ( const std::list<size_t>& times_could_own, size_t flow_start_time, size_t packets_already_sent )
+    return [num_packets] ( const list<size_t>& times_could_own, size_t flow_start_time, size_t packets_already_sent )
     {
         if (packets_already_sent >= num_packets)
         {
-            std::cout << "BIIG prob: packets_already_sent " << packets_already_sent  << " num_packets " << num_packets;
-            std::cout << " flow start time " << flow_start_time << " times coud own size " <<  times_could_own.size() << std::endl;
+            cout << "BIIG prob: packets_already_sent " << packets_already_sent  << " num_packets " << num_packets;
+            cout << " flow start time " << flow_start_time << " times coud own size " <<  times_could_own.size() << endl;
         }
         assert(packets_already_sent < num_packets);
         if ( (times_could_own.size() + packets_already_sent) < num_packets ) {
-            return std::numeric_limits<int>::min();
+            return numeric_limits<int>::min();
         } else {
             assert(not times_could_own.empty());
-            assert(std::max_element(times_could_own.begin(), times_could_own.end()) != times_could_own.end());
-            return - (int) (*std::max_element(times_could_own.begin(), times_could_own.end()) - flow_start_time);
+            assert(max_element(times_could_own.begin(), times_could_own.end()) != times_could_own.end());
+            return - (int) (*max_element(times_could_own.begin(), times_could_own.end()) - flow_start_time);
         }
     };
 }
 
-const std::vector<PacketSent> sim_brute_force_users(std::list<flow> usr_args, const bool print_order_book_when_changed)
+const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool print_order_book_when_changed)
 {
-    std::vector<std::unique_ptr<AbstractUser>> usersToEmulate;
+    vector<unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : usr_args)
     {
-        std::cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << std::endl;
-        usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));
-        //usersToEmulate.emplace_back(std::make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
+        cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
+        usersToEmulate.emplace_back(make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));
+        //usersToEmulate.emplace_back(make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func));
     }
 
     size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2; // also hack
-    usersToEmulate.emplace_back(std::make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
+    usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
     MarketEmulator emulated_market(move(usersToEmulate), print_order_book_when_changed);
 
@@ -54,7 +54,7 @@ const std::vector<PacketSent> sim_brute_force_users(std::list<flow> usr_args, co
     emulated_market.print_money_exchanged();
     //emulated_market.print_packets_sent();
 
-    std::vector<PacketSent> toRet = {};
+    vector<PacketSent> toRet = {};
     for (auto &ps : emulated_market.packets_sent()) {
         if (ps.owner != "ccst") {
             toRet.emplace_back(ps);
@@ -66,17 +66,17 @@ size_t dice_roll() {
     return (rand() % 6) + 1;
 }
 
-std::list<flow> random_users(size_t number)
+list<flow> random_users(size_t number)
 {
-    std::list<flow> toRet { };
+    list<flow> toRet { };
     for (size_t i = 0; i < number; i ++)
     {
-        toRet.push_back( { std::string(1,'A'+i), dice_roll(), dice_roll() } );
+        toRet.push_back( { string(1,'A'+i), dice_roll(), dice_roll() } );
     }
 
     size_t min_start_time = 1337;
     for (auto &flow : toRet) {
-        min_start_time = std::min(min_start_time, flow.flow_start_time);
+        min_start_time = min(min_start_time, flow.flow_start_time);
     }
     for (auto &flow : toRet) {
         flow.flow_start_time = flow.flow_start_time - min_start_time;
@@ -96,7 +96,7 @@ int main(){
 
     for (int i = 0; i < 1000; i++)
     {
-        std::list<flow> usr_args = random_users( 2 );
+        list<flow> usr_args = random_users( 2 );
         auto market = sim_brute_force_users(usr_args, false);
 
         auto delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, market );
@@ -106,15 +106,15 @@ int main(){
         if (excess_delay == 0)
         {
             num_matched++;
-            std::cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+            cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << endl;
         } else {
             num_didnt_match++;
 
-            std::cout << "market didnt match srtf! Market:"<< std::endl;
+            cout << "market didnt match srtf! Market:"<< endl;
             printPacketsSent(market);
-            std::cout << "and srtf:" << std::endl;
+            cout << "and srtf:" << endl;
             printPacketsSent(simulate_shortest_remaining_time_first(usr_args));
-            std::cout << "market had " << excess_delay << " more queuing delay" << std::endl;
+            cout << "market had " << excess_delay << " more queuing delay" << endl;
         }
 
         auto round_robin = simulate_round_robin(usr_args);
@@ -123,15 +123,15 @@ int main(){
         size_t round_robin_excess_delay = round_robin_delay_pair.first - round_robin_delay_pair.second;
         if (round_robin_excess_delay == 0) {
             round_robin_num_matched++;
-            std::cout << "round robin matched srtf" << std::endl;
+            cout << "round robin matched srtf" << endl;
         } else {
             round_robin_num_didnt_match++;
-            std::cout << "round robin didn't match" << std::endl;
+            cout << "round robin didn't match" << endl;
         }
     }
-    std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
-    std::cout << "average delay ratio " << ((double) total_market_delay / (double) total_srtf_delay) << std::endl;
-    std::cout << "for round robin: "<< round_robin_num_matched << " of " << round_robin_num_matched + round_robin_num_didnt_match << " scenarios matched the srtf result" << std::endl;
-    std::cout << "average delay ratio " << ((double) total_round_robin_delay / (double) total_srtf_delay) << std::endl;
+    cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << endl;
+    cout << "average delay ratio " << ((double) total_market_delay / (double) total_srtf_delay) << endl;
+    cout << "for round robin: "<< round_robin_num_matched << " of " << round_robin_num_matched + round_robin_num_didnt_match << " scenarios matched the srtf result" << endl;
+    cout << "average delay ratio " << ((double) total_round_robin_delay / (double) total_srtf_delay) << endl;
     return 1;
 }

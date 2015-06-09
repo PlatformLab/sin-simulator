@@ -6,10 +6,10 @@
 
 using namespace std;
 
-MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const bool print_order_book_when_changed )
+MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const bool verbose )
 : mkt_(),
 users_(move(users)),
-print_order_book_when_changed_(print_order_book_when_changed)
+verbose_(verbose)
 {
 }
 
@@ -32,7 +32,7 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
         for ( auto & u : users ) {
             Market beforeMkt = mkt;
             u->take_actions(mkt);
-            if (print_order_book_when_changed_ and beforeMkt != mkt) { // they actually did something
+            if (verbose_ and beforeMkt != mkt) { // they actually did something
                 print_packets_sent();
                 print_slots();
                 cout << "_____________________" << endl;
@@ -66,7 +66,7 @@ void MarketEmulator::print_slots()
 
 void MarketEmulator::print_packets_sent()
 {
-    cout << "Final packets sent are:" << endl;
+    //cout << "Final packets sent are:" << endl;
     printPacketsSent(mkt_.packets_sent());
 }
 

@@ -57,7 +57,7 @@ const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<
 }
 
 // figures out how much extra queuing time a schedule has over optimal
-size_t queueing_delay_over_optimal( std::list<flow> flows, std::vector<PacketSent> schedule )
+std::pair<size_t, size_t> queueing_delay_of_schedule_and_optimal( std::list<flow> flows, std::vector<PacketSent> schedule )
 {
     std::unordered_map<std::string, size_t> schedule_flow_completion_times;
     for (auto & packet_sent : schedule) {
@@ -76,7 +76,7 @@ size_t queueing_delay_over_optimal( std::list<flow> flows, std::vector<PacketSen
         srtf_queuing_delay += srtf_flow_completion_times[flow.name] - flow.flow_start_time;
     }
     assert (shedule_queuing_delay >= srtf_queuing_delay);
-    return shedule_queuing_delay - srtf_queuing_delay;
+    return std::make_pair(shedule_queuing_delay, srtf_queuing_delay);
 }
 
 #endif /* SRTF_HH */

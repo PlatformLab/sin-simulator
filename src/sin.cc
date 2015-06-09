@@ -87,24 +87,28 @@ std::list<flow> random_users(size_t number)
 int main(){
     size_t num_matched = 0;
     size_t num_didnt_match = 0;
-    size_t total_excess_delay = 0;
+    size_t total_market_delay = 0;
+    size_t total_srtf_delay = 0;
 
     size_t round_robin_num_matched = 0;
     size_t round_robin_num_didnt_match = 0;
-    size_t round_robin_total_excess_delay = 0;
+    size_t total_round_robin_delay = 0;
 
     for (int i = 0; i < 1000; i++)
     {
-        std::list<flow> usr_args = random_users( 4 );
+        std::list<flow> usr_args = random_users( 2 );
         auto market = sim_brute_force_users(usr_args, false);
-        size_t excess_delay = queueing_delay_over_optimal( usr_args, market );
+
+        auto delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, market );
+        total_market_delay += delay_pair.first;
+        total_srtf_delay += delay_pair.second;
+        size_t excess_delay = delay_pair.first - delay_pair.second;
         if (excess_delay == 0)
         {
             num_matched++;
             std::cout << "market matched srtf results!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         } else {
             num_didnt_match++;
-            total_excess_delay += excess_delay;
 
             std::cout << "market didnt match srtf! Market:"<< std::endl;
             printPacketsSent(market);
@@ -114,19 +118,20 @@ int main(){
         }
 
         auto round_robin = simulate_round_robin(usr_args);
-        size_t round_robin_excess_delay = queueing_delay_over_optimal( usr_args, round_robin );
+        auto round_robin_delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, round_robin );
+        total_round_robin_delay += round_robin_delay_pair.first;
+        size_t round_robin_excess_delay = round_robin_delay_pair.first - round_robin_delay_pair.second;
         if (round_robin_excess_delay == 0) {
             round_robin_num_matched++;
             std::cout << "round robin matched srtf" << std::endl;
         } else {
             round_robin_num_didnt_match++;
-            round_robin_total_excess_delay += round_robin_excess_delay;
             std::cout << "round robin didn't match" << std::endl;
         }
     }
     std::cout << num_matched << " of " << num_matched + num_didnt_match << " scenarios matched the srtf result" << std::endl;
-    std::cout << "average excess delay " << ((double) total_excess_delay / (double) (num_matched + num_didnt_match)) << std::endl;
+    std::cout << "average delay ratio " << ((double) total_market_delay / (double) total_srtf_delay) << std::endl;
     std::cout << "for round robin: "<< round_robin_num_matched << " of " << round_robin_num_matched + round_robin_num_didnt_match << " scenarios matched the srtf result" << std::endl;
-    std::cout << "average excess delay " << ((double) round_robin_total_excess_delay / (double) (round_robin_num_matched + round_robin_num_didnt_match)) << std::endl;
+    std::cout << "average delay ratio " << ((double) total_round_robin_delay / (double) total_srtf_delay) << std::endl;
     return 1;
 }

@@ -33,7 +33,8 @@ void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<Abstrac
             Market beforeMkt = mkt;
             u->take_actions(mkt);
             if (verbose_ and beforeMkt != mkt) { // they actually did something
-                print_packets_sent();
+
+                cout << u->name_ << " took actions:" << endl;
                 print_slots();
                 cout << "_____________________" << endl;
             }

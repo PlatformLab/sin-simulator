@@ -132,6 +132,7 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
 
             assert( best_backup_slot.first.size() == 1 && "no other slots to buy" );
         }
+        //cout << "cur utility is " << cur_utility << " and utility to buy next best slot (idx " << best_backup_slot.first.front() << ") if sold " << time << " is " << best_backup_slot.second  << endl;
         double utility_delta_to_move_slots = best_backup_slot.second - cur_utility;
         /*
         if (utility_delta_to_move_slots > 0)

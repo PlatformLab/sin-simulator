@@ -123,18 +123,18 @@ int main(){
             printPacketsSent(market);
             cout << "and srtf:" << endl;
             printPacketsSent(simulate_shortest_remaining_time_first(usr_args));
-            cout << "market had " << excess_delay << " more queuing delay" << endl;
+            cout << "market had " << excess_delay << " more queuing delay than srtf" << endl;
 
             double delay_ratio = (double) delay_pair.first / (double) delay_pair.second;
             worst_delay_ratio = max(delay_ratio, worst_delay_ratio);
-            cout << "delay ratio " << delay_ratio;
+            cout << "ratio of mean flow duration to optimal is: " << delay_ratio;
             if (delay_ratio == worst_delay_ratio) {
-                cout << " is worst seen so far " << delay_pair.first << "/" << delay_pair.second;
+                cout << ". This is the worst seen so far in trials (market sum flow durations " << delay_pair.first << " / srtf sum flow durations " << delay_pair.second << ").";
             }
 
             cout << endl;
 
-            cout << "in more detail, market is:" << endl;
+            cout << "in more detail, market results were:" << endl;
             auto market2 = sim_brute_force_users(usr_args, true);
             assert(market2 == market);
             cout << "DONE" << endl << endl;

@@ -102,9 +102,9 @@ int main(){
 
     double worst_delay_ratio = 0;
 
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < 10000; i++) // number of trails
     {
-        list<flow> usr_args = random_users( 3 );
+        list<flow> usr_args = random_users( 3 ); // makes this number of random users for market
         auto market = sim_brute_force_users(usr_args, false);
 
         auto delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, market );

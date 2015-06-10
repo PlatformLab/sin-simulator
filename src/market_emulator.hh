@@ -20,6 +20,7 @@ class MarketEmulator {
     std::vector<std::unique_ptr<AbstractUser>> users_;
     const bool verbose_;
     const bool random_user_order_;
+    size_t total_roundtrips_ = 0;
 
     size_t next_idx( size_t last_idx );
     void users_take_actions_until_finished();
@@ -32,6 +33,7 @@ class MarketEmulator {
     void print_slots();
 
     const std::vector<PacketSent> &packets_sent() const { return mkt_.packets_sent(); };
+    size_t total_roundtrips() const { return total_roundtrips_; };
 
     void print_packets_sent();
 

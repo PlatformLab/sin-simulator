@@ -54,6 +54,7 @@ const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool v
     MarketEmulator emulated_market(move(usersToEmulate), verbose, random_user_order);
 
     emulated_market.run_to_completion();
+    cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;
 
     if (verbose) {
         emulated_market.print_money_exchanged();

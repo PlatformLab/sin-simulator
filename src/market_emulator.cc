@@ -44,6 +44,7 @@ void MarketEmulator::users_take_actions_until_finished()
         const Market oldMkt = mkt_;
 
         users_.at(idx_to_run)->take_actions(mkt_);
+        total_roundtrips_++;
         if (oldMkt == mkt_) { // user didn't do anything
             idxs_finished.insert(idx_to_run);
         } else {

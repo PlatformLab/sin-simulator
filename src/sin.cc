@@ -10,31 +10,13 @@
 #include "market_emulator.hh"
 #include "market.hh"
 
+#include "flow_completion_time_user.hh"
 #include "shortest_remaining_time_first.hh"
 #include "round_robin.hh"
 
 using namespace std;
 
-// makes a utility function given a flow size
-function<int(const list<size_t>&, size_t, size_t)> get_utility_func(size_t num_packets)
-{
-    return [num_packets] ( const list<size_t>& times_could_own, size_t flow_start_time, size_t packets_already_sent )
-    {
-        assert(packets_already_sent < num_packets && "not good, sending more packets than flow size");
-
-        // if flow isnt all allocated, utility is ~ -inifinity
-        if ( (times_could_own.size() + packets_already_sent) < num_packets ) {
-            return numeric_limits<int>::min();
-        } else {
-            // if flow has slots for all packets, utility is - flow completion time
-            assert(not times_could_own.empty());
-            assert(max_element(times_could_own.begin(), times_could_own.end()) != times_could_own.end());
-            return - (int) (*max_element(times_could_own.begin(), times_could_own.end()) - flow_start_time);
-        }
-    };
-}
-
-const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
+const vector<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
 {
     vector<unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : usr_args)
@@ -42,8 +24,7 @@ const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool v
         if (verbose) {
             cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
         }
-        auto utility_func = get_utility_func( u.num_packets );
-        usersToEmulate.emplace_back(make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, utility_func ));
+        usersToEmulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
     }
 
     // hack to size number of slots for market simulation based on time to complete srtf
@@ -110,7 +91,7 @@ int main(){
     for (int i = 0; i < 10000; i++) // number of trails
     {
         list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_brute_force_users(usr_args, false, false);
+        auto market = sim_users(usr_args, false, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_delay = queueing_delay_of_schedule( usr_args, market );
@@ -141,7 +122,7 @@ int main(){
             cout << endl;
 
             cout << "in more detail, market results were:" << endl;
-            auto market2 = sim_brute_force_users(usr_args, true, false);
+            auto market2 = sim_users(usr_args, true, false);
             assert(market2 == market);
             cout << "DONE" << endl << endl;
         }

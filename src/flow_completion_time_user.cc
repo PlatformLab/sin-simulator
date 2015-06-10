@@ -11,13 +11,13 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 {
 }
 
-static pair<priority_queue<const SingleSlot &>, double> slots_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_send, size_t num_packets_already_sent, const size_t latest_time_already_owned )
+static pair<priority_queue<const SingleSlot &>, double> slots_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_buy, size_t num_packets_already_sent, const size_t latest_time_already_owned )
 {
     priority_queue<const SingleSlot &> slots_to_buy;
     double slots_to_buy_cost = 0;
 
     size_t idx = start_time < order_book.front().time ? 0 : order_book.front().time - start_time;
-    while  (slots_to_buy.size() == num_packets_to_send) {
+    while  (slots_to_buy.size() == num_packets_to_buy) {
         const SingleSlot &potential_slot = order_book.at( idx );
         bool can_buy = potential_slot.owner != name and not potential_slot.offers.empty();
         if ( can_buy ) {
@@ -44,7 +44,7 @@ static pair<priority_queue<const SingleSlot &>, double> slots_to_buy( const dequ
 
             slots_to_buy_cost -= slots_to_buy.top().best_offer().cost;
             slots_to_buy.top().pop();
-            assert(slots_to_buy.size() == num_packets_to_send);
+            assert(slots_to_buy.size() == num_packets_to_buy);
 
             double current_benefit = -max( i, latest_time_already_owned ) - start_time;
             double current_utility = current_benefit - slots_to_buy_cost;
@@ -71,75 +71,7 @@ static list<size_t> times_owned( const T &collection, const string &name )
     return toRet;
 }
 
-template <typename T>
-static size_t idx_of_time(size_t time, const T &order_book) {
-    for (size_t i = 0; i < order_book.size(); i++) {
-        if (order_book.at(i).time == time) {
-            return i;
-        }
-    }
-    assert(false && "time not in order book");
-    return -1;
-}
-
-void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
-{
-    auto &order_book = mkt.order_book();
-    if (times_owned( order_book, name_ ).empty()) {
-        return;
-    }
-
-    size_t num_packets_already_sent = times_owned( mkt.packets_sent(), name_ ).size();
-    /*
-    cout << name_ << " got num packets sent " << num_packets_already_sent  << endl;
-    printPacketsSent(mkt.packets_sent());
-    cout << "for these packets sent " << endl;
-    cout << "and order book is " << endl;
-    printOrderBook(order_book);
-    cout << "()()()()() " << endl;
-    */
-    const auto cur_times_owned = times_owned( order_book, name_ );
-    const double cur_utility = utility_func_( cur_times_owned, flow_start_time_, num_packets_already_sent );
-    for ( size_t time : times_owned( order_book, name_) ) {
-        mkt.clear_offers_from_slot(idx_of_time(time, order_book), name_);
-
-        auto times_owned_without_a_slot(cur_times_owned);
-        size_t before_size = times_owned_without_a_slot.size();
-        times_owned_without_a_slot.remove_if( [time] ( size_t elem ){ return elem == time; } );
-        assert(times_owned_without_a_slot.size() == before_size - 1);
-
-        auto best_backup_slot = best_slots( order_book, name_, times_owned_without_a_slot, flow_start_time_, 1, num_packets_already_sent, utility_func_ );
-        if (best_backup_slot.first.size() != 1)
-        {
-            cout << name_ << " failed to make offers for slot at time " << time << " got size = " << best_backup_slot.first.size() << endl;
-            cout << "times_owned_without_a_slot was [ ";
-            for ( auto i : times_owned_without_a_slot )
-                cout << i << ", ";
-            cout <<  "]" << endl;
-            cout << " num packets already sent " << num_packets_already_sent << " flow start time " << flow_start_time_ << endl;
-
-            assert( best_backup_slot.first.size() == 1 && "no other slots to buy" );
-        }
-        //cout << "cur utility is " << cur_utility << " and utility to buy next best slot (idx " << best_backup_slot.first.front() << ") if sold " << time << " is " << best_backup_slot.second  << endl;
-        double utility_delta_to_move_slots = best_backup_slot.second - cur_utility;
-        /*
-        if (utility_delta_to_move_slots > 0)
-        {
-            size_t idx_to_buy = best_backup_slot.first.front();
-            mkt.add_bid_to_slot( idx_to_buy, { order_book.at( idx_to_buy ).best_offer().cost, name_ } );
-            cout << name_ << " should just move slots to " <<  idx_to_buy << endl;
-            makeOffersForOwnedSlots( mkt ); // start over
-            return;
-        }
-        */
-        utility_delta_to_move_slots = min ( 0., utility_delta_to_move_slots );
-        //cout << " adding offer of $" << ((double) -utility_delta_to_move_slots ) + .01 << " to slot at time " << time << endl;
-        mkt.add_offer_to_slot( idx_of_time(time, order_book) , { ( (double) -utility_delta_to_move_slots ) + .01, name_ } );
-    }
-    //cout << " DONE adding offers" << endl;
-}
-
-void BruteForceUser::take_actions( Market& mkt )
+void FlowCompletionTimeUser::take_actions( Market& mkt )
 {
     auto &order_book = mkt.order_book();
     if ( order_book.empty() or order_book.front().time < flow_start_time_)
@@ -147,36 +79,51 @@ void BruteForceUser::take_actions( Market& mkt )
         return;
     }
 
-    assert( not times_owned( order_book, "ccst" ).empty() && " HACK: no owner slots left");
     size_t num_packets_sent = times_owned( mkt.packets_sent(), name_ ).size();
-    size_t num_order_book_slots_owned = times_owned( order_book, name_ ).size();
+
+    list<size_t> order_book_slots_owned =  times_owned( order_book, name_ );
+    size_t num_order_book_slots_owned = order_book_slots_owned.size();
+
     assert (num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ));
+
     size_t num_packets_to_buy = num_packets_ - num_packets_sent - num_order_book_slots_owned; 
+
     if (num_packets_to_buy > 0) {
-        pair<priority_queue<const SingleSlot &>, double> slots_to_buy = slots_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_send, size_t num_packets_already_sent, const size_t latest_time_already_owned );
+        size_t latest_time_already_owned = order_book_slots_owned.back().time;
+        pair<priority_queue<const SingleSlot &>, double> slots_to_buy = slots_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, num_packets_sent, latest_time_already_owned );
+
         for (auto slot : slots_to_buy.first) {
             mkt.add_bid_to_slot( slot, { slot.best_offer().cost, name_ } );
             //assert got it
         }
 
+        list<size_t> order_book_slots_owned =  times_owned( order_book, name_ ); // redo calc
         double current_utility = slots_to_buy.second();
-        for (auto slot : slots_to_buy.first) {
-            double utility_delta = current_utility - slots_to_buy( ).second;
-            utility_delta + .01;
-            make offer for it based on slots_to_buy( 1 slot, latest time );
+
+        // TODO, all slots but last one will be priced same so only do twice
+        for (auto slot_to_price : slots_to_buy.first) {
+            // first get latest time owned that isnt this slot
+            latest_time_owned_for_pricing = order_book_slots_owned.front(); // TODO what if only own one slot
+            for (auto & slot : order_book) {
+                if ( slot.owner == name_ and slot != slot_to_price ) {
+                    latest_time_owned_for_pricing = slot.time;
+                }
+            }
+
+            num_packets_to_buy = 1;
+            double utility_delta = current_utility - slots_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, num_packets_sent, latest_time_owned_for_pricing ).second;
+
+            mkt.add_order_to_slot( slot_to_price, { utility_delta + .01, name_ } );
         }
     }
-    makeOffersForOwnedSlots( mkt );
 }
 
-bool BruteForceUser::done( const Market& mkt ) const
+bool FlowCompletionTimeUser::done( const Market& mkt ) const
 {
-    //    cout << "num packets for " << name_ << " is " << num_packets_ << " and have sent " << num_owned_in_deque( mkt.packets_sent(), name_ ) << endl;
     return num_packets_ == times_owned( mkt.packets_sent(), name_ ).size();
 }
 
-void BruteForceUser::print_stats( const Market& ) const
+void FlowCompletionTimeUser::print_stats( const Market& ) const
 {
-        cout << "user " << name_ << " started at time " << flow_start_time_ << " and finished at time "
-        <<  endl; // need to track money spent
+        cout << "user " << name_ << " started at time " << flow_start_time_ << " and finished at time ?" <<  endl;
 }

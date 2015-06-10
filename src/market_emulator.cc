@@ -1,15 +1,17 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include <unordered_map>
+#include <unordered_set>
 #include "market_emulator.hh"
 #include "pretty_print.hh"
 
 using namespace std;
 
-MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const bool verbose )
+MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const bool verbose, const bool random_user_order )
 : mkt_(),
 users_(move(users)),
-verbose_(verbose)
+verbose_(verbose),
+random_user_order_(random_user_order)
 {
 }
 
@@ -17,34 +19,43 @@ static bool all_users_done(const vector<unique_ptr<AbstractUser>> &users, const 
 {
     for ( const auto & u : users ) {
         if (not u->done(mkt)) {
-//            cout << "not all users done" << endl;
             return false;
         }
     }
     return true;
 }
 
-void MarketEmulator::users_take_actions_until_finished(vector<unique_ptr<AbstractUser>> &users, Market &mkt)
+size_t MarketEmulator::next_idx(size_t last_idx)
 {
-    while (true) {
-        Market oldMkt = mkt;
+    return ( random_user_order_ ? rand() : last_idx + 1 ) % users_.size();
+}
 
-        for ( auto & u : users ) {
-            Market beforeMkt = mkt;
-            u->take_actions(mkt);
-            if (verbose_ and beforeMkt != mkt) { // they actually did something
+void MarketEmulator::users_take_actions_until_finished()
+{
+    unordered_set<size_t> idxs_finished;
+    size_t idx_to_run = next_idx( -1 );
 
-                cout << u->name_ << " took actions:" << endl;
+    while ( idxs_finished.size() < users_.size() ) {
+
+        while ( idxs_finished.count(idx_to_run) > 0 ) { // if idx already done, skip it
+            idx_to_run = next_idx( idx_to_run );
+        }
+
+        const Market oldMkt = mkt_;
+
+        users_.at(idx_to_run)->take_actions(mkt_);
+        if (oldMkt == mkt_) { // user didn't do anything
+            idxs_finished.insert(idx_to_run);
+        } else {
+            idxs_finished.clear(); // let everyone run again if someone changed market
+            if (verbose_) {
+                cout << users_.at(idx_to_run)->name_ << " took actions:" << endl;
                 print_slots();
                 cout << "_____________________" << endl;
             }
         }
 
-        if (oldMkt == mkt) {
-            //cout << "advancing time" << endl << endl;
-            break;
-        }
- //       cout << "market changed, taking user actions again" << endl;
+        idx_to_run = next_idx( idx_to_run );
     }
 }
 
@@ -52,7 +63,7 @@ void MarketEmulator::run_to_completion()
 { 
     while ( not all_users_done( users_, mkt_ ) ) // some comments
     {
-        users_take_actions_until_finished( users_, mkt_ );
+        users_take_actions_until_finished();
         mkt_.advance_time();
         if ( mkt_.order_book().empty() ){
             return;
@@ -67,7 +78,6 @@ void MarketEmulator::print_slots()
 
 void MarketEmulator::print_packets_sent()
 {
-    //cout << "Final packets sent are:" << endl;
     printPacketsSent(mkt_.packets_sent());
 }
 
@@ -75,7 +85,8 @@ void MarketEmulator::print_money_exchanged()
 {
     unordered_map<string, double> money_owed;
     unordered_map<string, double> money_total;
-    // track money owed in both directions (a to b $1 and b to a $-1 i.e.)
+
+    // track money owed in both directions symmetrically (a to b $1 and b to a $-1 i.e.)
     // print one that is net positive at end
     for ( auto &transaction : mkt_.money_exchanged() ) {
         string pair1 = transaction.from + " to " + transaction.to;
@@ -114,7 +125,6 @@ void MarketEmulator::print_money_exchanged()
 
 void MarketEmulator::print_user_stats()
 {
-    // print stats
     for ( auto & u : users_ ) {
         u->print_stats(mkt_);
     }

@@ -20,15 +20,13 @@ function<int(const list<size_t>&, size_t, size_t)> get_utility_func(size_t num_p
 {
     return [num_packets] ( const list<size_t>& times_could_own, size_t flow_start_time, size_t packets_already_sent )
     {
-        if (packets_already_sent >= num_packets)
-        {
-            cout << "BIIG prob: packets_already_sent " << packets_already_sent  << " num_packets " << num_packets;
-            cout << " flow start time " << flow_start_time << " times coud own size " <<  times_could_own.size() << endl;
-        }
-        assert(packets_already_sent < num_packets);
+        assert(packets_already_sent < num_packets && "not good, sending more packets than flow size");
+
+        // if flow isnt all allocated, utility is ~ -inifinity
         if ( (times_could_own.size() + packets_already_sent) < num_packets ) {
             return numeric_limits<int>::min();
         } else {
+            // if flow has slots for all packets, utility is - flow completion time
             assert(not times_could_own.empty());
             assert(max_element(times_could_own.begin(), times_could_own.end()) != times_could_own.end());
             return - (int) (*max_element(times_could_own.begin(), times_could_own.end()) - flow_start_time);
@@ -36,7 +34,7 @@ function<int(const list<size_t>&, size_t, size_t)> get_utility_func(size_t num_p
     };
 }
 
-const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool verbose)
+const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
 {
     vector<unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : usr_args)
@@ -47,17 +45,19 @@ const vector<PacketSent> sim_brute_force_users(list<flow> usr_args, const bool v
         usersToEmulate.emplace_back(make_unique<BruteForceUser>( u.name, u.flow_start_time, u.num_packets, get_utility_func( u.num_packets )));
     }
 
-    size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2; // also hack
+    size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2; // hack to size number of slots for market simulation
     usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
-    MarketEmulator emulated_market(move(usersToEmulate), verbose);
+    MarketEmulator emulated_market(move(usersToEmulate), verbose, random_user_order);
 
     emulated_market.run_to_completion();
+
     if (verbose) {
         emulated_market.print_money_exchanged();
         //emulated_market.print_packets_sent();
     }
 
+    // now clean up results by getting rid of hard coded owner
     vector<PacketSent> toRet = {};
     for (auto &ps : emulated_market.packets_sent()) {
         if (ps.owner != "ccst") {
@@ -105,7 +105,7 @@ int main(){
     for (int i = 0; i < 10000; i++) // number of trails
     {
         list<flow> usr_args = random_users( 3 ); // makes this number of random users for market
-        auto market = sim_brute_force_users(usr_args, false);
+        auto market = sim_brute_force_users(usr_args, false, false);
 
         auto delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, market );
         total_market_delay += delay_pair.first;
@@ -135,7 +135,7 @@ int main(){
             cout << endl;
 
             cout << "in more detail, market results were:" << endl;
-            auto market2 = sim_brute_force_users(usr_args, true);
+            auto market2 = sim_brute_force_users(usr_args, true, false);
             assert(market2 == market);
             cout << "DONE" << endl << endl;
         }

@@ -65,21 +65,4 @@ size_t queueing_delay_of_schedule( std::list<flow> flows, std::vector<PacketSent
     return shedule_queuing_delay;
 }
 
-/*
-// returns total queuing time of the optimal schedule for those flows
-size_t queueing_delay_of_optimal_schedule( std::list<flow> flows )
-{
-    std::unordered_map<std::string, size_t> srtf_flow_completion_times;
-    for (const auto & packet_sent : simulate_shortest_remaining_time_first(flows)) {
-        srtf_flow_completion_times[packet_sent.owner] = packet_sent.time;
-    }
-
-    size_t srtf_queuing_delay = 0;
-    for (auto & flow : flows) {
-        srtf_queuing_delay += srtf_flow_completion_times[flow.name] - flow.flow_start_time;
-    }
-    return srtf_queuing_delay;
-}
-*/
-
 #endif /* SRTF_HH */

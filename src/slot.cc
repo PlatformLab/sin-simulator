@@ -22,9 +22,8 @@ static double median(const double a, const double b)
 
 deque<MoneyExchanged> Slot::settle_slot()
 {
-    deque<MoneyExchanged> transactions = {};
+    deque<MoneyExchanged> transactions {};
 
-    // only single loop for now because we clear bids
     while ( market_crossed() ) {
         double sale_price = median(best_offer().cost, best_bid().cost);
 
@@ -54,7 +53,7 @@ bool Slot::has_bids() const { return not bids.empty(); }
 
 static bool compare_two_bidoffers(const BidOffer &a, const BidOffer &b)
 {
-    return (a.cost < b.cost);
+    return a.cost < b.cost;
 }
 
 const BidOffer &Slot::best_bid () const

@@ -22,26 +22,22 @@ const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<
 
     while ( not flows.empty() )
     {
+        // first find shortest remaining time flow we can schedule
         auto shortest_remaining_time_flow = flows.end();
-        for (auto it = flows.begin(); it != flows.end();  ++it )
-        {
-            // we can schedule this flow at this time
-            if (it->flow_start_time <= cur_time)
-            {
-                if (shortest_remaining_time_flow == flows.end()
-                        || it->num_packets < shortest_remaining_time_flow->num_packets)
-                {
-                    shortest_remaining_time_flow = it;
-                }
+        for (auto it = flows.begin(); it != flows.end(); ++it) {
+            bool can_schedule = it->flow_start_time <= cur_time;
+            bool is_shortest = shortest_remaining_time_flow == flows.end() || it->num_packets < shortest_remaining_time_flow->num_packets;
+            if ( can_schedule and is_shortest ) {
+                shortest_remaining_time_flow = it;
             }
         }
 
-        // we can schedule a flow now (otherwise they all have too high of start times
+        // we can schedule a flow now (otherwise they all have later start times and we advance time with no packet sent)
         if (shortest_remaining_time_flow != flows.end())
         {
             final_schedule.push_back( {shortest_remaining_time_flow->name, cur_time} );
 
-            // delete flow from list if flow completed
+            // decrement packets to be sent for flow we serviced, remove from list completed
             shortest_remaining_time_flow->num_packets--;
             if (shortest_remaining_time_flow->num_packets == 0)
             {
@@ -51,32 +47,39 @@ const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<
         cur_time++;
     }
 
-    // now print results
-//    printPacketsSent(final_schedule);
     return final_schedule;
 }
 
-// figures out how much extra queuing time a schedule has over optimal
-std::pair<size_t, size_t> queueing_delay_of_schedule_and_optimal( std::list<flow> flows, std::vector<PacketSent> schedule )
+// returns total queuing time for for schedule given
+size_t queueing_delay_of_schedule( std::list<flow> flows, std::vector<PacketSent> schedule )
 {
     std::unordered_map<std::string, size_t> schedule_flow_completion_times;
     for (auto & packet_sent : schedule) {
         schedule_flow_completion_times[packet_sent.owner] = packet_sent.time;
     }
 
+    size_t shedule_queuing_delay = 0;
+    for (auto & flow : flows) {
+        shedule_queuing_delay += schedule_flow_completion_times[flow.name] - flow.flow_start_time;
+    }
+    return shedule_queuing_delay;
+}
+
+/*
+// returns total queuing time of the optimal schedule for those flows
+size_t queueing_delay_of_optimal_schedule( std::list<flow> flows )
+{
     std::unordered_map<std::string, size_t> srtf_flow_completion_times;
     for (const auto & packet_sent : simulate_shortest_remaining_time_first(flows)) {
         srtf_flow_completion_times[packet_sent.owner] = packet_sent.time;
     }
 
-    size_t shedule_queuing_delay = 0;
     size_t srtf_queuing_delay = 0;
     for (auto & flow : flows) {
-        shedule_queuing_delay += schedule_flow_completion_times[flow.name] - flow.flow_start_time;
         srtf_queuing_delay += srtf_flow_completion_times[flow.name] - flow.flow_start_time;
     }
-    assert (shedule_queuing_delay >= srtf_queuing_delay);
-    return std::make_pair(shedule_queuing_delay, srtf_queuing_delay);
+    return srtf_queuing_delay;
 }
+*/
 
 #endif /* SRTF_HH */

@@ -12,8 +12,6 @@ void Market::advance_time()
 
         const SingleSlot &front = order_book().front();
 
-        //cout << "slot at time " << front.time << " awarded to " << front.owner << endl;
-
         // add slot to sent_slots and delete from order book
         packets_sent_.push_back({front.owner, front.time});
         order_book_.pop_front();

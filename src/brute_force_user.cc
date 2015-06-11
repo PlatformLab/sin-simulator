@@ -147,7 +147,7 @@ void BruteForceUser::makeOffersForOwnedSlots( Market& mkt )
         */
         utility_delta_to_move_slots = min ( 0., utility_delta_to_move_slots );
         //cout << " adding offer of $" << ((double) -utility_delta_to_move_slots ) + .01 << " to slot at time " << time << endl;
-        mkt.add_offer_to_slot_idx( idx_of_time(time, order_book) , { ( (double) -utility_delta_to_move_slots ) + .01, name_ } );
+        mkt.add_offer_to_slot( idx_of_time(time, order_book) , { ( (double) -utility_delta_to_move_slots ) + .01, name_ } );
     }
     //cout << " DONE adding offers" << endl;
 }
@@ -171,7 +171,7 @@ void BruteForceUser::take_actions( Market& mkt )
         //cout << name_ << " buying slots ";
         for ( size_t i : best_idxs ) {
             //cout << i << ", ";
-            mkt.add_bid_to_slot_idx( i, { order_book.at( i ).best_offer().cost, name_ } );
+            mkt.add_bid_to_slot( i, { order_book.at( i ).best_offer().cost, name_ } );
         }
         //cout << endl;
     }

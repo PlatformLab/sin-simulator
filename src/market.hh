@@ -30,11 +30,8 @@ class Market {
         void advance_time();
         void owner_add_to_order_book(const std::string &name, uint64_t next_time);
 
-        void add_offer_to_slot(SingleSlot &slot, BidOffer &&offer);
-        void add_bid_to_slot(SingleSlot &slot, BidOffer &&bid);
-
-        void add_offer_to_slot_idx(size_t slot_idx, BidOffer &&offer);
-        void add_bid_to_slot_idx(size_t slot_idx, BidOffer &&bid);
+        void add_offer_to_slot(size_t slot_idx, BidOffer &&offer);
+        void add_bid_to_slot(size_t slot_idx, BidOffer &&bid);
 
         void clear_offers_from_slot(size_t slot_idx, const std::string &name);
         void clear_bids_from_slot(size_t slot_idx, const std::string &name);

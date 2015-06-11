@@ -4,7 +4,9 @@
 #define FLOW_COMPLETION_TIME_USER
 
 #include <iostream>
+#include <functional>
 #include <deque>
+#include <queue>
 #include <list>
 #include "abstract_user.hh"
 #include "pretty_print.hh"

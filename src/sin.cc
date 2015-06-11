@@ -7,10 +7,10 @@
 #include "noop_user.hh"
 #include "owner_user.hh"
 #include "brute_force_user.hh"
+#include "flow_completion_time_user.hh"
 #include "market_emulator.hh"
 #include "market.hh"
 
-#include "flow_completion_time_user.hh"
 #include "shortest_remaining_time_first.hh"
 #include "round_robin.hh"
 

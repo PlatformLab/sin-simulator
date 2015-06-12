@@ -11,11 +11,25 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 {
 }
 
+template <typename T>
+static vector<size_t> && priority_queue_to_vector( T &pq ) {
+    vector<size_t> toRet;
+    while ( not pq.empty() ) {
+        toRet.emplace_back(pq.top());
+        pq.pop();
+    }
+    // put stuff back
+    for (size_t t : toRet) {
+        pq.push( t );
+    }
+    return move( toRet );
+}
+
 static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_buy, const size_t latest_time_already_owned )
 {
-    //auto cmp = [](const size_t &a, const size_t &b) const{ return a > b; };
-    vector<size_t> v;
-    priority_queue<size_t, vector<size_t>, greater<size_t>> idxs_to_buy(greater<size_t>(), v);
+    auto compare_prices_at_idxs = [ &order_book ](const size_t &a, const size_t &b){ return order_book.at( a ).best_offer().cost > order_book.at( b ).best_offer().cost; };
+
+    priority_queue<size_t, vector<size_t>, decltype( compare_prices_at_idxs )> idxs_to_buy( compare_prices_at_idxs );
     double idxs_to_buy_cost = 0;
 
     size_t idx = start_time < order_book.front().time ? 0 : order_book.front().time - start_time;
@@ -36,7 +50,7 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
     size_t min_flow_completion_time = max(order_book.at( idx ).time, latest_time_already_owned);
     cout << name << " got min fct " <<  min_flow_completion_time << endl;
 
-    priority_queue<size_t> best_idxs {};//= idxs_to_buy;
+    vector<size_t> best_idxs = priority_queue_to_vector( idxs_to_buy );
     double flow_benefit = -(min_flow_completion_time - start_time);
     double best_utility = flow_benefit - idxs_to_buy_cost;
 
@@ -56,19 +70,14 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
             cout << "benefit for " << i << " is " << current_benefit << endl;
 
             if (current_utility > best_utility) {
-                //TODO best_idxs = idxs_to_buy;
+                best_idxs = priority_queue_to_vector( idxs_to_buy );
                 best_utility = current_utility;
             }
         }
     }
 
-    vector<size_t> toRet;
-    while ( not best_idxs.empty() ) {
-        toRet.emplace_back(best_idxs.top());
-        best_idxs.pop();
-    }
-    assert( toRet.size() == num_packets_to_buy );
-    return toRet;
+    assert( best_idxs.size() == num_packets_to_buy );
+    return best_idxs;
 }
 
 template <typename T>

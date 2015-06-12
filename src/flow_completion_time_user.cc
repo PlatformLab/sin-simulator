@@ -117,15 +117,22 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         }
         cout << "done!" << endl;
 
-        order_book_times_owned =  times_owned( order_book, name_ ); // redo calc now that we bought slots
+        // now price all slots we own
 
         // TODO, all slots but last one will be priced same so only do twice
-        for ( auto idx_to_price : buying_slots ) {
+        size_t idx = 0;
+        for ( auto &slot : order_book ) {
+            if (slot.owner != name_) {
+                idx++;
+                continue;
+            }
+
+            mkt.clear_offers_from_slot( idx, name_ );
 
             // don't count slot we are selling for flow completion time
             size_t flow_completion_time_if_sold = 0;
             for ( size_t i = 0; i < order_book.size(); i++) {
-                if ( i != idx_to_price and order_book.at(i).owner == name_ ) {
+                if ( i != idx and order_book.at(i).owner == name_ ) {
                     flow_completion_time_if_sold = order_book.at(i).time;
                 }
             }
@@ -139,7 +146,9 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
             double utility_delta = benefit_delta - slot_would_buy_instead.best_offer().cost;
 
-            mkt.add_offer_to_slot( idx_to_price, { -utility_delta + .01, name_ } );
+            mkt.add_offer_to_slot( idx, { -utility_delta + .01, name_ } );
+
+            idx++;
         }
     }
 }

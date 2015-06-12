@@ -90,8 +90,8 @@ int main(){
 
     for (int i = 0; i < 1; i++) // number of trails
     {
-        list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_users(usr_args, false, false);
+        list<flow> usr_args = make_random_users( 2 ); // makes this number of random users for market
+        auto market = sim_users(usr_args, true, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_delay = queueing_delay_of_schedule( usr_args, market );

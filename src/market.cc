@@ -25,12 +25,14 @@ void Market::owner_add_to_order_book(const std::string &name, uint64_t next_time
 
 void Market::add_offer_to_slot(size_t slot_idx, BidOffer &&offer)
 {
+    assert( order_book_.at(slot_idx).owner == offer.owner );
     auto transactions = order_book_.at(slot_idx).add_offer(offer);
     money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
 }
 
 void Market::add_bid_to_slot(size_t slot_idx, BidOffer &&bid)
 {
+    assert( order_book_.at(slot_idx).owner != bid.owner );
     auto transactions = order_book_.at(slot_idx).add_bid(bid);
     money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
 }

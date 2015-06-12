@@ -17,7 +17,7 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
     double idxs_to_buy_cost = 0;
 
     size_t idx = start_time < order_book.front().time ? 0 : order_book.front().time - start_time;
-    while  (idxs_to_buy.size() == num_packets_to_buy) {
+    while  (idxs_to_buy.size() != num_packets_to_buy) {
         const SingleSlot &potential_slot = order_book.at( idx );
         bool can_buy = potential_slot.owner != name and not potential_slot.offers.empty();
         if ( can_buy ) {
@@ -28,7 +28,9 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
         assert(idx < order_book.size() && "can't buy slots we need");
     }
 
+    assert( idx != 0 );
     idx--; // we incremented 1 too many times in while loop
+
     size_t min_flow_completion_time = max(order_book.at( idx ).time, latest_time_already_owned);
 
     priority_queue<size_t> best_idxs = idxs_to_buy;
@@ -55,13 +57,20 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
             }
         }
     }
-    return {};//std::make_pair(best_idxs, //best_utility);
+
+    vector<size_t> toRet;
+    while ( not best_idxs.empty() ) {
+        toRet.emplace_back(best_idxs.top());
+        best_idxs.pop();
+    }
+    assert( toRet.size() == num_packets_to_buy );
+    return toRet;
 }
 
 template <typename T>
-static list<size_t> times_owned( const T &collection, const string &name )
+static vector<size_t> times_owned( const T &collection, const string &name )
 {
-    list<size_t> toRet {};
+    vector<size_t> toRet {};
     for (auto & item : collection)
     {
         if ( item.owner == name ) {
@@ -81,41 +90,56 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
     size_t num_packets_sent = times_owned( mkt.packets_sent(), name_ ).size();
 
-    list<size_t> order_book_slots_owned =  times_owned( order_book, name_ );
-    size_t num_order_book_slots_owned = order_book_slots_owned.size();
+    vector<size_t> order_book_times_owned =  times_owned( order_book, name_ );
+    size_t num_order_book_slots_owned = order_book_times_owned.size();
 
-    assert (num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ));
+    assert ( num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
 
     size_t num_packets_to_buy = num_packets_ - num_packets_sent - num_order_book_slots_owned; 
 
-    if (num_packets_to_buy > 0) {
-        size_t latest_time_already_owned = order_book_slots_owned.back();
-        auto buying_slots = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, latest_time_already_owned );
+    if ( num_packets_to_buy > 0 ) {
+        size_t current_flow_completion_time;
 
-        for (auto &idx : buying_slots ) {
-            
-            mkt.add_bid_to_slot( idx, { order_book.at(idx).best_offer().cost, name_ } );
-            //assert got it
+        if ( order_book_times_owned.empty() ) {
+            current_flow_completion_time = 0;
+        } else {
+            current_flow_completion_time = order_book_times_owned.back();
+            cout << "current_flow_completion_time " << current_flow_completion_time << endl;
         }
 
-        list<size_t> order_book_slots_owned =  times_owned( order_book, name_ ); // redo calc
-        double current_utility = 0; //TODO figure it out pair.second;
+        auto buying_slots = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time );
+
+        cout << name_ << " is buying slots: ";
+        for ( auto &idx : buying_slots ) {
+            cout << idx << ", ";
+            mkt.add_bid_to_slot( idx, { order_book.at( idx ).best_offer().cost, name_ } );
+            assert( order_book.at( idx ).owner == name_ ); // assert we succesfully got it
+        }
+        cout << "done!" << endl;
+
+        order_book_times_owned =  times_owned( order_book, name_ ); // redo calc now that we bought slots
 
         // TODO, all slots but last one will be priced same so only do twice
         for ( auto idx_to_price : buying_slots ) {
-            // first get latest time owned that isnt this slot
-            size_t latest_time_owned_for_pricing = order_book_slots_owned.front(); // TODO what if only own one slot
-            for (const auto & slot : order_book) {
-                //XXX temp if ( slot.owner == name_ and slot != slot_to_price ) {
-                    latest_time_owned_for_pricing = slot.time;
-                //}
+
+            // don't count slot we are selling for flow completion time
+            size_t flow_completion_time_if_sold = 0;
+            for ( size_t i = 0; i < order_book.size(); i++) {
+                if ( i != idx_to_price and order_book.at(i).owner == name_ ) {
+                    flow_completion_time_if_sold = order_book.at(i).time;
+                }
             }
 
             num_packets_to_buy = 1;
-            latest_time_owned_for_pricing --; // TODO temp
-            double utility_delta = current_utility - 0;//TODO urrent_utility - idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, num_packets_sent, latest_time_owned_for_pricing ).second;
+            size_t idx_would_buy_instead = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold ).front();
+            const SingleSlot &slot_would_buy_instead = order_book.at( idx_would_buy_instead );
 
-            mkt.add_offer_to_slot( idx_to_price, { utility_delta + .01, name_ } );
+            // if the time of slot we buy instead is later than the last time if we sold, then it decreases benefit
+            double benefit_delta = min( 0., (double) flow_completion_time_if_sold - (double) slot_would_buy_instead.time );
+
+            double utility_delta = benefit_delta - slot_would_buy_instead.best_offer().cost;
+
+            mkt.add_offer_to_slot( idx_to_price, { -utility_delta + .01, name_ } );
         }
     }
 }

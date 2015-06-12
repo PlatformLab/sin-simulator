@@ -88,7 +88,7 @@ int main(){
 
     double worst_delay_ratio = 0;
 
-    for (int i = 0; i < 10000; i++) // number of trails
+    for (int i = 0; i < 1; i++) // number of trails
     {
         list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
         auto market = sim_users(usr_args, false, false);

@@ -1,5 +1,7 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
+#define DEBUG_PRINT 0
+
 #include "flow_completion_time_user.hh" 
 
 using namespace std;
@@ -48,13 +50,15 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
     idx--; // we incremented 1 too many times in while loop
 
     size_t min_flow_completion_time = max(order_book.at( idx ).time, latest_time_already_owned);
-    cout << name << " got min fct " <<  min_flow_completion_time << " and start time " << start_time << endl;
+    if (DEBUG_PRINT)
+        cout << name << " got min fct " <<  min_flow_completion_time << " and start time " << start_time << " and latest already owned" << latest_time_already_owned << endl;
 
     vector<size_t> best_idxs = priority_queue_to_vector( idxs_to_buy );
     assert(min_flow_completion_time >= start_time);
     double flow_benefit = -((double) min_flow_completion_time - (double) start_time);
     double best_utility = flow_benefit - idxs_to_buy_cost;
-    cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
+    if (DEBUG_PRINT)
+        cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
 
     for (size_t i = idx + 1; i < order_book.size(); i++) {
         const SingleSlot &potential_slot = order_book.at( i );
@@ -63,17 +67,20 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
             idxs_to_buy.push( i );
             idxs_to_buy_cost += potential_slot.best_offer().cost;
 
-            cout << "trying slot " << i << " has cost " << potential_slot.best_offer().cost << " while most expensive slot in idxs_to_buy is " << order_book.at( idxs_to_buy.top() ).best_offer().cost << endl;
+            if (DEBUG_PRINT)
+                cout << "trying slot " << i << " has cost " << potential_slot.best_offer().cost << " while most expensive slot in idxs_to_buy is " << order_book.at( idxs_to_buy.top() ).best_offer().cost << endl;
             idxs_to_buy_cost -= order_book.at( idxs_to_buy.top() ).best_offer().cost;
             idxs_to_buy.pop();
             assert(idxs_to_buy.size() == num_packets_to_buy);
 
-            double current_benefit = - (double) max( potential_slot.time, latest_time_already_owned ) - (double) start_time;
+            double current_benefit = - ( (double) max( potential_slot.time, latest_time_already_owned ) - (double) start_time );
             double current_utility = (double) current_benefit - idxs_to_buy_cost;
-            cout << "benefit for " << i << " is " << current_benefit << " and utility is " << current_utility << endl;
+            if (DEBUG_PRINT)
+                cout << "benefit for " << i << " is " << current_benefit << " and utility is " << current_utility << endl;
 
             if (current_utility > best_utility) {
-                cout << "that is better than current best, " << best_utility << " so swapping" << endl;
+                if (DEBUG_PRINT)
+                    cout << "that is better than current best, " << best_utility << " so swapping" << endl;
                 best_idxs = priority_queue_to_vector( idxs_to_buy );
                 best_utility = current_utility;
             }
@@ -121,18 +128,22 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             current_flow_completion_time = 0;
         } else {
             current_flow_completion_time = order_book_times_owned.back();
-            cout << "current_flow_completion_time " << current_flow_completion_time << endl;
+            if (DEBUG_PRINT)
+                cout << "current_flow_completion_time " << current_flow_completion_time << endl;
         }
 
         auto buying_slots = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time );
 
-        cout << name_ << " is buying slots: ";
+        if (DEBUG_PRINT)
+            cout << name_ << " is buying slots: ";
         for ( auto &idx : buying_slots ) {
-            cout << idx << ", ";
+            if (DEBUG_PRINT)
+                cout << idx << ", ";
             mkt.add_bid_to_slot( idx, { order_book.at( idx ).best_offer().cost, name_ } );
             assert( order_book.at( idx ).owner == name_ ); // assert we succesfully got it
         }
-        cout << "done!" << endl;
+        if (DEBUG_PRINT)
+            cout << "done!" << endl;
 
         // now price all slots we own
 
@@ -157,11 +168,13 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                     }
                 }
             }
-            cout << "got fct if sold " << flow_completion_time_if_sold << " for " << idx << endl;
+            if (DEBUG_PRINT)
+                cout << "got fct if sold " << flow_completion_time_if_sold << " for " << idx << endl;
 
             num_packets_to_buy = 1;
             size_t idx_would_buy_instead = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold ).front();
-            cout << "would buy " << idx_would_buy_instead << " instead of " << idx;
+            if (DEBUG_PRINT)
+                cout << "would buy " << idx_would_buy_instead << " instead of " << idx;
             const SingleSlot &slot_would_buy_instead = order_book.at( idx_would_buy_instead );
 
             // if the time of slot we buy instead is later than the last time if we sold, then it decreases benefit
@@ -170,7 +183,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             double utility_delta = benefit_delta - slot_would_buy_instead.best_offer().cost;
 
             mkt.add_offer_to_slot( idx, { -utility_delta + .01, name_ } );
-            cout << " pricing it at " << -utility_delta + .01 << endl;
+            if (DEBUG_PRINT)
+                cout << " pricing it at " << -utility_delta + .01 << endl;
 
             idx++;
         }

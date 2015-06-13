@@ -12,7 +12,7 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 }
 
 template <typename T>
-static vector<size_t> && priority_queue_to_vector( T &pq ) {
+static vector<size_t> priority_queue_to_vector( T &pq ) {
     vector<size_t> toRet;
     while ( not pq.empty() ) {
         toRet.emplace_back(pq.top());
@@ -65,7 +65,7 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
             idxs_to_buy.pop();
             assert(idxs_to_buy.size() == num_packets_to_buy);
 
-            size_t current_benefit = -max( potential_slot.time, latest_time_already_owned ) - start_time;
+            double current_benefit = - (double) max( potential_slot.time, latest_time_already_owned ) - (double) start_time;
             double current_utility = (double) current_benefit - idxs_to_buy_cost;
             cout << "benefit for " << i << " is " << current_benefit << endl;
 

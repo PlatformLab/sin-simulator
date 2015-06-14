@@ -7,7 +7,6 @@
 #include <deque>
 #include <queue>
 #include <vector>
-#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <functional>

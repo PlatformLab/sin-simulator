@@ -19,7 +19,7 @@ static vector<vector<size_t>> potential_idxs( const deque<SingleSlot> &order_boo
 
     vector<vector<size_t>> toRet = {};
     for ( size_t i = start_idx; i < order_book.size(); i++ ) {
-        bool can_buy = order_book.at( i ).owner != name and not order_book.at( i ).offers.empty();
+        bool can_buy = order_book.at( i ).owner != name and order_book.at( i ).has_offers();
         if ( can_buy ) {
             for ( vector<size_t> &vec : potential_idxs( order_book, name, i+1, num_packets-1 ) ) {
                 vec.emplace_back( i );

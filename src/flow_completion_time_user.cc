@@ -38,7 +38,7 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
     while  (idxs_to_buy.size() != num_packets_to_buy) {
         assert(idx < order_book.size() && "can't buy slots we need");
         const SingleSlot &potential_slot = order_book.at( idx );
-        bool can_buy = potential_slot.owner != name and not potential_slot.offers.empty();
+        bool can_buy = potential_slot.owner != name and potential_slot.has_offers();
         if ( can_buy ) {
             idxs_to_buy.push( idx );
             idxs_to_buy_cost += potential_slot.best_offer().cost;
@@ -62,7 +62,7 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
 
     for (size_t i = idx + 1; i < order_book.size(); i++) {
         const SingleSlot &potential_slot = order_book.at( i );
-        bool can_buy = potential_slot.owner != name and not potential_slot.offers.empty();
+        bool can_buy = potential_slot.owner != name and potential_slot.has_offers();
         if ( can_buy ) {
             idxs_to_buy.push( i );
             idxs_to_buy_cost += potential_slot.best_offer().cost;

@@ -52,7 +52,7 @@ const vector<PacketSent> sim_users(list<flow> usr_args, const bool verbose, cons
     return toRet;
 }
 size_t dice_roll() {
-    return (rand() % 60) + 1;
+    return (rand() % 1000) + 1;
 }
 
 list<flow> make_random_users(size_t number)
@@ -88,7 +88,7 @@ int main(){
 
     double worst_delay_ratio = 0;
 
-    for (int i = 0; i < 1000; i++) // number of trails
+    for (int i = 0; i < 10; i++) // number of trails
     {
         list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
         auto market = sim_users(usr_args, false, false);

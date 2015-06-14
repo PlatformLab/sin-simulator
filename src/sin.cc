@@ -52,7 +52,7 @@ const vector<PacketSent> sim_users(list<flow> usr_args, const bool verbose, cons
     return toRet;
 }
 size_t dice_roll() {
-    return (rand() % 6) + 1;
+    return (rand() % 60) + 1;
 }
 
 list<flow> make_random_users(size_t number)

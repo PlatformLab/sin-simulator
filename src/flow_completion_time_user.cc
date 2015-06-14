@@ -144,50 +144,51 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         }
         if (DEBUG_PRINT)
             cout << "done!" << endl;
+    }
 
-        // now price all slots we own
+    // now price all slots we own
 
-        // TODO, all slots but last one will be priced same so only do twice
-        size_t idx = 0;
-        for ( auto &slot : order_book ) {
-            if (slot.owner != name_) {
-                idx++;
-                continue;
-            }
+    // TODO, all slots but last one will be priced same so only do twice
+    size_t idx = 0;
+    for ( auto &slot : order_book ) {
+        if (slot.owner != name_) {
+            idx++;
+            continue;
+        }
 
-            mkt.clear_offers_from_slot( idx, name_ );
+        mkt.clear_offers_from_slot( idx, name_ );
 
-            // don't count slot we are selling for flow completion time
-            size_t cur_flow_completion_time = 0;
-            size_t flow_completion_time_if_sold = 0;
-            for ( size_t i = 0; i < order_book.size(); i++) {
-                if ( order_book.at(i).owner == name_ ) {
-                    cur_flow_completion_time = order_book.at(i).time; // TODO dont calc this every time
-                    if ( i != idx ) {
-                        flow_completion_time_if_sold = order_book.at(i).time;
-                    }
+        // don't count slot we are selling for flow completion time
+        size_t current_flow_completion_time = 0;
+        size_t flow_completion_time_if_sold = 0;
+        for ( size_t i = 0; i < order_book.size(); i++) {
+            if ( order_book.at(i).owner == name_ ) {
+                current_flow_completion_time = order_book.at(i).time;
+                if ( i != idx ) {
+                    flow_completion_time_if_sold = order_book.at(i).time;
                 }
             }
-            if (DEBUG_PRINT)
-                cout << "got fct if sold " << flow_completion_time_if_sold << " for " << idx << endl;
-
-            num_packets_to_buy = 1;
-            size_t idx_would_buy_instead = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold ).front();
-            if (DEBUG_PRINT)
-                cout << "would buy " << idx_would_buy_instead << " instead of " << idx;
-            const SingleSlot &slot_would_buy_instead = order_book.at( idx_would_buy_instead );
-
-            // if the time of slot we buy instead is later than the last time if we sold, then it decreases benefit
-            double benefit_delta = min( 0., (double) cur_flow_completion_time - (double) slot_would_buy_instead.time );
-
-            double utility_delta = benefit_delta - slot_would_buy_instead.best_offer().cost;
-
-            mkt.add_offer_to_slot( idx, { -utility_delta + .01, name_ } );
-            if (DEBUG_PRINT)
-                cout << " pricing it at " << -utility_delta + .01 << endl;
-
-            idx++;
         }
+        if (DEBUG_PRINT)
+            cout << "got fct if sold " << flow_completion_time_if_sold << " for " << idx << endl;
+
+        num_packets_to_buy = 1;
+        size_t idx_would_buy_instead = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold ).front();
+        if (DEBUG_PRINT)
+            cout << "would buy " << idx_would_buy_instead << " instead of " << idx;
+        const SingleSlot &slot_would_buy_instead = order_book.at( idx_would_buy_instead );
+
+        // if the time of slot we buy instead is later than the last time if we sold, then it decreases benefit
+        flow_completion_time_if_sold = max( flow_completion_time_if_sold, slot_would_buy_instead.time );
+        double benefit_delta = (double) current_flow_completion_time - (double) flow_completion_time_if_sold;
+
+        double utility_delta = benefit_delta - slot_would_buy_instead.best_offer().cost;
+
+        mkt.add_offer_to_slot( idx, { -utility_delta + .01, name_ } );
+        if (DEBUG_PRINT)
+            cout << " pricing it at " << -utility_delta + .01 << endl;
+
+        idx++;
     }
 }
 

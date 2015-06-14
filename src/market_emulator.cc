@@ -41,11 +41,11 @@ void MarketEmulator::users_take_actions_until_finished()
             idx_to_run = next_idx( idx_to_run );
         }
 
-        const Market oldMkt = mkt_;
+        const size_t before_version = mkt_.version();
 
         users_.at(idx_to_run)->take_actions(mkt_);
         total_roundtrips_++;
-        if (oldMkt == mkt_) { // user didn't do anything
+        if ( before_version == mkt_.version() ) { // user didn't do anything
             idxs_finished.insert(idx_to_run);
         } else {
             idxs_finished.clear(); // let everyone run again if someone changed market

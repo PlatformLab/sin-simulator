@@ -17,10 +17,6 @@
 struct BidOffer {
     double cost;
     std::string owner;
-
-    inline bool operator==(const BidOffer& rhs) const {
-        return cost == rhs.cost and owner == rhs.owner;
-    }
 };
 
 // template <size_t size> XXX later
@@ -52,11 +48,6 @@ class Slot {
 
     void clear_all_bids(const std::string &user_name);
     void clear_all_offers(const std::string &user_name);
-
-    inline bool operator==(const Slot& rhs) const {
-        return owner == rhs.owner and time == rhs.time and 
-            bids == rhs.bids and offers == rhs.offers;
-    }
 };
 
 typedef Slot SingleSlot;

@@ -19,10 +19,6 @@ struct MoneyExchanged
     std::string to;
     double amount;
     uint64_t time;
-
-    inline bool operator==( const MoneyExchanged& rhs ) const {
-        return from == rhs.from and to == rhs.to and amount == rhs.amount and time == rhs.time;
-    }
 };
 
 #endif /* MARKET_EVENT_HH */

@@ -95,7 +95,7 @@ template <typename T>
 static vector<size_t> times_owned( const T &collection, const string &name )
 {
     vector<size_t> toRet {};
-    for (auto & item : collection)
+    for (auto &item : collection)
     {
         if ( item.owner == name ) {
             toRet.emplace_back( item.time );
@@ -172,12 +172,16 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     size_t idx = 0;
     for ( auto &slot : order_book ) {
         if (slot.owner == name_) {
-            mkt.clear_offers_from_slot( idx, name_ );
-
             if ( slot.time == current_flow_completion_time ) {
-                mkt.add_offer_to_slot( idx, { back_sell_price, name_ } );
+                if ( not slot.has_offers() or slot.best_offer().cost != back_sell_price ) {
+                    mkt.clear_offers_from_slot( idx, name_ );
+                    mkt.add_offer_to_slot( idx, { back_sell_price, name_ } );
+                }
             } else {
-                mkt.add_offer_to_slot( idx, { non_back_sell_price, name_ } );
+                if ( not slot.has_offers() or slot.best_offer().cost != non_back_sell_price ) {
+                    mkt.clear_offers_from_slot( idx, name_ );
+                    mkt.add_offer_to_slot( idx, { non_back_sell_price, name_ } );
+                }
             }
         }
         idx++;

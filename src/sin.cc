@@ -16,7 +16,7 @@
 
 using namespace std;
 
-const vector<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
 {
     vector<unique_ptr<AbstractUser>> usersToEmulate;
     for (auto & u : usr_args)
@@ -43,7 +43,7 @@ const vector<PacketSent> sim_users(list<flow> usr_args, const bool verbose, cons
     }
 
     // now clean up results by getting rid of hard coded owner
-    vector<PacketSent> toRet = {};
+    deque<PacketSent> toRet = {};
     for (auto &ps : emulated_market.packets_sent()) {
         if (ps.owner != "ccst") {
             toRet.emplace_back(ps);

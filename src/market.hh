@@ -19,13 +19,15 @@
 class Market {
     private:
         std::deque<SingleSlot> order_book_ = {};
-        std::vector<PacketSent> packets_sent_ = {};
-        std::vector<MoneyExchanged> money_exchanged_ = {};
+        std::deque<PacketSent> packets_sent_ = {};
+        std::deque<MoneyExchanged> money_exchanged_ = {};
+        size_t version_ = 0;
 
     public:
         const std::deque<SingleSlot> &order_book() const { return order_book_; }
-        const std::vector<PacketSent> &packets_sent() const { return packets_sent_; };
-        const std::vector<MoneyExchanged> &money_exchanged() const { return money_exchanged_; };
+        const std::deque<PacketSent> &packets_sent() const { return packets_sent_; };
+        const std::deque<MoneyExchanged> &money_exchanged() const { return money_exchanged_; };
+        const size_t &version() const { return version_; };
 
         void advance_time();
         void owner_add_to_order_book(const std::string &name, uint64_t next_time);
@@ -35,15 +37,6 @@ class Market {
 
         void clear_offers_from_slot(size_t slot_idx, const std::string &name);
         void clear_bids_from_slot(size_t slot_idx, const std::string &name);
-
-        inline bool operator==(const Market& rhs) const {
-            return order_book_ == rhs.order_book_ and packets_sent_ == rhs.packets_sent_
-                and money_exchanged_ == rhs.money_exchanged_;
-        }
-
-        inline bool operator!=(const Market& rhs) const {
-            return not operator==(rhs);
-        }
 };
 
 #endif /* MARKET_HH */

@@ -15,9 +15,9 @@ struct flow {
     size_t num_packets;
 };
 
-const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
+const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
 {
-    std::vector<PacketSent> final_schedule;
+    std::deque<PacketSent> final_schedule;
     uint64_t cur_time = 0;
 
     while ( not flows.empty() )
@@ -51,7 +51,7 @@ const std::vector<PacketSent> simulate_shortest_remaining_time_first( std::list<
 }
 
 // returns total queuing time for for schedule given
-size_t queueing_delay_of_schedule( std::list<flow> flows, std::vector<PacketSent> schedule )
+size_t queueing_delay_of_schedule( std::list<flow> flows, std::deque<PacketSent> schedule )
 {
     std::unordered_map<std::string, size_t> schedule_flow_completion_times;
     for (auto & packet_sent : schedule) {

@@ -5,9 +5,9 @@
 
 using namespace std;
 
-//void Market::advance_until_time(const size_t ts)
 void Market::advance_time()
 {
+    version_++;
     if ( not order_book_.empty() ) {
 
         const SingleSlot &front = order_book().front();
@@ -20,11 +20,13 @@ void Market::advance_time()
 
 void Market::owner_add_to_order_book(const std::string &name, uint64_t next_time)
 {
+    version_++;
     order_book_.push_back( {name, next_time} );
 }
 
 void Market::add_offer_to_slot(size_t slot_idx, BidOffer &&offer)
 {
+    version_++;
     assert( order_book_.at(slot_idx).owner == offer.owner );
     auto transactions = order_book_.at(slot_idx).add_offer(offer);
     money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
@@ -32,6 +34,7 @@ void Market::add_offer_to_slot(size_t slot_idx, BidOffer &&offer)
 
 void Market::add_bid_to_slot(size_t slot_idx, BidOffer &&bid)
 {
+    version_++;
     assert( order_book_.at(slot_idx).owner != bid.owner );
     auto transactions = order_book_.at(slot_idx).add_bid(bid);
     money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
@@ -39,10 +42,12 @@ void Market::add_bid_to_slot(size_t slot_idx, BidOffer &&bid)
 
 void Market::clear_offers_from_slot(size_t slot_idx, const std::string &name)
 {
+    version_++;
     order_book_.at(slot_idx).clear_all_offers(name);
 }
 
 void Market::clear_bids_from_slot(size_t slot_idx, const std::string &name)
 {
+    version_++;
     order_book_.at(slot_idx).clear_all_bids(name);
 }

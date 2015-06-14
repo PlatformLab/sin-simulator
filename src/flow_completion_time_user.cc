@@ -114,7 +114,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
     size_t num_packets_sent = times_owned( mkt.packets_sent(), name_ ).size();
 
-    vector<size_t> order_book_times_owned =  times_owned( order_book, name_ );
+    vector<size_t> order_book_times_owned = times_owned( order_book, name_ );
     size_t num_order_book_slots_owned = order_book_times_owned.size();
 
     assert ( num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
@@ -146,48 +146,40 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             cout << "done!" << endl;
     }
 
-    // now price all slots we own
+    // now price all slots we own, there are two prices, one for the non-last slot, which selling couldnt change flow completion time, and one for the last slot
 
-    // TODO, all slots but last one will be priced same so only do twice
+    order_book_times_owned = times_owned( order_book, name_ ); // redo now that we may have bought slots
+    if ( order_book_times_owned.empty() ) {
+        return;
+    }
+
+    // first price last slot
+    size_t current_flow_completion_time = order_book_times_owned.back();
+    size_t flow_completion_time_if_sold_back = 0;
+    if (order_book_times_owned.size() > 1) {
+        flow_completion_time_if_sold_back = order_book_times_owned.at( order_book_times_owned.size() - 2 );
+    }
+    num_packets_to_buy = 1;
+    size_t back_replacement_idx = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold_back ).front();
+    size_t non_back_replacement_idx = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time ).front();
+
+    double back_benefit_delta = (double) current_flow_completion_time - (double) max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time);
+    double non_back_benefit_delta = min( (double) current_flow_completion_time - (double) order_book.at( non_back_replacement_idx ).time, 0. );
+
+    double back_sell_price = .01 - ( back_benefit_delta - order_book.at( back_replacement_idx ).best_offer().cost );
+    double non_back_sell_price = .01 - ( non_back_benefit_delta - order_book.at( non_back_replacement_idx ).best_offer().cost );
+
     size_t idx = 0;
     for ( auto &slot : order_book ) {
-        if (slot.owner != name_) {
-            idx++;
-            continue;
-        }
+        if (slot.owner == name_) {
+            mkt.clear_offers_from_slot( idx, name_ );
 
-        mkt.clear_offers_from_slot( idx, name_ );
-
-        // don't count slot we are selling for flow completion time
-        size_t current_flow_completion_time = 0;
-        size_t flow_completion_time_if_sold = 0;
-        for ( size_t i = 0; i < order_book.size(); i++) {
-            if ( order_book.at(i).owner == name_ ) {
-                current_flow_completion_time = order_book.at(i).time;
-                if ( i != idx ) {
-                    flow_completion_time_if_sold = order_book.at(i).time;
-                }
+            if ( slot.time == current_flow_completion_time ) {
+                mkt.add_offer_to_slot( idx, { back_sell_price, name_ } );
+            } else {
+                mkt.add_offer_to_slot( idx, { non_back_sell_price, name_ } );
             }
         }
-        if (DEBUG_PRINT)
-            cout << "got fct if sold " << flow_completion_time_if_sold << " for " << idx << endl;
-
-        num_packets_to_buy = 1;
-        size_t idx_would_buy_instead = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold ).front();
-        if (DEBUG_PRINT)
-            cout << "would buy " << idx_would_buy_instead << " instead of " << idx;
-        const SingleSlot &slot_would_buy_instead = order_book.at( idx_would_buy_instead );
-
-        // if the time of slot we buy instead is later than the last time if we sold, then it decreases benefit
-        flow_completion_time_if_sold = max( flow_completion_time_if_sold, slot_would_buy_instead.time );
-        double benefit_delta = (double) current_flow_completion_time - (double) flow_completion_time_if_sold;
-
-        double utility_delta = benefit_delta - slot_would_buy_instead.best_offer().cost;
-
-        mkt.add_offer_to_slot( idx, { -utility_delta + .01, name_ } );
-        if (DEBUG_PRINT)
-            cout << " pricing it at " << -utility_delta + .01 << endl;
-
         idx++;
     }
 }

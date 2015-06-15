@@ -21,7 +21,7 @@ class OwnerUser : public AbstractUser
 
     void take_actions( Market& mkt ) override;
 
-    bool done( const Market& mkt ) const override;
+    bool done( const Market& mkt ) override;
 
     void print_stats( const Market& mkt ) const override;
 };

@@ -6,7 +6,6 @@
 #include "abstract_user.hh"
 #include "noop_user.hh"
 #include "owner_user.hh"
-#include "brute_force_user.hh"
 #include "flow_completion_time_user.hh"
 #include "market_emulator.hh"
 #include "market.hh"

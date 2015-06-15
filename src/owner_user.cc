@@ -28,7 +28,7 @@ void OwnerUser::take_actions( Market& mkt )
     }
 }
 
-bool OwnerUser::done( const Market& mkt ) const 
+bool OwnerUser::done( const Market& mkt )
 {
     if ( only_add_once_ ) {
         return added_before_ && mkt.order_book().empty();

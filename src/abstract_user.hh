@@ -17,7 +17,7 @@ class AbstractUser {
 
         virtual void take_actions( Market& mkt ) = 0;
 
-        virtual bool done( const Market& mkt ) const = 0;
+        virtual bool done( const Market& mkt ) = 0;
 
         virtual void print_stats( const Market& mkt ) const = 0;
 

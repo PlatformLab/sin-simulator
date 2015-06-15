@@ -13,7 +13,7 @@ class NoopUser : public AbstractUser
 
     void take_actions( Market& ) override { std::cout << "noop" << std::endl; }
 
-    bool done( const Market& ) const override { return true; };
+    bool done( const Market& ) override { return true; };
 
     void print_stats( const Market& ) const override { std::cout << "noop stats" << std::endl; }
 };

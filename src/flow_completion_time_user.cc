@@ -9,7 +9,8 @@ using namespace std;
 FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets )
 : AbstractUser( name ),
     flow_start_time_( flow_start_time ),
-    num_packets_( num_packets )
+    num_packets_( num_packets ),
+    done_( false )
 {
 }
 
@@ -202,9 +203,12 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     }
 }
 
-bool FlowCompletionTimeUser::done( const Market& mkt ) const
+bool FlowCompletionTimeUser::done( const Market& mkt )
 {
-    return num_packets_ == num_owned( mkt.packets_sent(), name_ );
+    if (not done_) {
+        done_ = num_packets_ == num_owned( mkt.packets_sent(), name_ );
+    }
+    return done_;
 }
 
 void FlowCompletionTimeUser::print_stats( const Market& ) const

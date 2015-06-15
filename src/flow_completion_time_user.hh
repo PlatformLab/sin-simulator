@@ -17,13 +17,14 @@ class FlowCompletionTimeUser : public AbstractUser
     private:
     const size_t flow_start_time_;
     const size_t num_packets_;
+    bool done_;
 
     public:
     FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );
 
     void take_actions( Market& mkt ) override;
 
-    bool done( const Market& mkt ) const override;
+    bool done( const Market& mkt ) override;
 
     void print_stats( const Market& mkt ) const override;
 };

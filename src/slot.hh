@@ -25,7 +25,7 @@ class Slot {
     std::list<BidOffer> offers = {};
 
     bool market_crossed() const;
-    std::deque<MoneyExchanged> settle_slot();
+    void settle_slot( std::deque<MoneyExchanged> &log );
 
     public:
     //std::array<std::string, size> owners; TODO
@@ -34,8 +34,8 @@ class Slot {
 
     Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
 
-    std::deque<MoneyExchanged> add_bid(struct BidOffer bid);
-    std::deque<MoneyExchanged> add_offer(struct BidOffer offer);
+    void add_bid( struct BidOffer bid, std::deque<MoneyExchanged> &log );
+    void add_offer( struct BidOffer offer, std::deque<MoneyExchanged> &log );
 
     void clear_all_bids(const std::string &user_name);
     void clear_all_offers(const std::string &user_name);

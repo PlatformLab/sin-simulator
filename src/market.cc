@@ -28,16 +28,14 @@ void Market::add_offer_to_slot(size_t slot_idx, BidOffer &&offer)
 {
     version_++;
     assert( order_book_.at(slot_idx).owner == offer.owner );
-    auto transactions = order_book_.at(slot_idx).add_offer(offer);
-    money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
+    order_book_.at(slot_idx).add_offer( offer, money_exchanged_ );
 }
 
 void Market::add_bid_to_slot(size_t slot_idx, BidOffer &&bid)
 {
     version_++;
     assert( order_book_.at(slot_idx).owner != bid.owner );
-    auto transactions = order_book_.at(slot_idx).add_bid(bid);
-    money_exchanged_.insert(money_exchanged_.end(), transactions.begin(), transactions.end());
+    order_book_.at(slot_idx).add_bid( bid, money_exchanged_ );
 }
 
 void Market::clear_offers_from_slot(size_t slot_idx, const std::string &name)

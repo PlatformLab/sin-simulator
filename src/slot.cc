@@ -21,32 +21,29 @@ static double median(const double a, const double b)
     }
 }
 
-deque<MoneyExchanged> Slot::settle_slot()
+void Slot::settle_slot( std::deque<MoneyExchanged> &log )
 {
-    deque<MoneyExchanged> transactions {};
-
     while ( market_crossed() ) {
         double sale_price = median(best_offer().cost, best_bid().cost);
 
-        transactions.push_back({ best_bid().owner, best_offer().owner, sale_price, time });
+        log.push_back( { best_bid().owner, best_offer().owner, sale_price, time } );
 
         owner = best_bid().owner;
         offers.clear();
         bids.clear();
     }
-    return transactions;
 }
 
-deque<MoneyExchanged> Slot::add_bid(BidOffer bid)
+void Slot::add_bid( BidOffer bid, std::deque<MoneyExchanged> &log )
 {
-    bids.emplace_back(bid);
-    return settle_slot();
+    bids.emplace_back( bid );
+    settle_slot( log );
 }
 
-deque<MoneyExchanged> Slot::add_offer(BidOffer offer)
+void Slot::add_offer( BidOffer offer, std::deque<MoneyExchanged> &log )
 {
-    offers.emplace_back(offer);
-    return settle_slot();
+    offers.emplace_back( offer );
+    settle_slot( log );
 }
 
 bool Slot::has_offers() const { return not offers.empty(); }

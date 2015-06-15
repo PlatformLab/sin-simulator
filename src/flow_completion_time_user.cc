@@ -13,10 +13,8 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 {
 }
 
-static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_buy, const size_t latest_time_already_owned )
+static priority_queue<pair<double, size_t>> idxs_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_buy, const size_t latest_time_already_owned )
 {
-    //auto compare_prices_at_idxs = [ &order_book ](const size_t &a, const size_t &b){ return order_book.at( a ).best_offer().cost < order_book.at( b ).best_offer().cost; };
-
     priority_queue<pair<double, size_t>> idxs_to_buy;
     double idxs_to_buy_cost = 0;
 
@@ -79,13 +77,8 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
         }
     }
 
-    vector<size_t> toRet;
-    while ( not best_idxs.empty() ) {
-        toRet.emplace_back(best_idxs.top().second);
-        best_idxs.pop();
-    }
-    assert( toRet.size() == num_packets_to_buy );
-    return toRet;
+    assert( best_idxs.size() == num_packets_to_buy );
+    return move( best_idxs );
 }
 
 template <typename T>
@@ -129,15 +122,20 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                 cout << "current_flow_completion_time " << current_flow_completion_time << endl;
         }
 
-        auto buying_slots = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time );
+        priority_queue<pair<double, size_t>> buying_slots = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time );
 
         if (DEBUG_PRINT)
             cout << name_ << " is buying slots: ";
-        for ( auto &idx : buying_slots ) {
+        while ( not buying_slots.empty() ) {
+            const size_t slot_idx_to_buy = buying_slots.top().second;
+            const double best_offer_cost = buying_slots.top().first;
+
             if (DEBUG_PRINT)
-                cout << idx << ", ";
-            mkt.add_bid_to_slot( idx, { order_book.at( idx ).best_offer().cost, name_ } );
-            assert( order_book.at( idx ).owner == name_ ); // assert we succesfully got it
+                cout << slot_idx_to_buy << ", ";
+            mkt.add_bid_to_slot( slot_idx_to_buy, { best_offer_cost, name_ } );
+            assert( order_book.at( slot_idx_to_buy ).owner == name_ ); // assert we succesfully got it
+
+            buying_slots.pop();
         }
         if (DEBUG_PRINT)
             cout << "done!" << endl;
@@ -157,14 +155,14 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         flow_completion_time_if_sold_back = order_book_times_owned.at( order_book_times_owned.size() - 2 );
     }
     num_packets_to_buy = 1;
-    size_t back_replacement_idx = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold_back ).front();
-    size_t non_back_replacement_idx = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time ).front();
+    pair<double, size_t> back_replacement = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold_back ).top();
+    pair<double, size_t> non_back_replacement = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time ).top();
 
-    double back_benefit_delta = (double) current_flow_completion_time - (double) max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time);
-    double non_back_benefit_delta = min( (double) current_flow_completion_time - (double) order_book.at( non_back_replacement_idx ).time, 0. );
+    double back_benefit_delta = (double) current_flow_completion_time - (double) max( flow_completion_time_if_sold_back, order_book.at( back_replacement.second ).time);
+    double non_back_benefit_delta = min( (double) current_flow_completion_time - (double) order_book.at( non_back_replacement.second ).time, 0. );
 
-    double back_sell_price = .01 - ( back_benefit_delta - order_book.at( back_replacement_idx ).best_offer().cost );
-    double non_back_sell_price = .01 - ( non_back_benefit_delta - order_book.at( non_back_replacement_idx ).best_offer().cost );
+    double back_sell_price = .01 - ( back_benefit_delta - back_replacement.first );
+    double non_back_sell_price = .01 - ( non_back_benefit_delta - non_back_replacement.first );
 
     size_t idx = 0;
     for ( auto &slot : order_book ) {

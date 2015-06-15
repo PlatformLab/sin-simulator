@@ -7,21 +7,6 @@
 #include "slot.hh"
 #include "market_event.hh"
 
-template <typename T>
-void printPacketsSent(T& container)
-{
-    std::cout << "[ ";
-    bool is_first = true;
-    for ( auto & pkt : container ){
-        if (not is_first) {
-            std::cout << "| ";
-        }
-        std::cout << pkt.time << ". " << pkt.owner << " ";
-        is_first = false;
-    }
-    std::cout << "]" << std::endl;
-}
-
 void print_cost( const PacketSent * );
 void print_cost( const SingleSlot *p );
 
@@ -43,7 +28,7 @@ bool matches( const PacketSent &s1, const PacketSent *s2 );
 bool matches( const SingleSlot &s1, const SingleSlot *s2 );
 
 template <typename T>
-void printOrderBook(T& container)
+void printSlots(T& container)
 {
     std::cout << "[ ";
     auto *first_consecutive_slot = &container.front(); 

@@ -106,9 +106,9 @@ int main(){
             market_didnt_match_srtf++;
 
             cout << "market didnt match srtf! Market was:"<< endl;
-            printPacketsSent(market);
+            printSlots(market);
             cout << "and srtf was:" << endl;
-            printPacketsSent(srtf);
+            printSlots(srtf);
             cout << "market had " << market_delay - srtf_delay << " more queuing delay than srtf" << endl;
 
             double delay_ratio = (double) market_delay / (double) srtf_delay;

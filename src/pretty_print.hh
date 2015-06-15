@@ -4,7 +4,8 @@
 #define PRETTY_PRINT_HH
 
 #include <iostream>
-#include <limits>
+#include "slot.hh"
+#include "market_event.hh"
 
 template <typename T>
 void printPacketsSent(T& container)
@@ -21,6 +22,9 @@ void printPacketsSent(T& container)
     std::cout << "]" << std::endl;
 }
 
+void print_cost( const PacketSent * );
+void print_cost( const SingleSlot *p );
+
 template <typename T>
 void print_consecutive_slot_range(T *start, T* end)
 {
@@ -32,13 +36,11 @@ void print_consecutive_slot_range(T *start, T* end)
         std::cout << "null";
     }
 
-    std::cout << " $";
-    if ( start->has_offers() ) {
-        std::cout << start->best_offer().cost;
-    } else {
-        std::cout << "null";
-    }
+    print_cost( start );
 }
+
+bool matches( const PacketSent &s1, const PacketSent *s2 );
+bool matches( const SingleSlot &s1, const SingleSlot *s2 );
 
 template <typename T>
 void printOrderBook(T& container)
@@ -49,13 +51,8 @@ void printOrderBook(T& container)
 
     for (auto &slot : container)
     {
-        bool owner_matches = slot.owner == last_consecutive_slot->owner;
-        bool cost_matches = last_consecutive_slot->has_offers() == slot.has_offers();
-        if ( cost_matches and slot.has_offers() ) {
-            cost_matches = last_consecutive_slot->best_offer().cost == slot.best_offer().cost;
-        }
 
-        if ( not owner_matches or not cost_matches ) {
+        if ( not matches(slot, last_consecutive_slot ) ) {
             print_consecutive_slot_range( first_consecutive_slot, last_consecutive_slot );
             std::cout << " | ";
 

@@ -79,7 +79,7 @@ void MarketEmulator::print_slots()
 
 void MarketEmulator::print_packets_sent()
 {
-    printPacketsSent(mkt_.packets_sent());
+    printOrderBook(mkt_.packets_sent());
 }
 
 void MarketEmulator::print_money_exchanged()

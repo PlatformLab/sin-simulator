@@ -38,7 +38,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
 
     if (verbose) {
         emulated_market.print_money_exchanged();
-        //emulated_market.print_packets_sent();
+        emulated_market.print_packets_sent();
     }
 
     // now clean up results by getting rid of hard coded owner

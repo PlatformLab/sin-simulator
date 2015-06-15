@@ -82,13 +82,13 @@ static priority_queue<pair<double, size_t>> idxs_to_buy( const deque<SingleSlot>
 }
 
 template <typename T>
-static vector<size_t> times_owned( const T &collection, const string &name )
+static size_t num_owned( const T &collection, const string &name )
 {
-    vector<size_t> toRet {};
+    size_t toRet = 0;
     for (auto &item : collection)
     {
         if ( item.owner == name ) {
-            toRet.emplace_back( item.time );
+            toRet++;
         }
     }
     return toRet;
@@ -102,25 +102,29 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         return;
     }
 
-    size_t num_packets_sent = times_owned( mkt.packets_sent(), name_ ).size();
+    const size_t num_packets_sent = num_owned( mkt.packets_sent(), name_ );
 
-    vector<size_t> order_book_times_owned = times_owned( order_book, name_ );
-    size_t num_order_book_slots_owned = order_book_times_owned.size();
+    const size_t num_order_book_slots_owned = num_owned( order_book, name_ );
 
     assert ( num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
 
     size_t num_packets_to_buy = num_packets_ - num_packets_sent - num_order_book_slots_owned; 
 
     if ( num_packets_to_buy > 0 ) {
-        size_t current_flow_completion_time;
+        size_t current_flow_completion_time = 0;
 
-        if ( order_book_times_owned.empty() ) {
-            current_flow_completion_time = 0;
-        } else {
-            current_flow_completion_time = order_book_times_owned.back();
-            if (DEBUG_PRINT)
-                cout << "current_flow_completion_time " << current_flow_completion_time << endl;
+        if ( num_order_book_slots_owned > 0 ) {
+            size_t idx = order_book.size() - 1;
+            while ( idx != 0 ) { // skip idx 0 dont care
+                if (order_book.at(idx).owner == name_) {
+                    current_flow_completion_time = order_book.at(idx).time;
+                    break;
+                }
+                idx--;
+            }
         }
+        if (DEBUG_PRINT)
+            cout << "current_flow_completion_time " << current_flow_completion_time << endl;
 
         priority_queue<pair<double, size_t>> buying_slots = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time );
 
@@ -143,17 +147,31 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
     // now price all slots we own, there are two prices, one for the non-last slot, which selling couldnt change flow completion time, and one for the last slot
 
-    order_book_times_owned = times_owned( order_book, name_ ); // redo now that we may have bought slots
-    if ( order_book_times_owned.empty() ) {
+    if ( num_order_book_slots_owned == 0 and num_packets_to_buy == 0) {
         return;
     }
 
     // first price last slot
-    size_t current_flow_completion_time = order_book_times_owned.back();
+    size_t current_flow_completion_time = 0;
     size_t flow_completion_time_if_sold_back = 0;
-    if (order_book_times_owned.size() > 1) {
-        flow_completion_time_if_sold_back = order_book_times_owned.at( order_book_times_owned.size() - 2 );
+    bool has_more_than_one_slot = ( num_order_book_slots_owned + num_packets_to_buy ) > 1;
+
+    size_t idx = order_book.size() - 1;
+    while ( idx != 0 ) { // skip idx 0 dont care
+        if ( order_book.at(idx).owner == name_ ) {
+            if ( current_flow_completion_time == 0 ) {
+                current_flow_completion_time = order_book.at(idx).time;
+                if ( not has_more_than_one_slot ) {
+                    break;
+                }
+            } else {
+                flow_completion_time_if_sold_back = order_book.at(idx).time;
+                break;
+            }
+        }
+        idx--;
     }
+
     num_packets_to_buy = 1;
     pair<double, size_t> back_replacement = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, flow_completion_time_if_sold_back ).top();
     pair<double, size_t> non_back_replacement = idxs_to_buy( order_book, name_, flow_start_time_, num_packets_to_buy, current_flow_completion_time ).top();
@@ -164,7 +182,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     double back_sell_price = .01 - ( back_benefit_delta - back_replacement.first );
     double non_back_sell_price = .01 - ( non_back_benefit_delta - non_back_replacement.first );
 
-    size_t idx = 0;
+    idx = 0;
     for ( auto &slot : order_book ) {
         if (slot.owner == name_) {
             if ( slot.time == current_flow_completion_time ) {
@@ -172,6 +190,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                     mkt.clear_offers_from_slot( idx, name_ );
                     mkt.add_offer_to_slot( idx, { back_sell_price, name_ } );
                 }
+                break;
             } else {
                 if ( not slot.has_offers() or slot.best_offer().cost != non_back_sell_price ) {
                     mkt.clear_offers_from_slot( idx, name_ );
@@ -185,7 +204,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
 bool FlowCompletionTimeUser::done( const Market& mkt ) const
 {
-    return num_packets_ == times_owned( mkt.packets_sent(), name_ ).size();
+    return num_packets_ == num_owned( mkt.packets_sent(), name_ );
 }
 
 void FlowCompletionTimeUser::print_stats( const Market& ) const

@@ -60,10 +60,11 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
     if (DEBUG_PRINT)
         cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
 
+    double most_expensive_slot_cost = order_book.at( idxs_to_buy.top() ).best_offer().cost;
     for (size_t i = idx + 1; i < order_book.size(); i++) {
         const SingleSlot &potential_slot = order_book.at( i );
         bool can_buy = potential_slot.owner != name and potential_slot.has_offers();
-        if ( can_buy ) {
+        if ( can_buy and potential_slot.best_offer().cost < most_expensive_slot_cost ) {
             idxs_to_buy.push( i );
             idxs_to_buy_cost += potential_slot.best_offer().cost;
 
@@ -72,6 +73,7 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
             idxs_to_buy_cost -= order_book.at( idxs_to_buy.top() ).best_offer().cost;
             idxs_to_buy.pop();
             assert(idxs_to_buy.size() == num_packets_to_buy);
+            most_expensive_slot_cost = order_book.at( idxs_to_buy.top() ).best_offer().cost;
 
             double current_benefit = - ( (double) max( potential_slot.time, latest_time_already_owned ) - (double) start_time );
             double current_utility = (double) current_benefit - idxs_to_buy_cost;

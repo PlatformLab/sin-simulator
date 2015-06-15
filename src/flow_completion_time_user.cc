@@ -13,25 +13,11 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 {
 }
 
-template <typename T>
-static vector<size_t> priority_queue_to_vector( T &pq ) {
-    vector<size_t> toRet;
-    while ( not pq.empty() ) {
-        toRet.emplace_back(pq.top());
-        pq.pop();
-    }
-    // put stuff back
-    for (size_t t : toRet) {
-        pq.push( t );
-    }
-    return move( toRet );
-}
-
 static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const string &name, size_t start_time, size_t num_packets_to_buy, const size_t latest_time_already_owned )
 {
-    auto compare_prices_at_idxs = [ &order_book ](const size_t &a, const size_t &b){ return order_book.at( a ).best_offer().cost < order_book.at( b ).best_offer().cost; };
+    //auto compare_prices_at_idxs = [ &order_book ](const size_t &a, const size_t &b){ return order_book.at( a ).best_offer().cost < order_book.at( b ).best_offer().cost; };
 
-    priority_queue<size_t, vector<size_t>, decltype( compare_prices_at_idxs )> idxs_to_buy( compare_prices_at_idxs );
+    priority_queue<pair<double, size_t>> idxs_to_buy;
     double idxs_to_buy_cost = 0;
 
     size_t idx = start_time < order_book.front().time ? 0 : order_book.front().time - start_time;
@@ -40,8 +26,9 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
         const SingleSlot &potential_slot = order_book.at( idx );
         bool can_buy = potential_slot.owner != name and potential_slot.has_offers();
         if ( can_buy ) {
-            idxs_to_buy.push( idx );
-            idxs_to_buy_cost += potential_slot.best_offer().cost;
+            double slot_cost = potential_slot.best_offer().cost;
+            idxs_to_buy.push( {slot_cost, idx} );
+            idxs_to_buy_cost += slot_cost;
         }
         idx++;
     }
@@ -53,27 +40,30 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
     if (DEBUG_PRINT)
         cout << name << " got min fct " <<  min_flow_completion_time << " and start time " << start_time << " and latest already owned" << latest_time_already_owned << endl;
 
-    vector<size_t> best_idxs = priority_queue_to_vector( idxs_to_buy );
+    auto best_idxs = idxs_to_buy;
     assert(min_flow_completion_time >= start_time);
+
     double flow_benefit = -((double) min_flow_completion_time - (double) start_time);
     double best_utility = flow_benefit - idxs_to_buy_cost;
     if (DEBUG_PRINT)
         cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
 
-    double most_expensive_slot_cost = order_book.at( idxs_to_buy.top() ).best_offer().cost;
+    double most_expensive_slot_cost = idxs_to_buy.top().first;
     for (size_t i = idx + 1; i < order_book.size(); i++) {
         const SingleSlot &potential_slot = order_book.at( i );
         bool can_buy = potential_slot.owner != name and potential_slot.has_offers();
         if ( can_buy and potential_slot.best_offer().cost < most_expensive_slot_cost ) {
-            idxs_to_buy.push( i );
-            idxs_to_buy_cost += potential_slot.best_offer().cost;
+            double slot_cost = potential_slot.best_offer().cost;
+            idxs_to_buy.push( {slot_cost, i} );
+            idxs_to_buy_cost += slot_cost;
 
             if (DEBUG_PRINT)
-                cout << "trying slot " << i << " has cost " << potential_slot.best_offer().cost << " while most expensive slot in idxs_to_buy is " << order_book.at( idxs_to_buy.top() ).best_offer().cost << endl;
-            idxs_to_buy_cost -= order_book.at( idxs_to_buy.top() ).best_offer().cost;
+                cout << "trying slot " << i << " has cost " << slot_cost << " while most expensive slot in idxs_to_buy is " << most_expensive_slot_cost << endl;
+            idxs_to_buy_cost -= idxs_to_buy.top().first;
             idxs_to_buy.pop();
+
             assert(idxs_to_buy.size() == num_packets_to_buy);
-            most_expensive_slot_cost = order_book.at( idxs_to_buy.top() ).best_offer().cost;
+            most_expensive_slot_cost = idxs_to_buy.top().first;
 
             double current_benefit = - ( (double) max( potential_slot.time, latest_time_already_owned ) - (double) start_time );
             double current_utility = (double) current_benefit - idxs_to_buy_cost;
@@ -83,14 +73,19 @@ static vector<size_t> idxs_to_buy( const deque<SingleSlot> &order_book, const st
             if (current_utility > best_utility) {
                 if (DEBUG_PRINT)
                     cout << "that is better than current best, " << best_utility << " so swapping" << endl;
-                best_idxs = priority_queue_to_vector( idxs_to_buy );
+                best_idxs = idxs_to_buy;
                 best_utility = current_utility;
             }
         }
     }
 
-    assert( best_idxs.size() == num_packets_to_buy );
-    return best_idxs;
+    vector<size_t> toRet;
+    while ( not best_idxs.empty() ) {
+        toRet.emplace_back(best_idxs.top().second);
+        best_idxs.pop();
+    }
+    assert( toRet.size() == num_packets_to_buy );
+    return toRet;
 }
 
 template <typename T>

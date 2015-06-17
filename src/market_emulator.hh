@@ -3,6 +3,7 @@
 #ifndef MARKET_EMULATOR_HH
 #define MARKET_EMULATOR_HH
 
+#include <unordered_map>
 #include <iostream>
 #include <deque>
 #include <queue>
@@ -37,7 +38,7 @@ class MarketEmulator {
 
     void print_packets_sent();
 
-    void print_money_exchanged();
+    std::unordered_map<std::string, double> print_money_exchanged();
 
     void print_user_stats();
 };

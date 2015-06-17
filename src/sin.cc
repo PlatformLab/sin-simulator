@@ -31,14 +31,19 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
 
     usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
-    MarketEmulator emulated_market(move(usersToEmulate), verbose, random_user_order);
+    MarketEmulator emulated_market( move(usersToEmulate), verbose, random_user_order);
 
     emulated_market.run_to_completion();
     //cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;
 
     if (verbose) {
-        emulated_market.print_money_exchanged();
+        unordered_map<string, double> net_balances = emulated_market.print_money_exchanged();
         emulated_market.print_packets_sent();
+
+        std::unordered_map<std::string, size_t> flow_completion_times = schedule_flow_completion_times( usr_args, emulated_market.packets_sent() );
+        for (auto &fct_pair : flow_completion_times) {
+cout << "utility for " << fct_pair.first << " was " << -(double) fct_pair.second + net_balances[fct_pair.first] << endl;
+        }
     }
 
     // now clean up results by getting rid of hard coded owner

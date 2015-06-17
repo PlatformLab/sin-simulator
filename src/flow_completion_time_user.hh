@@ -6,7 +6,7 @@
 #include <iostream>
 #include <functional>
 #include <deque>
-#include <queue>
+#include <limits>
 #include <list>
 #include "abstract_user.hh"
 #include "pretty_print.hh"
@@ -18,6 +18,8 @@ class FlowCompletionTimeUser : public AbstractUser
     const size_t flow_start_time_;
     const size_t num_packets_;
     bool done_;
+    double money_spent_ = 0;
+    double expected_utility_ = std::numeric_limits<double>::lowest();
 
     public:
     FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );

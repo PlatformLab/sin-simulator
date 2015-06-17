@@ -83,6 +83,19 @@ static priority_queue<pair<double, size_t>> idxs_to_buy( const deque<SingleSlot>
 }
 
 template <typename T>
+static double money_earned( const T &collection, const string &name )
+{
+    double toRet = 0;
+    for (auto &item : collection)
+    {
+        if ( item.to == name ) {
+            toRet += item.amount;
+        }
+    }
+    return toRet;
+}
+
+template <typename T>
 static size_t num_owned( const T &collection, const string &name )
 {
     size_t toRet = 0;
@@ -131,6 +144,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
         if (DEBUG_PRINT)
             cout << name_ << " is buying slots: ";
+
         while ( not buying_slots.empty() ) {
             const size_t slot_idx_to_buy = buying_slots.top().second;
             const double best_offer_cost = buying_slots.top().first;
@@ -138,10 +152,20 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             if (DEBUG_PRINT)
                 cout << slot_idx_to_buy << ", ";
             mkt.add_bid_to_slot( slot_idx_to_buy, { best_offer_cost, name_ } );
+            current_flow_completion_time = max( order_book.at( slot_idx_to_buy ).time, current_flow_completion_time );// might not be necessary
+            money_spent_ += best_offer_cost; // assumes bid worked
             assert( order_book.at( slot_idx_to_buy ).owner == name_ ); // assert we succesfully got it
 
             buying_slots.pop();
         }
+        double new_expected_utility = - (double) (current_flow_completion_time - flow_start_time_) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
+        cout << name_ << "'s new expected utility " << new_expected_utility << " while previous was " << expected_utility_ <<endl;
+        if ( new_expected_utility <= expected_utility_ ) {
+            cout << "BADBADBAD" << endl;
+        }
+        //assert( new_expected_utility > expected_utility_ );
+        expected_utility_ = new_expected_utility;
+
         if (DEBUG_PRINT)
             cout << "done!" << endl;
     }

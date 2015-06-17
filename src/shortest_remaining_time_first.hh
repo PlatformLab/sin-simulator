@@ -49,18 +49,24 @@ const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<f
 
     return final_schedule;
 }
+std::unordered_map<std::string, size_t> schedule_flow_completion_times( std::list<flow> flows, std::deque<PacketSent> schedule )
+{
+    std::unordered_map<std::string, size_t> toRet;
+    for (auto & packet_sent : schedule) {
+        toRet[packet_sent.owner] = packet_sent.time;
+    }
+    for (auto &flow : flows ) {
+        toRet[flow.name] -= flow.flow_start_time;
+    }
+    return toRet;
+}
 
 // returns total queuing time for for schedule given
 size_t queueing_delay_of_schedule( std::list<flow> flows, std::deque<PacketSent> schedule )
 {
-    std::unordered_map<std::string, size_t> schedule_flow_completion_times;
-    for (auto & packet_sent : schedule) {
-        schedule_flow_completion_times[packet_sent.owner] = packet_sent.time;
-    }
-
     size_t shedule_queuing_delay = 0;
-    for (auto & flow : flows) {
-        shedule_queuing_delay += schedule_flow_completion_times[flow.name] - flow.flow_start_time;
+    for (auto &fct_pair : schedule_flow_completion_times( flows, schedule ) ) {
+        shedule_queuing_delay += fct_pair.second;
     }
     return shedule_queuing_delay;
 }

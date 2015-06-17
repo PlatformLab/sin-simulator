@@ -1,6 +1,5 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
-#include <unordered_map>
 #include <unordered_set>
 #include "market_emulator.hh"
 #include "pretty_print.hh"
@@ -82,7 +81,7 @@ void MarketEmulator::print_packets_sent()
     printSlots(mkt_.packets_sent());
 }
 
-void MarketEmulator::print_money_exchanged()
+unordered_map<string, double> MarketEmulator::print_money_exchanged()
 {
     unordered_map<string, double> money_owed;
     unordered_map<string, double> money_total;
@@ -122,6 +121,7 @@ void MarketEmulator::print_money_exchanged()
     for ( auto &pair : money_total ) {
             cout << pair.first << " $" << pair.second << endl;
     }
+    return money_total;
 }
 
 void MarketEmulator::print_user_stats()

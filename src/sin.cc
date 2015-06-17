@@ -34,7 +34,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
     MarketEmulator emulated_market(move(usersToEmulate), verbose, random_user_order);
 
     emulated_market.run_to_completion();
-    cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;
+    //cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;
 
     if (verbose) {
         emulated_market.print_money_exchanged();
@@ -51,7 +51,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
     return toRet;
 }
 size_t dice_roll() {
-    return (rand() % 1000) + 1;
+    return (rand() % 6) + 1;
 }
 
 list<flow> make_random_users(size_t number)
@@ -87,10 +87,10 @@ int main(){
 
     double worst_delay_ratio = 0;
 
-    for (int i = 0; i < 1; i++) // number of trails
+    for (int i = 0; i < 1000; i++) // number of trails
     {
         list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_users(usr_args, true, false);
+        auto market = sim_users(usr_args, false, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_delay = queueing_delay_of_schedule( usr_args, market );

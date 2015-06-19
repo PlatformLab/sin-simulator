@@ -140,7 +140,7 @@ int main(){
             cout << endl;
 
             cout << "in more detail, market results were:" << endl;
-            auto market2 = sim_users(usr_args, false, false);
+            auto market2 = sim_users(usr_args, true, false);
             assert(market2 == market);
             cout << "DONE" << endl << endl;
         }

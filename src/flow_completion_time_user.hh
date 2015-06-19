@@ -22,6 +22,7 @@ class FlowCompletionTimeUser : public AbstractUser
     double expected_utility_ = std::numeric_limits<double>::lowest();
     double best_expected_utility_ = std::numeric_limits<double>::lowest();
 
+    std::vector<size_t> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned );
     public:
     FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );
 

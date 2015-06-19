@@ -20,6 +20,7 @@ class FlowCompletionTimeUser : public AbstractUser
     bool done_;
     double money_spent_ = 0;
     double expected_utility_ = std::numeric_limits<double>::lowest();
+    double best_expected_utility_ = std::numeric_limits<double>::lowest();
 
     public:
     FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );

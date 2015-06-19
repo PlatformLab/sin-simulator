@@ -159,9 +159,13 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             buying_slots.pop();
         }
         double new_expected_utility = - (double) (current_flow_completion_time - flow_start_time_) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
-        cout << name_ << "'s new expected utility " << new_expected_utility << " while previous was " << expected_utility_ <<endl;
+        cout << name_ << "'s new expected utility " << new_expected_utility << " while previous was " << expected_utility_ << " and previous best was " << best_expected_utility_ << endl;
+        if ( new_expected_utility > best_expected_utility_ ) {
+            cout << "new best expected utility" << endl;
+            best_expected_utility_ = new_expected_utility;
+        }
         if ( new_expected_utility <= expected_utility_ ) {
-            cout << "BADBADBAD" << endl;
+            cout << "!!DECREASE FROM PREVIOUS EXPECTED UTILITY" << endl;
         }
         //assert( new_expected_utility > expected_utility_ );
         expected_utility_ = new_expected_utility;
@@ -237,5 +241,5 @@ bool FlowCompletionTimeUser::done( const Market& mkt )
 
 void FlowCompletionTimeUser::print_stats( const Market& ) const
 {
-        cout << "user " << name_ << " started at time " << flow_start_time_ << " and finished at time ?" <<  endl;
+        cout << name_ << " had best expected utility " << best_expected_utility_ << endl;
 }

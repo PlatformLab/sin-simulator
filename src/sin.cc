@@ -18,6 +18,18 @@ using namespace std;
 const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
 {
     vector<unique_ptr<AbstractUser>> usersToEmulate;
+    if (verbose) {
+        cout << "trial shorthand: ";
+    }
+    for (auto & u : usr_args)
+    {
+        if (verbose) {
+            cout <<u.flow_start_time << u.num_packets;
+        }
+    }
+    if (verbose) {
+        cout << endl;
+    }
     for (auto & u : usr_args)
     {
         if (verbose) {
@@ -37,6 +49,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
     //cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;
 
     if (verbose) {
+        emulated_market.print_user_stats();
         unordered_map<string, double> net_balances = emulated_market.print_money_exchanged();
         emulated_market.print_packets_sent();
 
@@ -56,7 +69,7 @@ cout << "utility for " << fct_pair.first << " was " << -(double) fct_pair.second
     return toRet;
 }
 size_t dice_roll() {
-    return (rand() % 6) + 1;
+    return (rand() % 1000) + 1;
 }
 
 list<flow> make_random_users(size_t number)
@@ -92,9 +105,10 @@ int main(){
 
     double worst_delay_ratio = 0;
 
-    for (int i = 0; i < 1000; i++) // number of trails
+    const int num_trials = 100;
+    for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
+        list<flow> usr_args = make_random_users( 50 ); // makes this number of random users for market
         auto market = sim_users(usr_args, false, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
@@ -131,6 +145,7 @@ int main(){
             cout << "DONE" << endl << endl;
         }
 
+        cout << "finished trial " << i << " of " << num_trials << endl;
         /*
         auto round_robin = simulate_round_robin(usr_args);
         auto round_robin_delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, round_robin );

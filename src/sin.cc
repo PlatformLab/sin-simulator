@@ -69,7 +69,7 @@ cout << "utility for " << fct_pair.first << " was " << -(double) fct_pair.second
     return toRet;
 }
 size_t dice_roll() {
-    return (rand() % 1000) + 1;
+    return (rand() % 6) + 1;
 }
 
 list<flow> make_random_users(size_t number)
@@ -105,10 +105,10 @@ int main(){
 
     double worst_delay_ratio = 0;
 
-    const int num_trials = 100;
+    const int num_trials = 1000;
     for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args = make_random_users( 50 ); // makes this number of random users for market
+        list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
         auto market = sim_users(usr_args, false, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
@@ -140,7 +140,7 @@ int main(){
             cout << endl;
 
             cout << "in more detail, market results were:" << endl;
-            auto market2 = sim_users(usr_args, true, false);
+            auto market2 = sim_users(usr_args, false, false);
             assert(market2 == market);
             cout << "DONE" << endl << endl;
         }

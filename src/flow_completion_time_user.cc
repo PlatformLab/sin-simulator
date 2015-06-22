@@ -35,53 +35,35 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
     priority_queue<pair<double, size_t>> idxs_to_buy;
     double idxs_to_buy_cost = 0;
 
-    size_t idx = 0;
-    while  (idxs_to_buy.size() < num_packets_to_buy) {
-        assert(idx < order_book.size() && "can't buy slots we need");
-        const SingleSlot &potential_slot = order_book.at( idx );
-        if ( can_buy( potential_slot ) ) {
-            double slot_cost = potential_slot.best_offer().cost;
-            idxs_to_buy.push( {slot_cost, idx} );
-            idxs_to_buy_cost += slot_cost;
-        }
-        idx++;
-    }
+    priority_queue<pair<double, size_t>> best_idxs;
+    double best_utility = std::numeric_limits<double>::lowest();
 
-    assert( idx != 0 );
-
-    // keep a copy of best slots seen so far
-    priority_queue<pair<double, size_t>> best_idxs = idxs_to_buy;
-    double flow_benefit = get_benefit( max(order_book.at( idx - 1 ).time, latest_time_already_owned) ); // idx - 1 is idx of latest potential slot on pq
-    double best_utility =  flow_benefit - idxs_to_buy_cost;
-    if (DEBUG_PRINT)
-        cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
-
-    double most_expensive_slot_cost = idxs_to_buy.top().first;
-    for (size_t i = idx; i < order_book.size(); i++) {
+    for (size_t i = 0; i < order_book.size(); i++) {
         const SingleSlot &potential_slot = order_book.at( i );
-        if ( can_buy( potential_slot ) and potential_slot.best_offer().cost < most_expensive_slot_cost ) {
+
+        if ( can_buy( potential_slot ) ) {
+
             double slot_cost = potential_slot.best_offer().cost;
-            idxs_to_buy.push( {slot_cost, i} );
-            idxs_to_buy_cost += slot_cost;
+            if ( idxs_to_buy.size() < num_packets_to_buy or slot_cost < idxs_to_buy.top().first ) {
+                idxs_to_buy.push( {slot_cost, i} );
+                idxs_to_buy_cost += slot_cost;
+            }
 
-            if (DEBUG_PRINT)
-                cout << "trying slot " << i << " has cost " << slot_cost << " while most expensive slot in idxs_to_buy is " << most_expensive_slot_cost << endl;
-            idxs_to_buy_cost -= idxs_to_buy.top().first;
-            idxs_to_buy.pop();
+            if ( idxs_to_buy.size() > num_packets_to_buy ) {
+                idxs_to_buy_cost -= idxs_to_buy.top().first;
+                idxs_to_buy.pop();
+            }
 
-            assert(idxs_to_buy.size() == num_packets_to_buy);
-            most_expensive_slot_cost = idxs_to_buy.top().first;
+            if ( idxs_to_buy.size() == num_packets_to_buy ) {
+                double current_benefit = get_benefit( max( potential_slot.time, latest_time_already_owned ) );
+                double current_utility = current_benefit - idxs_to_buy_cost;
 
-            double current_benefit = get_benefit( max( potential_slot.time, latest_time_already_owned ) );
-            double current_utility = current_benefit - idxs_to_buy_cost;
-            if (DEBUG_PRINT)
-                cout << "benefit for " << i << " is " << current_benefit << " and utility is " << current_utility << endl;
-
-            if (current_utility > best_utility) {
-                if (DEBUG_PRINT)
-                    cout << "that is better than current best, " << best_utility << " so swapping" << endl;
-                best_idxs = idxs_to_buy;
-                best_utility = current_utility;
+                if (current_utility > best_utility) {
+                    if (DEBUG_PRINT)
+                        cout << "that is better than current best, " << best_utility << " so swapping" << endl;
+                    best_idxs = idxs_to_buy;
+                    best_utility = current_utility;
+                }
             }
         }
     }

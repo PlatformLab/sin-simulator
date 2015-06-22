@@ -209,8 +209,10 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, 1, current_flow_completion_time ).front();
 
     double current_benefit = get_benefit( current_flow_completion_time );
-    double back_benefit_delta = get_benefit( max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time ) ) - current_benefit;
-    double non_back_benefit_delta = get_benefit( max( current_flow_completion_time, order_book.at( non_back_replacement_idx ).time ) ) - current_benefit;
+    double benefit_with_back_replacement = get_benefit( max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time ) );
+    double benefit_with_non_back_replacement = get_benefit( max( current_flow_completion_time, order_book.at( non_back_replacement_idx ).time ) );
+    double back_benefit_delta = benefit_with_back_replacement - current_benefit;
+    double non_back_benefit_delta = benefit_with_non_back_replacement - current_benefit;
     //cout << "new calc gets: " << non_back_benefit_delta;
 
     non_back_benefit_delta = min( (double) current_flow_completion_time - (double) order_book.at( non_back_replacement_idx ).time, 0. );

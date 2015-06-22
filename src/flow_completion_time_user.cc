@@ -30,6 +30,8 @@ bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
     return slot.owner != name_ and slot.has_offers();
 }
 
+// fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots
+// then keeps a copy of the set of cheapest slots with the most utility and returns that
 vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned )
 {
     priority_queue<pair<double, size_t>> idxs_to_buy;
@@ -43,10 +45,14 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
 
         if ( can_buy( potential_slot ) ) {
             double slot_cost = potential_slot.best_offer().cost;
+            // add to the priority queue if it is not full size yet
+            // or if the potential slot is cheaper than the most expensive slot on the priority queue
             if ( idxs_to_buy.size() < num_packets_to_buy or slot_cost < idxs_to_buy.top().first ) {
                 idxs_to_buy.push( {slot_cost, i} );
                 idxs_to_buy_cost += slot_cost;
 
+                // if we added a new cheaper slot and put the priority queue over the number of packets we needed
+                // take the most expensive one off
                 if ( idxs_to_buy.size() > num_packets_to_buy ) {
                     idxs_to_buy_cost -= idxs_to_buy.top().first;
                     idxs_to_buy.pop();
@@ -54,14 +60,15 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
             }
 
             if ( idxs_to_buy.size() == num_packets_to_buy ) {
-                double current_benefit = get_benefit( max( potential_slot.time, latest_time_already_owned ) );
+                size_t flow_completion_time = max( potential_slot.time, latest_time_already_owned );
+                double current_benefit = get_benefit( flow_completion_time );
                 double current_utility = current_benefit - idxs_to_buy_cost;
 
                 if (current_utility > best_utility) {
                     if (DEBUG_PRINT)
                         cout << "that is better than current best, " << best_utility << " so swapping" << endl;
-                    best_idxs = idxs_to_buy;
                     best_utility = current_utility;
+                    best_idxs = idxs_to_buy;
                 }
             }
         }

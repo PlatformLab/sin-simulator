@@ -14,6 +14,12 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 {
 }
 
+/* Returns the benefit score for a given flow completion time */
+double FlowCompletionTimeUser::get_benefit(size_t flow_completion_time)
+{
+    return - (double) (flow_completion_time - flow_start_time_ + 1);
+}
+
 vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned )
 {
     priority_queue<pair<double, size_t>> idxs_to_buy;
@@ -35,15 +41,10 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
     assert( idx != 0 );
     idx--; // we incremented 1 too many times in while loop
 
-    size_t min_flow_completion_time = max(order_book.at( idx ).time, latest_time_already_owned);
-    if (DEBUG_PRINT)
-        cout << name_ << " got min fct " <<  min_flow_completion_time << " and start time " << flow_start_time_ << " and latest already owned" << latest_time_already_owned << endl;
-
-    auto best_idxs = idxs_to_buy;
-    assert(min_flow_completion_time >= flow_start_time_);
-
-    double flow_benefit = -((double) min_flow_completion_time - (double) flow_start_time_);
-    double best_utility = flow_benefit - idxs_to_buy_cost;
+    // keep a copy of best slots seen so far
+    priority_queue<pair<double, size_t>> best_idxs = idxs_to_buy;
+    double flow_benefit = get_benefit( max(order_book.at( idx ).time, latest_time_already_owned) );
+    double best_utility =  flow_benefit - idxs_to_buy_cost;
     if (DEBUG_PRINT)
         cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
 
@@ -64,8 +65,8 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
             assert(idxs_to_buy.size() == num_packets_to_buy);
             most_expensive_slot_cost = idxs_to_buy.top().first;
 
-            double current_benefit = - ( (double) max( potential_slot.time, latest_time_already_owned ) - (double) flow_start_time_ );
-            double current_utility = (double) current_benefit - idxs_to_buy_cost;
+            double current_benefit = get_benefit( max( potential_slot.time, latest_time_already_owned ) );
+            double current_utility = current_benefit - idxs_to_buy_cost;
             if (DEBUG_PRINT)
                 cout << "benefit for " << i << " is " << current_benefit << " and utility is " << current_utility << endl;
 

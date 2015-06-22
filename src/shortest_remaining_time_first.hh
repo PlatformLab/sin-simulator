@@ -56,7 +56,7 @@ std::unordered_map<std::string, size_t> schedule_flow_completion_times( std::lis
         toRet[packet_sent.owner] = packet_sent.time;
     }
     for (auto &flow : flows ) {
-        toRet[flow.name] -= flow.flow_start_time;
+        toRet[flow.name] += 1 - flow.flow_start_time;
     }
     return toRet;
 }

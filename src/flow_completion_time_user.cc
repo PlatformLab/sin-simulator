@@ -42,16 +42,15 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
         const SingleSlot &potential_slot = order_book.at( i );
 
         if ( can_buy( potential_slot ) ) {
-
             double slot_cost = potential_slot.best_offer().cost;
             if ( idxs_to_buy.size() < num_packets_to_buy or slot_cost < idxs_to_buy.top().first ) {
                 idxs_to_buy.push( {slot_cost, i} );
                 idxs_to_buy_cost += slot_cost;
-            }
 
-            if ( idxs_to_buy.size() > num_packets_to_buy ) {
-                idxs_to_buy_cost -= idxs_to_buy.top().first;
-                idxs_to_buy.pop();
+                if ( idxs_to_buy.size() > num_packets_to_buy ) {
+                    idxs_to_buy_cost -= idxs_to_buy.top().first;
+                    idxs_to_buy.pop();
+                }
             }
 
             if ( idxs_to_buy.size() == num_packets_to_buy ) {

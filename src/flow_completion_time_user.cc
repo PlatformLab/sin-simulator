@@ -143,12 +143,10 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         if (DEBUG_PRINT)
             cout << "current_flow_completion_time " << current_flow_completion_time << endl;
 
-        vector<size_t> buying_slots = pick_n_slots_to_buy( order_book, num_packets_to_buy, current_flow_completion_time );
-
         if (DEBUG_PRINT)
             cout << name_ << " is buying slots: ";
 
-        for ( size_t idx : buying_slots )
+        for ( size_t idx : pick_n_slots_to_buy( order_book, num_packets_to_buy, current_flow_completion_time ) )
         {
             if (DEBUG_PRINT)
                 cout << idx << ", ";

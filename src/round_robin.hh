@@ -6,9 +6,8 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "market_event.hh"
 #include "pretty_print.hh"
-#include "shortest_remaining_time_first.hh"
+#include "schedule.hh"
 
 const std::vector<PacketSent> simulate_round_robin( std::list<flow> flows ) // copy of flows so we can decrement
 {

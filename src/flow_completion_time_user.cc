@@ -205,9 +205,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         idx--;
     }
 
-    num_packets_to_buy = 1;
-    size_t back_replacement_idx  = pick_n_slots_to_buy( order_book, num_packets_to_buy, flow_completion_time_if_sold_back ).front();
-    size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, num_packets_to_buy, current_flow_completion_time ).front();
+    size_t back_replacement_idx  = pick_n_slots_to_buy( order_book, 1, flow_completion_time_if_sold_back ).front();
+    size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, 1, current_flow_completion_time ).front();
 
     double current_benefit = get_benefit( current_flow_completion_time );
     double back_benefit_delta = get_benefit( max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time ) ) - current_benefit;

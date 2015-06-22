@@ -131,8 +131,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         size_t current_flow_completion_time = 0;
 
         if ( num_order_book_slots_owned > 0 ) {
-            size_t idx = order_book.size() - 1;
-            while ( idx != 0 ) { // skip idx 0 dont care
+            int idx = order_book.size() - 1;
+            while ( idx >= 0 ) {
                 if (order_book.at(idx).owner == name_) {
                     current_flow_completion_time = order_book.at(idx).time;
                     break;
@@ -189,8 +189,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     size_t flow_completion_time_if_sold_back = 0;
     bool has_more_than_one_slot = ( num_order_book_slots_owned + num_packets_to_buy ) > 1;
 
-    size_t idx = order_book.size() - 1;
-    while ( idx != 0 ) { // skip idx 0 dont care
+    int idx = order_book.size() - 1;
+    while ( idx >= 0 ) {
         if ( order_book.at(idx).owner == name_ ) {
             if ( current_flow_completion_time == 0 ) {
                 current_flow_completion_time = order_book.at(idx).time;
@@ -211,13 +211,9 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     double current_benefit = get_benefit( current_flow_completion_time );
     double benefit_with_back_replacement = get_benefit( max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time ) );
     double benefit_with_non_back_replacement = get_benefit( max( current_flow_completion_time, order_book.at( non_back_replacement_idx ).time ) );
+
     double back_benefit_delta = benefit_with_back_replacement - current_benefit;
     double non_back_benefit_delta = benefit_with_non_back_replacement - current_benefit;
-    //cout << "new calc gets: " << non_back_benefit_delta;
-
-    non_back_benefit_delta = min( (double) current_flow_completion_time - (double) order_book.at( non_back_replacement_idx ).time, 0. );
-    //cout << "old calc gets: " << non_back_benefit_delta;
-    //cout << endl << endl;
 
     double back_sell_price = .01 - ( back_benefit_delta - order_book.at( back_replacement_idx ).best_offer().cost );
     double non_back_sell_price = .01 - ( non_back_benefit_delta - order_book.at( non_back_replacement_idx ).best_offer().cost );
@@ -235,6 +231,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                 if ( not slot.has_offers() or slot.best_offer().cost != non_back_sell_price ) {
                     mkt.clear_offers_from_slot( idx, name_ );
                     mkt.add_offer_to_slot( idx, { non_back_sell_price, name_ } );
+                    assert( has_more_than_one_slot );
                 }
             }
         }

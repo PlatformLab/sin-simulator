@@ -1,7 +1,5 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
-#define DEBUG_PRINT 0
-
 #include "flow_completion_time_user.hh" 
 
 using namespace std;
@@ -121,8 +119,6 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
                 double utility = benefit - total_cost;
 
                 if (utility > best_utility) {
-                    if (DEBUG_PRINT)
-                        cout << "that is better than current best, " << best_utility << " so swapping" << endl;
                     best_utility = utility;
                     best_indicies = costs_and_indices_to_buy;
                 }
@@ -193,17 +189,9 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                 }
             }
         }
-        if (DEBUG_PRINT)
-            cout << "flow_completion_time " << flow_completion_time << endl;
-
-        if (DEBUG_PRINT)
-            cout << name_ << " is buying slots: ";
 
         for ( size_t idx : pick_n_slots_to_buy( order_book, num_packets_to_buy, flow_completion_time ) )
         {
-            if (DEBUG_PRINT)
-                cout << idx << ", ";
-
             const double slot_cost = order_book.at( idx ).best_offer().cost;
             mkt.add_bid_to_slot( idx, { slot_cost, name_ } );
 
@@ -214,22 +202,12 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         }
 
         double new_expected_utility = - (double) (flow_completion_time - flow_start_time_) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
-        if (DEBUG_PRINT)
-            cout << name_ << "'s new expected utility " << new_expected_utility << " while previous was " << expected_utility_ << " and previous best was " << best_expected_utility_ << endl;
         if ( new_expected_utility > best_expected_utility_ ) {
-            if (DEBUG_PRINT)
-                cout << "new best expected utility" << endl;
             best_expected_utility_ = new_expected_utility;
         }
         if ( new_expected_utility <= expected_utility_ ) {
-           if (DEBUG_PRINT)
-                cout << "!!DECREASE FROM PREVIOUS EXPECTED UTILITY" << endl;
         }
-        //assert( new_expected_utility > expected_utility_ );
         expected_utility_ = new_expected_utility;
-
-        if (DEBUG_PRINT)
-            cout << "done!" << endl;
     }
 
     if ( num_order_book_slots_owned > 0 or num_packets_to_buy > 0) {

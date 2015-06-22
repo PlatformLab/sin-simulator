@@ -30,40 +30,27 @@ static size_t num_owned( const T &collection, const string &name )
     return toRet;
 }
 
+/* Returns 0 if name owns no slots in collection */
+template <typename T>
+static size_t flow_completion_time( const T &collection, const string &name )
+{
+    size_t flow_completion_time = 0;
+
+    for ( auto rit = collection.rbegin(); rit != collection.rend(); rit++) {
+        if ( rit->owner == name ) {
+            flow_completion_time = rit->time;
+            break;
+        }
+    }
+    return flow_completion_time;
+}
+
 FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets )
 : AbstractUser( name ),
     flow_start_time_( flow_start_time ),
     num_packets_( num_packets ),
     done_( false )
 {
-}
-
-/* Returns 0 if user owns no slots in order book */
-size_t FlowCompletionTimeUser::get_flow_completion_time( const Market &mkt ) const
-{
-    size_t flow_completion_time = 0;
-
-    auto order_book = mkt.order_book();
-    for ( auto rit = order_book.rbegin(); rit != order_book.rend(); rit++) {
-        if ( rit->owner == name_ ) {
-            flow_completion_time = rit->time;
-            break;
-        }
-    }
-
-    /* check packets sent if user has no slots in order book */
-    if ( flow_completion_time == 0 )
-    {
-        auto packets_sent = mkt.packets_sent();
-        for ( auto rit = packets_sent.rbegin(); rit != packets_sent.rend(); rit++) {
-            if ( rit->owner == name_ ) {
-                flow_completion_time = rit->time;
-                break;
-            }
-        }
-    }
-
-    return flow_completion_time;
 }
 
 /* Returns the benefit score for a given flow completion time */
@@ -207,25 +194,25 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     size_t num_packets_to_buy = num_packets_ - num_packets_sent - num_order_book_slots_owned; 
 
     if ( num_packets_to_buy > 0 ) {
-        size_t flow_completion_time = 0;
+        size_t completion_time = 0;
 
         if ( num_order_book_slots_owned > 0 ) {
-            flow_completion_time = get_flow_completion_time( mkt );
+            completion_time = flow_completion_time( order_book, name_ );
         }
 
-        for ( size_t idx : pick_n_slots_to_buy( order_book, num_packets_to_buy, flow_completion_time ) )
+        for ( size_t idx : pick_n_slots_to_buy( order_book, num_packets_to_buy, completion_time ) )
         {
             const double slot_cost = order_book.at( idx ).best_offer().cost;
             mkt.add_bid_to_slot( idx, { slot_cost, name_ } );
 
             /* have flow completion time reflect if we bought new slots after previous flow completion time */
-            flow_completion_time = max( flow_completion_time, order_book.at( idx ).time );
+            completion_time = max( completion_time, order_book.at( idx ).time );
             /* assert we succesfully got it */
             assert( order_book.at( idx ).owner == name_ );
             money_spent_ += slot_cost;
         }
 
-        expected_utility_ = get_benefit( flow_completion_time ) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
+        expected_utility_ = get_benefit( completion_time ) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
         best_expected_utility_ = max( best_expected_utility_, expected_utility_ );
     }
 
@@ -244,7 +231,7 @@ bool FlowCompletionTimeUser::done( const Market& mkt )
 
 void FlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
-    double benefit = get_benefit( get_flow_completion_time( mkt ) );
+    double benefit = get_benefit( flow_completion_time( mkt.packets_sent(), name_ ) );
     double cost = - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
     double utility = benefit + cost;
 

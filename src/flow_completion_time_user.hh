@@ -22,7 +22,6 @@ class FlowCompletionTimeUser : public AbstractUser
     double expected_utility_ = std::numeric_limits<double>::lowest();
     double best_expected_utility_ = std::numeric_limits<double>::lowest();
 
-    size_t get_flow_completion_time( const Market &mkt ) const;
     double get_benefit(size_t finish_time) const;
     bool can_buy(const SingleSlot &slot) const;
     void price_owned_slots( Market &mkt );

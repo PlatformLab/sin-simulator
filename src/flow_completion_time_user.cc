@@ -4,6 +4,32 @@
 
 using namespace std;
 
+template <typename T>
+static double money_earned( const T &collection, const string &name )
+{
+    double toRet = 0;
+    for (auto &item : collection)
+    {
+        if ( item.to == name ) {
+            toRet += item.amount;
+        }
+    }
+    return toRet;
+}
+
+template <typename T>
+static size_t num_owned( const T &collection, const string &name )
+{
+    size_t toRet = 0;
+    for (auto &item : collection)
+    {
+        if ( item.owner == name ) {
+            toRet++;
+        }
+    }
+    return toRet;
+}
+
 FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets )
 : AbstractUser( name ),
     flow_start_time_( flow_start_time ),
@@ -165,32 +191,6 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
     return move( toRet );
 }
 
-template <typename T>
-static double money_earned( const T &collection, const string &name )
-{
-    double toRet = 0;
-    for (auto &item : collection)
-    {
-        if ( item.to == name ) {
-            toRet += item.amount;
-        }
-    }
-    return toRet;
-}
-
-template <typename T>
-static size_t num_owned( const T &collection, const string &name )
-{
-    size_t toRet = 0;
-    for (auto &item : collection)
-    {
-        if ( item.owner == name ) {
-            toRet++;
-        }
-    }
-    return toRet;
-}
-
 void FlowCompletionTimeUser::take_actions( Market& mkt )
 {
     auto &order_book = mkt.order_book();
@@ -219,17 +219,14 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             mkt.add_bid_to_slot( idx, { slot_cost, name_ } );
 
             /* have flow completion time reflect if we bought new slots after previous flow completion time */
-            flow_completion_time = max( order_book.at( idx ).time, flow_completion_time );
+            flow_completion_time = max( flow_completion_time, order_book.at( idx ).time );
             /* assert we succesfully got it */
             assert( order_book.at( idx ).owner == name_ );
             money_spent_ += slot_cost;
         }
 
-        double new_expected_utility = get_benefit( flow_completion_time ) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
-        if ( new_expected_utility > best_expected_utility_ ) {
-            best_expected_utility_ = new_expected_utility;
-        }
-        expected_utility_ = new_expected_utility;
+        expected_utility_ = get_benefit( flow_completion_time ) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
+        best_expected_utility_ = max( best_expected_utility_, expected_utility_ );
     }
 
     if ( num_order_book_slots_owned > 0 or num_packets_to_buy > 0) {

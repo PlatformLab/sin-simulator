@@ -17,11 +17,7 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const s
 /* Returns the benefit score for a given flow completion time */
 double FlowCompletionTimeUser::get_benefit(size_t flow_completion_time) const
 {
-    /*
-    if (flow_completion_time < flow_start_time_)
-        cout << "AAAA " << flow_completion_time <<" greater than "<<flow_start_time_ << endl;
     assert(flow_completion_time >= flow_start_time_);
-    */
     return - (double) (flow_completion_time + 1 - flow_start_time_);
 }
 

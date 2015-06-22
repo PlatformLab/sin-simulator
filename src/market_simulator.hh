@@ -1,7 +1,7 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
-#ifndef MARKET_EMULATOR_HH
-#define MARKET_EMULATOR_HH
+#ifndef MARKET_SIMULATOR_HH
+#define MARKET_SIMULATOR_HH
 
 #include <unordered_map>
 #include <iostream>
@@ -16,7 +16,7 @@
 #include "abstract_user.hh"
 #include "market.hh"
 
-class MarketEmulator {
+class MarketSimulator {
     Market mkt_;
     std::vector<std::unique_ptr<AbstractUser>> users_;
     const bool verbose_;
@@ -27,7 +27,7 @@ class MarketEmulator {
     void users_take_actions_until_finished();
 
     public:
-    MarketEmulator( std::vector<std::unique_ptr<AbstractUser>> &&users, bool verbose, bool random_user_order );
+    MarketSimulator( std::vector<std::unique_ptr<AbstractUser>> &&users, bool verbose, bool random_user_order );
 
     void run_to_completion();
 
@@ -43,4 +43,4 @@ class MarketEmulator {
     void print_user_stats();
 };
 
-#endif /* MARKET_EMULATOR_HH */
+#endif /* MARKET_SIMULATOR_HH */

@@ -1,12 +1,12 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include <unordered_set>
-#include "market_emulator.hh"
+#include "market_simulator.hh"
 #include "pretty_print.hh"
 
 using namespace std;
 
-MarketEmulator::MarketEmulator( vector<unique_ptr<AbstractUser>> &&users, const bool verbose, const bool random_user_order )
+MarketSimulator::MarketSimulator( vector<unique_ptr<AbstractUser>> &&users, const bool verbose, const bool random_user_order )
 : mkt_(),
 users_(move(users)),
 verbose_(verbose),
@@ -24,12 +24,12 @@ static bool all_users_done(const vector<unique_ptr<AbstractUser>> &users, const 
     return true;
 }
 
-size_t MarketEmulator::next_idx(size_t last_idx)
+size_t MarketSimulator::next_idx(size_t last_idx)
 {
     return ( random_user_order_ ? rand() : last_idx + 1 ) % users_.size();
 }
 
-void MarketEmulator::users_take_actions_until_finished()
+void MarketSimulator::users_take_actions_until_finished()
 {
     unordered_set<size_t> idxs_finished;
     size_t idx_to_run = next_idx( -1 );
@@ -59,7 +59,7 @@ void MarketEmulator::users_take_actions_until_finished()
     }
 }
 
-void MarketEmulator::run_to_completion()
+void MarketSimulator::run_to_completion()
 { 
     while ( not all_users_done( users_, mkt_ ) ) // some comments
     {
@@ -71,17 +71,17 @@ void MarketEmulator::run_to_completion()
     }
 }
 
-void MarketEmulator::print_slots()
+void MarketSimulator::print_slots()
 {
     printSlots(mkt_.order_book());
 }
 
-void MarketEmulator::print_packets_sent()
+void MarketSimulator::print_packets_sent()
 {
     printSlots(mkt_.packets_sent());
 }
 
-unordered_map<string, double> MarketEmulator::print_money_exchanged()
+unordered_map<string, double> MarketSimulator::print_money_exchanged()
 {
     unordered_map<string, double> money_owed;
     unordered_map<string, double> money_total;
@@ -124,7 +124,7 @@ unordered_map<string, double> MarketEmulator::print_money_exchanged()
     return money_total;
 }
 
-void MarketEmulator::print_user_stats()
+void MarketSimulator::print_user_stats()
 {
     for ( auto & u : users_ ) {
         u->print_stats(mkt_);

@@ -7,7 +7,7 @@
 #include "noop_user.hh"
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
-#include "market_emulator.hh"
+#include "market_simulator.hh"
 #include "market.hh"
 
 #include "schedule.hh"
@@ -44,7 +44,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
 
     usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
-    MarketEmulator emulated_market( move(usersToEmulate), verbose, random_user_order);
+    MarketSimulator emulated_market( move(usersToEmulate), verbose, random_user_order);
 
     emulated_market.run_to_completion();
     //cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;

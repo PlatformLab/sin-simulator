@@ -32,52 +32,52 @@ bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
 
 // fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots
 // then keeps a copy of the set of cheapest slots with the most utility and returns that
-vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned )
+vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
 {
-    priority_queue<pair<double, size_t>> idxs_to_buy;
-    double idxs_to_buy_cost = 0;
+    priority_queue<pair<double, size_t>> costs_and_indices_to_buy;
+    double total_cost = 0;
 
-    priority_queue<pair<double, size_t>> best_idxs;
+    priority_queue<pair<double, size_t>> best_indicies;
     double best_utility = std::numeric_limits<double>::lowest();
 
     for (size_t i = 0; i < order_book.size(); i++) {
-        const SingleSlot &potential_slot = order_book.at( i );
+        const SingleSlot &slot = order_book.at( i );
 
-        if ( can_buy( potential_slot ) ) {
-            double slot_cost = potential_slot.best_offer().cost;
+        if ( can_buy( slot ) ) {
+            double slot_cost = slot.best_offer().cost;
             // add to the priority queue if it is not full size yet
-            // or if the potential slot is cheaper than the most expensive slot on the priority queue
-            if ( idxs_to_buy.size() < num_packets_to_buy or slot_cost < idxs_to_buy.top().first ) {
-                idxs_to_buy.push( {slot_cost, i} );
-                idxs_to_buy_cost += slot_cost;
+            // or if the slot is cheaper than the most expensive slot on the priority queue
+            if ( costs_and_indices_to_buy.size() < num_packets_to_buy or slot_cost < costs_and_indices_to_buy.top().first ) {
+                costs_and_indices_to_buy.push( {slot_cost, i} );
+                total_cost += slot_cost;
 
                 // if we added a new cheaper slot and put the priority queue over the number of packets we needed
                 // take the most expensive one off
-                if ( idxs_to_buy.size() > num_packets_to_buy ) {
-                    idxs_to_buy_cost -= idxs_to_buy.top().first;
-                    idxs_to_buy.pop();
+                if ( costs_and_indices_to_buy.size() > num_packets_to_buy ) {
+                    total_cost -= costs_and_indices_to_buy.top().first;
+                    costs_and_indices_to_buy.pop();
                 }
             }
 
-            if ( idxs_to_buy.size() == num_packets_to_buy ) {
-                size_t flow_completion_time = max( potential_slot.time, latest_time_already_owned );
-                double current_benefit = get_benefit( flow_completion_time );
-                double current_utility = current_benefit - idxs_to_buy_cost;
+            if ( costs_and_indices_to_buy.size() == num_packets_to_buy ) {
+                size_t flow_completion_time = max( slot.time, latest_time_already_owned );
+                double benefit = get_benefit( flow_completion_time );
+                double utility = benefit - total_cost;
 
-                if (current_utility > best_utility) {
+                if (utility > best_utility) {
                     if (DEBUG_PRINT)
                         cout << "that is better than current best, " << best_utility << " so swapping" << endl;
-                    best_utility = current_utility;
-                    best_idxs = idxs_to_buy;
+                    best_utility = utility;
+                    best_indicies = costs_and_indices_to_buy;
                 }
             }
         }
     }
 
     vector<size_t> toRet {};
-    while ( not best_idxs.empty() ) {
-        toRet.push_back( best_idxs.top().second );
-        best_idxs.pop();
+    while ( not best_indicies.empty() ) {
+        toRet.push_back( best_indicies.top().second );
+        best_indicies.pop();
     }
 
     assert( toRet.size() == num_packets_to_buy );

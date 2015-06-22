@@ -36,7 +36,7 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
     double idxs_to_buy_cost = 0;
 
     size_t idx = 0;
-    while  (idxs_to_buy.size() != num_packets_to_buy) {
+    while  (idxs_to_buy.size() < num_packets_to_buy) {
         assert(idx < order_book.size() && "can't buy slots we need");
         const SingleSlot &potential_slot = order_book.at( idx );
         if ( can_buy( potential_slot ) ) {
@@ -48,17 +48,16 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
     }
 
     assert( idx != 0 );
-    idx--; // we incremented 1 too many times in while loop
 
     // keep a copy of best slots seen so far
     priority_queue<pair<double, size_t>> best_idxs = idxs_to_buy;
-    double flow_benefit = get_benefit( max(order_book.at( idx ).time, latest_time_already_owned) );
+    double flow_benefit = get_benefit( max(order_book.at( idx - 1 ).time, latest_time_already_owned) ); // idx - 1 is idx of latest potential slot on pq
     double best_utility =  flow_benefit - idxs_to_buy_cost;
     if (DEBUG_PRINT)
         cout << "best utility starting at" << best_utility << " and benefit is " << flow_benefit << endl;
 
     double most_expensive_slot_cost = idxs_to_buy.top().first;
-    for (size_t i = idx + 1; i < order_book.size(); i++) {
+    for (size_t i = idx; i < order_book.size(); i++) {
         const SingleSlot &potential_slot = order_book.at( i );
         if ( can_buy( potential_slot ) and potential_slot.best_offer().cost < most_expensive_slot_cost ) {
             double slot_cost = potential_slot.best_offer().cost;

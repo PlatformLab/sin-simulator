@@ -166,7 +166,6 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     }
 
     const size_t num_packets_sent = num_owned( mkt.packets_sent(), name_ );
-
     const size_t num_order_book_slots_owned = num_owned( order_book, name_ );
 
     assert ( num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
@@ -178,7 +177,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
         if ( num_order_book_slots_owned > 0 ) {
             for ( auto rit = order_book.rbegin(); rit != order_book.rend(); rit++) {
-                if ( rit->owner == name_) {
+                if ( rit->owner == name_ ) {
                     flow_completion_time = rit->time;
                     break;
                 }

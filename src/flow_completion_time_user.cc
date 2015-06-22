@@ -246,7 +246,7 @@ void FlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
     double benefit = get_benefit( get_flow_completion_time( mkt ) );
     double cost = - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
-    double utility = benefit - cost;
+    double utility = benefit + cost;
 
     cout << name_ << " has benefit " << benefit << ", cost " << cost << ", utility " << utility;
     cout << ", and best expected utility " << best_expected_utility_ << endl;

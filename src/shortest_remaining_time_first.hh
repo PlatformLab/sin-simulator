@@ -3,17 +3,8 @@
 #ifndef SRTF_HH
 #define SRTF_HH
 
-#include <iostream>
-#include <unordered_map>
-
 #include "market_event.hh"
-#include "pretty_print.hh"
-
-struct flow {
-    std::string name;
-    size_t flow_start_time;
-    size_t num_packets;
-};
+#include "schedule.hh"
 
 const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<flow> flows )
 {
@@ -48,27 +39,6 @@ const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<f
     }
 
     return final_schedule;
-}
-std::unordered_map<std::string, size_t> schedule_flow_completion_times( std::list<flow> flows, std::deque<PacketSent> schedule )
-{
-    std::unordered_map<std::string, size_t> toRet;
-    for (auto & packet_sent : schedule) {
-        toRet[packet_sent.owner] = packet_sent.time;
-    }
-    for (auto &flow : flows ) {
-        toRet[flow.name] += 1 - flow.flow_start_time;
-    }
-    return toRet;
-}
-
-// returns total queuing time for for schedule given
-size_t queueing_delay_of_schedule( std::list<flow> flows, std::deque<PacketSent> schedule )
-{
-    size_t shedule_queuing_delay = 0;
-    for (auto &fct_pair : schedule_flow_completion_times( flows, schedule ) ) {
-        shedule_queuing_delay += fct_pair.second;
-    }
-    return shedule_queuing_delay;
 }
 
 #endif /* SRTF_HH */

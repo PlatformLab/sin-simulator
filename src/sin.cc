@@ -10,6 +10,7 @@
 #include "market_emulator.hh"
 #include "market.hh"
 
+#include "schedule.hh"
 #include "shortest_remaining_time_first.hh"
 #include "round_robin.hh"
 
@@ -112,8 +113,8 @@ int main(){
         auto market = sim_users(usr_args, false, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
-        size_t market_delay = queueing_delay_of_schedule( usr_args, market );
-        size_t srtf_delay = queueing_delay_of_schedule( usr_args, srtf );
+        size_t market_delay = schedule_sum_flow_completion_times( usr_args, market );
+        size_t srtf_delay = schedule_sum_flow_completion_times( usr_args, srtf );
         assert(market_delay >= srtf_delay);
         total_market_delay += market_delay;
         total_srtf_delay += srtf_delay;

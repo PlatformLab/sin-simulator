@@ -65,19 +65,20 @@ bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
     return slot.owner != name_ and slot.has_offers();
 }
 
-/* Slots are priced based to increase the overall utility by .01 if they were sold and the best
+/* Slots are priced to increase the overall utility by .01 if they were sold and the best
    replacement was bought. */
 void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
-{
+{/* split up so if there is only 1 owned slots we dont calculate non-back replacement */
     auto &order_book = mkt.order_book();
+    assert ( num_owned( order_book, name_ ) + num_owned( mkt.packets_sent(), name_ ) == num_packets_ );
     size_t flow_completion_time = 0;
     size_t flow_completion_time_if_sold_back = 0;
 
     /* first we find the flow completion time and the flow completion time not including the last
        owned slot, which is used for pricing that slot */
-    for ( auto rit = order_book.rbegin(); rit != order_book.rend(); rit++) {
+    for ( auto rit = order_book.rbegin(); rit != order_book.rend(); rit++ ) {
         if ( rit->owner == name_ ) {
-            if (flow_completion_time == 0 ) {
+            if ( flow_completion_time == 0 ) {
                 flow_completion_time = rit->time;
             } else {
                 flow_completion_time_if_sold_back = rit->time;
@@ -89,6 +90,7 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
     /* there are two prices, one for the last slot, for which selling can reduce the overall flow
        completion time, and another for every other slot, for which selling cannot reduce the
        overall flow completion time. For both we find index of best slot to buy instead if that slot was sold */
+       /* explain better */
     size_t back_replacement_idx  = pick_n_slots_to_buy( order_book, 1, flow_completion_time_if_sold_back ).front();
     size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, 1, flow_completion_time ).front();
 
@@ -106,19 +108,18 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
     double non_back_sell_price = .01 - non_back_utility_delta;
 
 
-    size_t idx = 0;
-    for ( const SingleSlot &slot : order_book ) {
+    for ( size_t idx = 0; idx < order_book.size(); idx++ ) {
+        const SingleSlot &slot = order_book.at( idx );
         if ( slot.owner == name_ ) {
             double slot_sell_price = slot.time == flow_completion_time ? back_sell_price : non_back_sell_price;
 
             /* only add offer to slot if it differs from existing best offer */
             if ( not slot.has_offers() or slot.best_offer().cost != slot_sell_price ) {
-                    mkt.clear_offers_from_slot( idx, name_ );
-                    mkt.add_offer_to_slot( idx, { slot_sell_price, name_ } );
+                mkt.clear_offers_from_slot( idx, name_ );
+                mkt.add_offer_to_slot( idx, { slot_sell_price, name_ } );
             }
         }
-        idx++;
-        if ( idx > flow_completion_time ) {
+        if ( slot.time > flow_completion_time ) {
             /* nothing left to price */
             break;
         }
@@ -127,15 +128,15 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
 
 /* fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots then keeps a
    copy of the set of cheapest slots with the most utility and returns that */
-vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
+vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, /* const */ size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
 {
     priority_queue<pair<double, size_t>> costs_and_indices_to_buy;
     double total_cost = 0;
 
-    priority_queue<pair<double, size_t>> best_indicies;
+    priority_queue<pair<double, size_t>> best_indicies; //indices
     double best_utility = std::numeric_limits<double>::lowest();
 
-    for (size_t i = 0; i < order_book.size(); i++) {
+    for ( size_t i = 0; i < order_book.size(); i++ ) {
         const SingleSlot &slot = order_book.at( i );
 
         if ( can_buy( slot ) ) {
@@ -151,9 +152,11 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
                 if ( costs_and_indices_to_buy.size() > num_packets_to_buy ) {
                     total_cost -= costs_and_indices_to_buy.top().first;
                     costs_and_indices_to_buy.pop();
+                    assert( costs_and_indices_to_buy.size() == num_packets_to_buy );
                 }
             }
 
+            /* this means we have an complete possible set of slot indices to buy */
             if ( costs_and_indices_to_buy.size() == num_packets_to_buy ) {
                 size_t flow_completion_time = max( slot.time, latest_time_already_owned );
                 double benefit = get_benefit( flow_completion_time );
@@ -167,7 +170,7 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
         }
     }
 
-    vector<size_t> toRet {};
+    vector<size_t> toRet;
     while ( not best_indicies.empty() ) {
         toRet.push_back( best_indicies.top().second );
         best_indicies.pop();
@@ -175,12 +178,13 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
 
     assert( toRet.size() == num_packets_to_buy );
 
-    return move( toRet );
+    return toRet;
 }
 
 void FlowCompletionTimeUser::take_actions( Market& mkt )
 {
     auto &order_book = mkt.order_book();
+    /* order book empty or flow hasn't started yet */
     if ( order_book.empty() or order_book.front().time < flow_start_time_)
     {
         return;
@@ -189,15 +193,17 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     const size_t num_packets_sent = num_owned( mkt.packets_sent(), name_ );
     const size_t num_order_book_slots_owned = num_owned( order_book, name_ );
 
+    /* makes sure num_packets_to_buy is non-negative */
     assert ( num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
 
     size_t num_packets_to_buy = num_packets_ - num_packets_sent - num_order_book_slots_owned; 
 
+    /* if we have something to buy, buy things */
     if ( num_packets_to_buy > 0 ) {
         size_t completion_time = 0;
 
         if ( num_order_book_slots_owned > 0 ) {
-            completion_time = flow_completion_time( order_book, name_ );
+            completion_time = flow_completion_time( order_book, name_ );// TIME of last slot owned function
         }
 
         for ( size_t idx : pick_n_slots_to_buy( order_book, num_packets_to_buy, completion_time ) )
@@ -216,8 +222,9 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         best_expected_utility_ = max( best_expected_utility_, expected_utility_ );
     }
 
+    /* if we own anything from before or bought anything than price all slots again */
     if ( num_order_book_slots_owned > 0 or num_packets_to_buy > 0) {
-        price_owned_slots( mkt );
+        price_owned_slots( mkt );//make offers for owned slots
     }
 }
 

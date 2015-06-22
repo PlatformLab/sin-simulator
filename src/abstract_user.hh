@@ -22,6 +22,7 @@ class AbstractUser {
         virtual void print_stats( const Market& mkt ) const = 0;
 
         virtual ~AbstractUser() = default;
+        // put utility, benefit, cost
 };
 
 #endif /* ABSTRACT_USER */

@@ -128,5 +128,6 @@ void MarketSimulator::print_user_stats()
 {
     for ( auto & u : users_ ) {
         u->print_stats(mkt_);
+        //if (u-> 
     }
 }

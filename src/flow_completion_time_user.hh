@@ -16,7 +16,7 @@ class FlowCompletionTimeUser : public AbstractUser
 {
     private:
     const size_t flow_start_time_;
-    const size_t num_packets_;
+    const size_t num_packets_; // maybe rename
     bool done_;
     double money_spent_ = 0;
     double expected_utility_ = std::numeric_limits<double>::lowest();
@@ -26,7 +26,7 @@ class FlowCompletionTimeUser : public AbstractUser
     bool can_buy(const SingleSlot &slot) const;
     void price_owned_slots( Market &mkt );
 
-    std::vector<size_t> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned ) const;
+    std::vector<size_t> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book, const size_t num_packets_to_buy, const size_t latest_time_already_owned ) const;
     public:
     FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );
 

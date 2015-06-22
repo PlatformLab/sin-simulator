@@ -30,6 +30,52 @@ bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
     return slot.owner != name_ and slot.has_offers();
 }
 
+void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
+{
+    auto &order_book = mkt.order_book();
+    size_t current_flow_completion_time = 0;
+    size_t flow_completion_time_if_sold_back = 0;
+
+    for ( const SingleSlot &slot : order_book ) {
+        if ( slot.owner == name_ ) {
+            flow_completion_time_if_sold_back = current_flow_completion_time;
+            current_flow_completion_time = slot.time;
+        }
+    }
+
+    size_t back_replacement_idx  = pick_n_slots_to_buy( order_book, 1, flow_completion_time_if_sold_back ).front();
+    size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, 1, current_flow_completion_time ).front();
+
+    double current_benefit = get_benefit( current_flow_completion_time );
+    double benefit_with_back_replacement = get_benefit( max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time ) );
+    double benefit_with_non_back_replacement = get_benefit( max( current_flow_completion_time, order_book.at( non_back_replacement_idx ).time ) );
+
+    double back_benefit_delta = benefit_with_back_replacement - current_benefit;
+    double non_back_benefit_delta = benefit_with_non_back_replacement - current_benefit;
+
+    double back_sell_price = .01 - ( back_benefit_delta - order_book.at( back_replacement_idx ).best_offer().cost );
+    double non_back_sell_price = .01 - ( non_back_benefit_delta - order_book.at( non_back_replacement_idx ).best_offer().cost );
+
+    size_t idx = 0;
+    for ( const SingleSlot &slot : order_book ) {
+        if ( slot.owner == name_ ) {
+            if ( slot.time == current_flow_completion_time ) {
+                if ( not slot.has_offers() or slot.best_offer().cost != back_sell_price ) {
+                    mkt.clear_offers_from_slot( idx, name_ );
+                    mkt.add_offer_to_slot( idx, { back_sell_price, name_ } );
+                }
+                break;
+            } else {
+                if ( not slot.has_offers() or slot.best_offer().cost != non_back_sell_price ) {
+                    mkt.clear_offers_from_slot( idx, name_ );
+                    mkt.add_offer_to_slot( idx, { non_back_sell_price, name_ } );
+                }
+            }
+        }
+        idx++;
+    }
+}
+
 // fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots
 // then keeps a copy of the set of cheapest slots with the most utility and returns that
 vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
@@ -180,62 +226,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
     // now price all slots we own, there are two prices, one for the non-last slot, which selling couldnt change flow completion time, and one for the last slot
 
-    if ( num_order_book_slots_owned == 0 and num_packets_to_buy == 0) {
-        return;
-    }
-
-    // first price last slot
-    size_t current_flow_completion_time = 0;
-    size_t flow_completion_time_if_sold_back = 0;
-    bool has_more_than_one_slot = ( num_order_book_slots_owned + num_packets_to_buy ) > 1;
-
-    int idx = order_book.size() - 1;
-    while ( idx >= 0 ) {
-        if ( order_book.at(idx).owner == name_ ) {
-            if ( current_flow_completion_time == 0 ) {
-                current_flow_completion_time = order_book.at(idx).time;
-                if ( not has_more_than_one_slot ) {
-                    break;
-                }
-            } else {
-                flow_completion_time_if_sold_back = order_book.at(idx).time;
-                break;
-            }
-        }
-        idx--;
-    }
-
-    size_t back_replacement_idx  = pick_n_slots_to_buy( order_book, 1, flow_completion_time_if_sold_back ).front();
-    size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, 1, current_flow_completion_time ).front();
-
-    double current_benefit = get_benefit( current_flow_completion_time );
-    double benefit_with_back_replacement = get_benefit( max( flow_completion_time_if_sold_back, order_book.at( back_replacement_idx ).time ) );
-    double benefit_with_non_back_replacement = get_benefit( max( current_flow_completion_time, order_book.at( non_back_replacement_idx ).time ) );
-
-    double back_benefit_delta = benefit_with_back_replacement - current_benefit;
-    double non_back_benefit_delta = benefit_with_non_back_replacement - current_benefit;
-
-    double back_sell_price = .01 - ( back_benefit_delta - order_book.at( back_replacement_idx ).best_offer().cost );
-    double non_back_sell_price = .01 - ( non_back_benefit_delta - order_book.at( non_back_replacement_idx ).best_offer().cost );
-
-    idx = 0;
-    for ( auto &slot : order_book ) {
-        if (slot.owner == name_) {
-            if ( slot.time == current_flow_completion_time ) {
-                if ( not slot.has_offers() or slot.best_offer().cost != back_sell_price ) {
-                    mkt.clear_offers_from_slot( idx, name_ );
-                    mkt.add_offer_to_slot( idx, { back_sell_price, name_ } );
-                }
-                break;
-            } else {
-                if ( not slot.has_offers() or slot.best_offer().cost != non_back_sell_price ) {
-                    mkt.clear_offers_from_slot( idx, name_ );
-                    mkt.add_offer_to_slot( idx, { non_back_sell_price, name_ } );
-                    assert( has_more_than_one_slot );
-                }
-            }
-        }
-        idx++;
+    if ( num_order_book_slots_owned > 0 or num_packets_to_buy > 0) {
+        price_owned_slots( mkt );
     }
 }
 

@@ -24,6 +24,8 @@ class FlowCompletionTimeUser : public AbstractUser
 
     double get_benefit(size_t finish_time) const;
     bool can_buy(const SingleSlot &slot) const;
+    void price_owned_slots( Market &mkt );
+
     std::vector<size_t> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book, size_t num_packets_to_buy, const size_t latest_time_already_owned ) const;
     public:
     FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );

@@ -39,6 +39,11 @@ class FlowCompletionTimeUser : public AbstractUser
     bool done( const Market& mkt ) override;
 
     void print_stats( const Market& mkt ) const override;
+
+    double cost( const Market& ) const;
+    double utility( const Market& ) const override;
+    double best_expected_utility() const override;
+    double benefit( const Market& ) const override;
 };
 
 #endif /* FLOW_COMPLETION_TIME_USER */

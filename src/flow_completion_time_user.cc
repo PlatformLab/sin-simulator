@@ -230,10 +230,26 @@ bool FlowCompletionTimeUser::done( const Market& mkt )
 
 void FlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
-    double benefit = get_benefit( last_slot_time( mkt.packets_sent(), name_ ) );
-    double cost = - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
-    double utility = benefit + cost;
+    cout << name_ << " has benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
+    cout << ", and best expected utility " << best_expected_utility() << endl;
+}
 
-    cout << name_ << " has benefit " << benefit << ", cost " << cost << ", utility " << utility;
-    cout << ", and best expected utility " << best_expected_utility_ << endl;
+double FlowCompletionTimeUser::cost( const Market& mkt ) const
+{
+    return - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
+}
+
+double FlowCompletionTimeUser::utility( const Market& mkt ) const
+{
+    return benefit( mkt ) + cost( mkt );
+
+}
+double FlowCompletionTimeUser::best_expected_utility() const
+{
+    return best_expected_utility_;
+}
+
+double FlowCompletionTimeUser::benefit( const Market& mkt ) const
+{
+    return get_benefit( last_slot_time( mkt.packets_sent(), name_ ) );
 }

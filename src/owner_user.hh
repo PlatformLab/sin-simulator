@@ -24,6 +24,10 @@ class OwnerUser : public AbstractUser
     bool done( const Market& mkt ) override;
 
     void print_stats( const Market& mkt ) const override;
+
+    double utility( const Market& ) const override { return 0.; };
+    double best_expected_utility() const override { return 0.; };
+    double benefit( const Market& ) const override { return 0.; };
 };
 
 #endif /* OWNER_USER */

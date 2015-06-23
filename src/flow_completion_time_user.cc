@@ -65,11 +65,10 @@ bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
 }
 
 /* Price slot to increase the overall utility by .01 if it was sold and the best replacement was bought. */
-double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_book, const size_t last_slot_time ) const
+double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_book, const size_t last_slot_time, const double current_benefit ) const
 {
     size_t replacement_idx = pick_n_slots_to_buy( order_book, 1, last_slot_time ).front();
 
-    double current_benefit = get_benefit( last_slot_time );
     double benefit_with_replacement = get_benefit( max( last_slot_time, order_book.at( replacement_idx ).time ) );
 
     double benefit_delta = benefit_with_replacement - current_benefit;
@@ -85,6 +84,7 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
     assert ( num_owned( order_book, name_ ) + num_owned( mkt.packets_sent(), name_ ) == flow_num_packets_ );
 
     size_t last_packet_time = last_slot_time( order_book, name_ );
+    double current_benefit = get_benefit( last_packet_time );
 
     double sell_price = -1;
 
@@ -93,19 +93,19 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
         if ( slot.owner == name_ ) {
             if ( slot.time == last_packet_time ) {
                 /* price last packet differently, as the last_packet_time if we sold this slot would
-                   be the time of the second to last slot*/
+                   be the time of the second to last slot */
                    last_packet_time = order_book.front().time;
-                   for ( int i = idx; i >= 0; i-- ) {
+                   for ( int i = idx - 1; i >= 0; i-- ) {
                        if ( order_book.at(i).owner == name_ ) {
                            last_packet_time = order_book.at(i).time;
                            break;
                        }
                    }
-                   sell_price = get_sell_price( order_book, last_packet_time );
+                   sell_price = get_sell_price( order_book, last_packet_time, current_benefit );
             } else {
                 /* haven't set sell price yet */
                 if ( sell_price < 0 ) {
-                    sell_price = get_sell_price( order_book, last_packet_time );
+                    sell_price = get_sell_price( order_book, last_packet_time, current_benefit );
                 }
             }
 

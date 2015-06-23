@@ -17,7 +17,7 @@ using namespace std;
 
 const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
 {
-    vector<unique_ptr<AbstractUser>> usersToEmulate;
+    vector<unique_ptr<AbstractUser>> usersToSimulate;
     if (verbose) {
         cout << "trial shorthand: ";
     }
@@ -35,40 +35,42 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
         if (verbose) {
             cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
         }
-        usersToEmulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
+        usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
     }
 
     // hack to size number of slots for market simulation based on time to complete srtf
     size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2;
 
-    usersToEmulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
+    usersToSimulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
-    MarketSimulator emulated_market( move(usersToEmulate), verbose, random_user_order);
+    MarketSimulator simulated_market( move(usersToSimulate), verbose, random_user_order);
 
-    emulated_market.run_to_completion();
-    //cout << "market required " << emulated_market.total_roundtrips() << " round trips" << endl;
+    simulated_market.run_to_completion();
+    //cout << "market required " << simulated_market.total_roundtrips() << " round trips" << endl;
 
     if (verbose) {
-        emulated_market.print_user_stats();
-        unordered_map<string, double> net_balances = emulated_market.print_money_exchanged();
-        emulated_market.print_packets_sent();
+        simulated_market.print_user_stats();
+        unordered_map<string, double> net_balances = simulated_market.print_money_exchanged();
+        simulated_market.print_packets_sent();
 
-        std::unordered_map<std::string, size_t> flow_completion_times = schedule_flow_completion_times( usr_args, emulated_market.packets_sent() );
+        std::unordered_map<std::string, size_t> flow_completion_times = schedule_flow_completion_times( usr_args, simulated_market.packets_sent() );
         for (auto &fct_pair : flow_completion_times) {
-cout << "utility for " << fct_pair.first << " was " << -(double) fct_pair.second + net_balances[fct_pair.first] << endl;
+            cout << "utility for " << fct_pair.first << " was " << -(double) fct_pair.second + net_balances[fct_pair.first] << endl;
         }
     }
 
     // now clean up results by getting rid of hard coded owner
     deque<PacketSent> toRet = {};
-    for (auto &ps : emulated_market.packets_sent()) {
+    for (auto &ps : simulated_market.packets_sent()) {
         if (ps.owner != "ccst") {
             toRet.emplace_back(ps);
         }
     }
     return toRet;
 }
-size_t dice_roll() {
+
+size_t dice_roll()
+{
     return (rand() % 6) + 1;
 }
 

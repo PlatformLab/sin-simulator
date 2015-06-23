@@ -41,6 +41,9 @@ class MarketSimulator {
     std::unordered_map<std::string, double> print_money_exchanged();
 
     void print_user_stats();
+    double sum_user_utilities();
+    double sum_user_best_expected_utilities();
+    double sum_user_benefits();
 };
 
 #endif /* MARKET_SIMULATOR_HH */

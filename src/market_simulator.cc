@@ -128,6 +128,32 @@ void MarketSimulator::print_user_stats()
 {
     for ( auto & u : users_ ) {
         u->print_stats(mkt_);
-        //if (u-> 
     }
+}
+
+double MarketSimulator::sum_user_utilities()
+{
+    double toRet = 0;
+    for ( auto & u : users_ ) {
+        toRet += u->utility( mkt_ );
+    }
+    return toRet;
+}
+
+double MarketSimulator::sum_user_best_expected_utilities()
+{
+    double toRet = 0;
+    for ( auto & u : users_ ) {
+        toRet += u->best_expected_utility();
+    }
+    return toRet;
+}
+
+double MarketSimulator::sum_user_benefits()
+{
+    double toRet = 0;
+    for ( auto & u : users_ ) {
+        toRet += u->benefit( mkt_ );
+    }
+    return toRet;
 }

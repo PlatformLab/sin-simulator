@@ -15,26 +15,26 @@
 
 using namespace std;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const bool random_user_order)
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool print_end_stats )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
-    if (verbose) {
+    if ( print_start_stats ) {
         cout << "trial shorthand: ";
     }
     for (auto & u : usr_args)
     {
-        if (verbose) {
-            cout <<u.flow_start_time << u.num_packets;
-        }
+    if ( print_start_stats ) {
+        cout <<u.flow_start_time << u.num_packets;
     }
-    if (verbose) {
-        cout << endl;
+    }
+    if ( print_start_stats ) {
+    cout << endl;
     }
     for (auto & u : usr_args)
     {
-        if (verbose) {
-            cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
-        }
+    if ( print_start_stats ) {
+        cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
+    }
         usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
     }
 
@@ -43,21 +43,10 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
 
     usersToSimulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
 
-    MarketSimulator simulated_market( move(usersToSimulate), verbose, random_user_order);
+    MarketSimulator simulated_market( move(usersToSimulate), false, false );
 
     simulated_market.run_to_completion();
     //cout << "market required " << simulated_market.total_roundtrips() << " round trips" << endl;
-
-    if (verbose) {
-        simulated_market.print_user_stats();
-        unordered_map<string, double> net_balances = simulated_market.print_money_exchanged();
-        simulated_market.print_packets_sent();
-
-        std::unordered_map<std::string, size_t> flow_completion_times = schedule_flow_completion_times( usr_args, simulated_market.packets_sent() );
-        for (auto &fct_pair : flow_completion_times) {
-            cout << "utility for " << fct_pair.first << " was " << -(double) fct_pair.second + net_balances[fct_pair.first] << endl;
-        }
-    }
 
     // now clean up results by getting rid of hard coded owner
     deque<PacketSent> toRet = {};
@@ -65,6 +54,13 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool verbose, const
         if (ps.owner != "ccst") {
             toRet.emplace_back(ps);
         }
+    }
+    assert( simulated_market.sum_user_benefits() == - (double) schedule_sum_flow_completion_times( usr_args, toRet ) );
+    if ( print_end_stats ) {
+        simulated_market.print_user_stats();
+        double sum_user_utilities = simulated_market.sum_user_utilities();
+        double sum_user_best_expected_utilities = simulated_market.sum_user_best_expected_utilities();
+        cout << "sum user utility was " << sum_user_utilities << " while sum of best expected utilties was " << sum_user_best_expected_utilities << " the difference between these is " << sum_user_best_expected_utilities -sum_user_utilities << endl;
     }
     return toRet;
 }
@@ -105,24 +101,24 @@ int main(){
     size_t total_round_robin_delay = 0;
     */
 
-    double worst_delay_ratio = 0;
-
     const int num_trials = 1000;
     for (int i = 0; i < num_trials; i++)
     {
         list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_users(usr_args, false, false);
+        auto market = sim_users(usr_args, true, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
-        size_t market_delay = schedule_sum_flow_completion_times( usr_args, market );
-        size_t srtf_delay = schedule_sum_flow_completion_times( usr_args, srtf );
-        assert(market_delay >= srtf_delay);
-        total_market_delay += market_delay;
-        total_srtf_delay += srtf_delay;
+        size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
+        size_t srtf_sum_fcts = schedule_sum_flow_completion_times( usr_args, srtf );
+        assert( market_sum_fcts >= srtf_sum_fcts );
+        total_market_delay += market_sum_fcts;
+        total_srtf_delay += srtf_sum_fcts;
 
-        if (market_delay == srtf_delay)
+        if ( market_sum_fcts == srtf_sum_fcts )
         {
             market_matched_srtf++;
+            cout << "market matched srtf, market was:"<< endl;
+            printSlots(market);
         } else {
             market_didnt_match_srtf++;
 
@@ -130,44 +126,15 @@ int main(){
             printSlots(market);
             cout << "and srtf was:" << endl;
             printSlots(srtf);
-            cout << "market had " << market_delay - srtf_delay << " more queuing delay than srtf" << endl;
 
-            double delay_ratio = (double) market_delay / (double) srtf_delay;
-            worst_delay_ratio = max(delay_ratio, worst_delay_ratio);
-            cout << "ratio of mean flow duration to optimal is: " << delay_ratio;
-            if (delay_ratio == worst_delay_ratio) {
-                cout << ". This is the worst seen so far in trials (market sum flow durations " << market_delay << " / srtf sum flow durations " << srtf_delay << ").";
-            }
-
-            cout << endl;
-
-            cout << "in more detail, market results were:" << endl;
-            auto market2 = sim_users(usr_args, true, false);
-            assert(market2 == market);
-            cout << "DONE" << endl << endl;
+            cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
         }
+        auto market2 = sim_users(usr_args, false, true);
+        assert(market2 == market);
 
-        cout << "finished trial " << i << " of " << num_trials << endl;
-        /*
-        auto round_robin = simulate_round_robin(usr_args);
-        auto round_robin_delay_pair = queueing_delay_of_schedule_and_optimal( usr_args, round_robin );
-        total_round_robin_delay += round_robin_delay_pair.first;
-        size_t round_robin_excess_delay = round_robin_delay_pair.first - round_robin_delay_pair.second;
-        if (round_robin_excess_delay == 0) {
-            round_robin_num_matched++;
-            cout << "round robin matched srtf" << endl;
-        } else {
-            round_robin_num_didnt_match++;
-            cout << "round robin didn't match" << endl;
-        }
-        */
+        cout << "finished trial " << i << " of " << num_trials << endl << endl;
     }
     cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
     cout << "average delay ratio " << ((double) total_market_delay / (double) total_srtf_delay) << endl;
-    cout << "worst delay ratio for market " << worst_delay_ratio << endl;
-    /*
-    cout << "for round robin: "<< round_robin_num_matched << " of " << round_robin_num_matched + round_robin_num_didnt_match << " scenarios matched the srtf result" << endl;
-    cout << "average delay ratio " << ((double) total_round_robin_delay / (double) total_srtf_delay) << endl;
-    */
     return 1;
 }

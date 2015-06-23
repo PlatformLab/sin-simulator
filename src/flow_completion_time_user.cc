@@ -230,7 +230,7 @@ bool FlowCompletionTimeUser::done( const Market& mkt )
 
 void FlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
-    cout << name_ << " has benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
+    cout << name_ << " had benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
     cout << ", and best expected utility " << best_expected_utility() << endl;
 }
 

@@ -32,17 +32,17 @@ static size_t num_owned( const T &collection, const string &name )
 
 /* Returns 0 if name owns no slots in collection */
 template <typename T>
-static size_t last_packet_time( const T &collection, const string &name )
+static size_t last_slot_time( const T &collection, const string &name )
 {
-    size_t last_packet_time = 0;
+    size_t last_slot_time = 0;
 
     for ( auto rit = collection.rbegin(); rit != collection.rend(); rit++ ) {
         if ( rit->owner == name ) {
-            last_packet_time = rit->time;
+            last_slot_time = rit->time;
             break;
         }
     }
-    return last_packet_time;
+    return last_slot_time;
 }
 
 FlowCompletionTimeUser::FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets )
@@ -64,72 +64,63 @@ bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
     return slot.owner != name_ and slot.has_offers();
 }
 
-/* Slots are priced to increase the overall utility by .01 if they were sold and the best
-   replacement was bought. */
+/* Price slot to increase the overall utility by .01 if it was sold and the best replacement was bought. */
+double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_book, const size_t last_slot_time ) const
+{
+    size_t replacement_idx = pick_n_slots_to_buy( order_book, 1, last_slot_time ).front();
+
+    double current_benefit = get_benefit( last_slot_time );
+    double benefit_with_replacement = get_benefit( max( last_slot_time, order_book.at( replacement_idx ).time ) );
+
+    double benefit_delta = benefit_with_replacement - current_benefit;
+
+    double utility_delta = benefit_delta - order_book.at( replacement_idx ).best_offer().cost;
+
+    return .01 - utility_delta;
+}
+
 void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
-{/* split up so if there is only 1 owned slots we dont calculate non-back replacement */
+{
     auto &order_book = mkt.order_book();
     assert ( num_owned( order_book, name_ ) + num_owned( mkt.packets_sent(), name_ ) == flow_num_packets_ );
-    //bool price_non_back_differently = num_owned( order_book, name_ ) > 1;
 
-    size_t last_packet_time = 0;
-    size_t last_packet_time_if_sold_back = 0;
+    size_t last_packet_time = last_slot_time( order_book, name_ );
 
-    /* first we find the flow completion time and the flow completion time not including the last
-       owned slot, which is used for pricing that slot */
-    for ( auto rit = order_book.rbegin(); rit != order_book.rend(); rit++ ) {
-        if ( rit->owner == name_ ) {
-            if ( last_packet_time == 0 ) {
-                last_packet_time = rit->time;
-            } else {
-                last_packet_time_if_sold_back = rit->time;
-                break;
-            }
-        }
-    }
-
-    /* there are two prices, one for the last slot, for which selling can reduce the overall flow
-       completion time, and another for every other slot, for which selling cannot reduce the
-       overall flow completion time. For both we find index of best slot to buy instead if that slot was sold */
-       /* explain better */
-    size_t back_replacement_idx  = pick_n_slots_to_buy( order_book, 1, last_packet_time_if_sold_back ).front();
-    size_t non_back_replacement_idx = pick_n_slots_to_buy( order_book, 1, last_packet_time ).front();
-
-    double current_benefit = get_benefit( last_packet_time );
-    double benefit_with_back_replacement = get_benefit( max( last_packet_time_if_sold_back, order_book.at( back_replacement_idx ).time ) );
-    double benefit_with_non_back_replacement = get_benefit( max( last_packet_time, order_book.at( non_back_replacement_idx ).time ) );
-
-    double back_benefit_delta = benefit_with_back_replacement - current_benefit;
-    double non_back_benefit_delta = benefit_with_non_back_replacement - current_benefit;
-
-    double back_utility_delta = back_benefit_delta - order_book.at( back_replacement_idx ).best_offer().cost;
-    double non_back_utility_delta = non_back_benefit_delta - order_book.at( non_back_replacement_idx ).best_offer().cost;
-
-    double back_sell_price = .01 - back_utility_delta;
-    double non_back_sell_price = .01 - non_back_utility_delta;
-
+    double sell_price = -1;
 
     for ( size_t idx = 0; idx < order_book.size(); idx++ ) {
         const SingleSlot &slot = order_book.at( idx );
         if ( slot.owner == name_ ) {
-            double slot_sell_price = slot.time == last_packet_time ? back_sell_price : non_back_sell_price;
+            if ( slot.time == last_packet_time ) {
+                /* price last packet differently, as the last_packet_time if we sold this slot would
+                   be the time of the second to last slot*/
+                   last_packet_time = order_book.front().time;
+                   for ( int i = idx; i >= 0; i-- ) {
+                       if ( order_book.at(i).owner == name_ ) {
+                           last_packet_time = order_book.at(i).time;
+                           break;
+                       }
+                   }
+                   sell_price = get_sell_price( order_book, last_packet_time );
+            } else {
+                /* haven't set sell price yet */
+                if ( sell_price < 0 ) {
+                    sell_price = get_sell_price( order_book, last_packet_time );
+                }
+            }
 
             /* only add offer to slot if it differs from existing best offer */
-            if ( not slot.has_offers() or slot.best_offer().cost != slot_sell_price ) {
+            if ( not slot.has_offers() or slot.best_offer().cost != sell_price ) {
                 mkt.clear_offers_from_slot( idx, name_ );
-                mkt.add_offer_to_slot( idx, { slot_sell_price, name_ } );
+                mkt.add_offer_to_slot( idx, { sell_price, name_ } );
             }
-        }
-        if ( slot.time > last_packet_time ) {
-            /* nothing left to price */
-            break;
         }
     }
 }
 
 /* fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots then keeps a
    copy of the set of cheapest slots with the most utility and returns that */
-vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, /* const */ size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
+vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, const size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
 {
     priority_queue<pair<double, size_t>> costs_and_indices_to_buy;
     double total_cost = 0;
@@ -159,8 +150,8 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
 
             /* this means we have an complete possible set of slot indices to buy */
             if ( costs_and_indices_to_buy.size() == num_packets_to_buy ) {
-                size_t last_packet_time = max( slot.time, latest_time_already_owned );
-                double benefit = get_benefit( last_packet_time );
+                size_t last_slot_time = max( slot.time, latest_time_already_owned );
+                double benefit = get_benefit( last_slot_time );
                 double utility = benefit - total_cost;
 
                 if (utility > best_utility) {
@@ -204,7 +195,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         size_t completion_time = 0;
 
         if ( num_order_book_slots_owned > 0 ) {
-            completion_time = last_packet_time( order_book, name_ );// TIME of last slot owned function
+            completion_time = last_slot_time( order_book, name_ );// TIME of last slot owned function
         }
 
         for ( size_t idx : pick_n_slots_to_buy( order_book, num_packets_to_buy, completion_time ) )
@@ -239,7 +230,7 @@ bool FlowCompletionTimeUser::done( const Market& mkt )
 
 void FlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
-    double benefit = get_benefit( last_packet_time( mkt.packets_sent(), name_ ) );
+    double benefit = get_benefit( last_slot_time( mkt.packets_sent(), name_ ) );
     double cost = - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
     double utility = benefit + cost;
 

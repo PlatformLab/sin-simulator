@@ -24,6 +24,8 @@ class FlowCompletionTimeUser : public AbstractUser
 
     double get_benefit( size_t finish_time ) const;
     bool can_buy( const SingleSlot &slot ) const;
+
+    double get_sell_price( const std::deque<SingleSlot> &order_book, const size_t last_slot_time ) const;
     void price_owned_slots( Market &mkt );
 
     std::vector<size_t> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book,

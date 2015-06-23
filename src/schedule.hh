@@ -27,11 +27,11 @@ std::unordered_map<std::string, size_t> schedule_flow_completion_times( std::lis
 
 size_t schedule_sum_flow_completion_times( std::list<flow> flows, std::deque<PacketSent> schedule )
 {
-    size_t shedule_queuing_delay = 0;
+    size_t toRet = 0;
     for (auto &fct_pair : schedule_flow_completion_times( flows, schedule ) ) {
-        shedule_queuing_delay += fct_pair.second;
+        toRet += fct_pair.second;
     }
-    return shedule_queuing_delay;
+    return toRet;
 }
 
 #endif /* SCHEDULE */

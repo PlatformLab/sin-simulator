@@ -57,13 +57,21 @@ static bool compare_two_bidoffers(const BidOffer &a, const BidOffer &b)
 const BidOffer &Slot::best_bid () const
 {
     assert(not bids.empty());
-    return *max_element(bids.begin(), bids.end(), compare_two_bidoffers);
+    if ( bids.size() == 1 ) {
+        return bids.front();
+    } else {
+        return *max_element(bids.begin(), bids.end(), compare_two_bidoffers);
+    }
 }
 
 const BidOffer &Slot::best_offer() const
 {
     assert(not offers.empty());
-    return *min_element(offers.begin(), offers.end(), compare_two_bidoffers);
+    if ( offers.size() == 1 ) {
+        return offers.front();
+    } else {
+        return *min_element(offers.begin(), offers.end(), compare_two_bidoffers);
+    }
 }
 
 void Slot::clear_all_bids(const size_t &uid)

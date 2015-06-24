@@ -59,7 +59,7 @@ double FlowCompletionTimeUser::get_benefit(size_t flow_completion_time) const
     return - (double) ( flow_completion_time + 1 - flow_start_time_ );
 }
 
-bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
+inline bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
 {
     return slot.owner != uid_ and slot.has_offers();
 }

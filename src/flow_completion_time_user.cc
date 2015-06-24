@@ -157,6 +157,11 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
                 if (utility > best_utility) {
                     best_utility = utility;
                     best_indices = costs_and_indices_to_buy;
+                } else if ( best_utility > benefit ) {
+                    /* The benefit only gets worse as we move later, so if benefit is less than best utility,
+                       it would require the sum costs of the slots purchased to be negative to be better,
+                       which we assume to be impossible, so we break */
+                    break;
                 }
             }
         }

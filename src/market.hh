@@ -29,13 +29,13 @@ class Market {
         const size_t &version() const { return version_; };
 
         void advance_time();
-        void owner_add_to_order_book(const std::string &name, uint64_t next_time);
+        void owner_add_to_order_book(const size_t &uid, uint64_t next_time);
 
         void add_offer_to_slot(size_t slot_idx, BidOffer offer);
         void add_bid_to_slot(size_t slot_idx, BidOffer bid);
 
-        void clear_offers_from_slot(size_t slot_idx, const std::string &name);
-        void clear_bids_from_slot(size_t slot_idx, const std::string &name);
+        void clear_offers_from_slot(size_t slot_idx, const size_t &uid);
+        void clear_bids_from_slot(size_t slot_idx, const size_t &uid);
 };
 
 #endif /* MARKET_HH */

@@ -15,7 +15,7 @@
 
 struct BidOffer {
     double cost;
-    std::string owner;
+    size_t owner;
 };
 
 // template <size_t size> XXX later
@@ -29,16 +29,16 @@ class Slot {
 
     public:
     //std::array<std::string, size> owners; TODO
-    std::string owner;
+    size_t owner;
     const uint64_t time;
 
-    Slot(std::string owner, uint64_t time) : owner(owner), time(time) {}
+    Slot( size_t uid, uint64_t time ) : owner( uid ), time( time ) {}
 
     void add_bid( struct BidOffer bid, std::deque<MoneyExchanged> &log );
     void add_offer( struct BidOffer offer, std::deque<MoneyExchanged> &log );
 
-    void clear_all_bids(const std::string &user_name);
-    void clear_all_offers(const std::string &user_name);
+    void clear_all_bids(const size_t &uid);
+    void clear_all_offers(const size_t &uid);
 
     bool has_offers() const;
     bool has_bids() const;

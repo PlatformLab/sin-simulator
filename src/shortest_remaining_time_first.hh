@@ -26,7 +26,7 @@ const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<f
         // we can schedule a flow now (otherwise they all have later start times and we advance time with no packet sent)
         if (shortest_remaining_time_flow != flows.end())
         {
-            final_schedule.push_back( {shortest_remaining_time_flow->name, cur_time} );
+            final_schedule.push_back( {shortest_remaining_time_flow->uid, cur_time} );
 
             // decrement packets to be sent for flow we serviced, remove from list completed
             shortest_remaining_time_flow->num_packets--;

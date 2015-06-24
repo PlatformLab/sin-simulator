@@ -49,7 +49,7 @@ void MarketSimulator::users_take_actions_until_finished()
         } else {
             idxs_finished.clear(); // let everyone run again if someone changed market
             if (verbose_) {
-                cout << users_.at(idx_to_run)->name_ << " took actions:" << endl;
+                cout << users_.at(idx_to_run)->uid_ << " took actions:" << endl;
                 print_slots();
                 cout << "_____________________" << endl;
             }
@@ -61,7 +61,7 @@ void MarketSimulator::users_take_actions_until_finished()
 
 void MarketSimulator::run_to_completion()
 { 
-    while ( not all_users_done( users_, mkt_ ) ) // some comments
+    while ( not all_users_done( users_, mkt_ ) ) // TODO some comments
     {
         users_take_actions_until_finished();
         mkt_.advance_time();
@@ -81,10 +81,10 @@ void MarketSimulator::print_packets_sent()
     printSlots(mkt_.packets_sent());
 }
 
-unordered_map<string, double> MarketSimulator::print_money_exchanged()
+unordered_map<size_t, double> MarketSimulator::print_money_exchanged()
 {
     unordered_map<string, double> money_owed;
-    unordered_map<string, double> money_total;
+    unordered_map<size_t, double> money_total;
 
     // track money owed in both directions symmetrically (a to b $1 and b to a $-1 i.e.)
     // print one that is net positive at end

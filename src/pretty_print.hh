@@ -19,11 +19,7 @@ void print_consecutive_slot_range(T *start, T* end)
         std::cout << start->time << "-" << end->time << ": ";
     }
 
-    if (start->owner != "") {
-        std::cout << start->owner;
-    } else {
-        std::cout << "null";
-    }
+    std::cout << start->owner;
 
     print_cost( start );
 }

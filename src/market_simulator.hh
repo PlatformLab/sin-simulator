@@ -38,7 +38,7 @@ class MarketSimulator {
 
     void print_packets_sent();
 
-    std::unordered_map<std::string, double> print_money_exchanged();
+    std::unordered_map<size_t, double> print_money_exchanged();
 
     void print_user_stats();
     double sum_user_utilities();

@@ -26,7 +26,7 @@ const std::vector<PacketSent> simulate_round_robin( std::list<flow> flows ) // c
             bool flow_started = cur_time >= flow.flow_start_time;
 
             if (flow_started and not flow_finished) { // then schedule it
-                final_schedule.push_back( {flow.name, cur_time} );
+                final_schedule.push_back( {flow.uid, cur_time} );
                 flow.num_packets--;
                 cur_time++;
                 someone_went = true;

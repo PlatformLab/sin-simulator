@@ -32,7 +32,7 @@ class FlowCompletionTimeUser : public AbstractUser
             const size_t num_packets_to_buy, const size_t latest_time_already_owned ) const;
 
     public:
-    FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );
+    FlowCompletionTimeUser( const size_t &uid, const size_t flow_start_time, const size_t num_packets );
 
     void take_actions( Market& mkt ) override;
 

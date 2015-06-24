@@ -15,6 +15,7 @@
 #include "round_robin.hh"
 
 using namespace std;
+
 double worst_let_down = std::numeric_limits<double>::lowest();
 
 const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool print_end_stats )
@@ -35,15 +36,15 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
     for (auto & u : usr_args)
     {
     if ( print_start_stats ) {
-        cout << "User: " << u.name << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
+        cout << "User: " << u.uid << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
     }
-        usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
+        usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
     }
 
     // hack to size number of slots for market simulation based on time to complete srtf
     size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2;
 
-    usersToSimulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
+    usersToSimulate.emplace_back(make_unique<OwnerUser>( 0, 1, slots_needed, true ));
 
     MarketSimulator simulated_market( move(usersToSimulate), false, false );
 
@@ -53,7 +54,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
     // now clean up results by getting rid of hard coded owner
     deque<PacketSent> toRet = {};
     for (auto &ps : simulated_market.packets_sent()) {
-        if (ps.owner != "ccst") {
+        if (ps.owner != 0) {
             toRet.emplace_back(ps);
         }
     }
@@ -69,9 +70,9 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
             cout << "running again in detail " << endl;
             for (auto & u : usr_args)
             {
-                usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
+                usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
             }
-            usersToSimulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
+            usersToSimulate.emplace_back(make_unique<OwnerUser>( 0, 1, slots_needed, true ));
 
             MarketSimulator simulated_market( move(usersToSimulate), true, false );
 
@@ -91,7 +92,7 @@ list<flow> make_random_users(size_t number)
     list<flow> toRet { };
     for (size_t i = 0; i < number; i ++)
     {
-        toRet.push_back( { string(1,'A'+i), dice_roll(), dice_roll() } );
+        toRet.push_back( { i+1, dice_roll(), dice_roll() } );
     }
 
     // normalize them to 0 start time
@@ -121,7 +122,7 @@ int main(){
     for (int i = 0; i < num_trials; i++)
     {
         //list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
-        list<flow> usr_args = {{"A", 0, 1000}, {"B", 1, 998}, {"C", 1, 997}, {"D", 1, 996}, {"E", 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
+        list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
         /*
         unordered_set<size_t> start_times;
         bool has_two_starting_at_same_time = false;

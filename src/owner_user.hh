@@ -17,7 +17,7 @@ class OwnerUser : public AbstractUser
     bool added_before_;
 
     public:
-    OwnerUser( const std::string &name, const double default_slot_offer, const size_t total_num_slots, const bool add_once );
+    OwnerUser( const size_t &uid, const double default_slot_offer, const size_t total_num_slots, const bool add_once );
 
     void take_actions( Market& mkt ) override;
 

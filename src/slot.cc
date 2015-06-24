@@ -66,12 +66,12 @@ const BidOffer &Slot::best_offer() const
     return *min_element(offers.begin(), offers.end(), compare_two_bidoffers);
 }
 
-void Slot::clear_all_bids(const string &user_name)
+void Slot::clear_all_bids(const size_t &uid)
 {
-    bids.remove_if( [&user_name](BidOffer x){ return x.owner == user_name; } );
+    bids.remove_if( [uid](BidOffer x){ return x.owner == uid; } );
 }
 
-void Slot::clear_all_offers(const string &user_name)
+void Slot::clear_all_offers(const size_t &uid)
 {
-    offers.remove_if( [&user_name](BidOffer x){ return x.owner == user_name; } );
+    offers.remove_if( [uid](BidOffer x){ return x.owner == uid; } );
 }

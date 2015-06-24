@@ -5,7 +5,7 @@
 
 struct PacketSent
 {
-    std::string owner;
+    size_t owner;
     uint64_t time;
 
     inline bool operator==( const PacketSent& rhs ) const {
@@ -15,8 +15,8 @@ struct PacketSent
 
 struct MoneyExchanged
 {
-    std::string from;
-    std::string to;
+    size_t from;
+    size_t to;
     double amount;
     uint64_t time;
 };

@@ -18,10 +18,10 @@ void Market::advance_time()
     }
 }
 
-void Market::owner_add_to_order_book(const std::string &name, uint64_t next_time)
+void Market::owner_add_to_order_book(const size_t &uid, uint64_t next_time)
 {
     version_++;
-    order_book_.push_back( {name, next_time} );
+    order_book_.push_back( {uid, next_time} );
 }
 
 void Market::add_offer_to_slot(size_t slot_idx, BidOffer offer)
@@ -38,14 +38,14 @@ void Market::add_bid_to_slot(size_t slot_idx, BidOffer bid)
     order_book_.at(slot_idx).add_bid( bid, money_exchanged_ );
 }
 
-void Market::clear_offers_from_slot(size_t slot_idx, const std::string &name)
+void Market::clear_offers_from_slot(size_t slot_idx, const size_t &uid)
 {
     version_++;
-    order_book_.at(slot_idx).clear_all_offers(name);
+    order_book_.at(slot_idx).clear_all_offers( uid );
 }
 
-void Market::clear_bids_from_slot(size_t slot_idx, const std::string &name)
+void Market::clear_bids_from_slot(size_t slot_idx, const size_t &uid)
 {
     version_++;
-    order_book_.at(slot_idx).clear_all_bids(name);
+    order_book_.at(slot_idx).clear_all_bids( uid );
 }

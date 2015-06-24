@@ -6,6 +6,7 @@
 #include <iostream>
 #include <deque>
 #include <queue>
+#include <unordered_map>
 #include <vector>
 #include <cassert>
 #include <memory>
@@ -17,9 +18,11 @@
 
 class Market {
     private:
-        std::deque<SingleSlot> order_book_ = {};
-        std::deque<PacketSent> packets_sent_ = {};
-        std::deque<MoneyExchanged> money_exchanged_ = {};
+        std::deque<SingleSlot> order_book_ {};
+        std::deque<PacketSent> packets_sent_ {};
+        std::deque<MoneyExchanged> money_exchanged_ {};
+        std::unordered_map<size_t, size_t> order_book_num_owned_ {};
+        std::unordered_map<size_t, size_t> packets_sent_num_owned_ {};
         size_t version_ = 0;
 
     public:
@@ -29,13 +32,16 @@ class Market {
         const size_t &version() const { return version_; };
 
         void advance_time();
-        void owner_add_to_order_book(const size_t &uid, uint64_t next_time);
+        void owner_add_to_order_book( const size_t &uid, uint64_t next_time );
 
-        void add_offer_to_slot(size_t slot_idx, BidOffer offer);
-        void add_bid_to_slot(size_t slot_idx, BidOffer bid);
+        void add_offer_to_slot( size_t slot_idx, BidOffer offer );
+        void add_bid_to_slot( size_t slot_idx, BidOffer bid );
 
-        void clear_offers_from_slot(size_t slot_idx, const size_t &uid);
-        void clear_bids_from_slot(size_t slot_idx, const size_t &uid);
+        size_t num_owned_in_order_book( const size_t &uid ) const;
+        size_t num_owned_in_packets_sent( const size_t &uid ) const;
+
+        void clear_offers_from_slot( size_t slot_idx, const size_t &uid );
+        void clear_bids_from_slot( size_t slot_idx, const size_t &uid );
 };
 
 #endif /* MARKET_HH */

@@ -17,19 +17,6 @@ static double money_earned( const T &collection, const size_t &uid )
     return toRet;
 }
 
-template <typename T>
-static size_t num_owned( const T &collection, const size_t &uid )
-{
-    size_t toRet = 0;
-    for ( auto &item : collection )
-    {
-        if ( item.owner == uid ) {
-            toRet++;
-        }
-    }
-    return toRet;
-}
-
 /* Returns 0 if name owns no slots in collection */
 template <typename T>
 static size_t last_slot_time( const T &collection, const size_t &uid )
@@ -81,7 +68,7 @@ double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_bo
 void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
 {
     auto &order_book = mkt.order_book();
-    assert ( num_owned( order_book, uid_ ) + num_owned( mkt.packets_sent(), uid_ ) == flow_num_packets_ );
+    assert ( mkt.num_owned_in_order_book(uid_) + mkt.num_owned_in_packets_sent(uid_) == flow_num_packets_ );
 
     size_t last_packet_time = last_slot_time( order_book, uid_ );
     double current_benefit = get_benefit( last_packet_time );
@@ -187,8 +174,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         return;
     }
 
-    const size_t num_packets_sent = num_owned( mkt.packets_sent(), uid_ );
-    const size_t num_order_book_slots_owned = num_owned( order_book, uid_ );
+    const size_t num_packets_sent = mkt.num_owned_in_packets_sent(uid_);
+    const size_t num_order_book_slots_owned = mkt.num_owned_in_order_book(uid_);
 
     /* makes sure num_packets_to_buy is non-negative */
     assert ( flow_num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
@@ -231,7 +218,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 bool FlowCompletionTimeUser::done( const Market& mkt )
 {
     if ( not done_ ) {
-        done_ = flow_num_packets_ == num_owned( mkt.packets_sent(), uid_ );
+        done_ = flow_num_packets_ == mkt.num_owned_in_packets_sent(uid_);
     }
     return done_;
 }

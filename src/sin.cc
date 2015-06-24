@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <map>
+#include <unordered_set>
 #include "abstract_user.hh"
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
@@ -14,6 +15,7 @@
 #include "round_robin.hh"
 
 using namespace std;
+double worst_let_down = std::numeric_limits<double>::lowest();
 
 const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool print_end_stats )
 {
@@ -61,13 +63,27 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
         double sum_user_utilities = simulated_market.sum_user_utilities();
         double sum_user_best_expected_utilities = simulated_market.sum_user_best_expected_utilities();
         cout << "sum user utility was " << sum_user_utilities << " while sum of best expected utilties was " << sum_user_best_expected_utilities << " the difference between these is " << sum_user_best_expected_utilities -sum_user_utilities << endl;
+        if ( abs( sum_user_best_expected_utilities - sum_user_utilities ) > 1e-9 ) {
+            cout << "some users got let down " << endl;
+            worst_let_down = max( worst_let_down, sum_user_best_expected_utilities - sum_user_utilities );
+            cout << "running again in detail " << endl;
+            for (auto & u : usr_args)
+            {
+                usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.name, u.flow_start_time, u.num_packets ));
+            }
+            usersToSimulate.emplace_back(make_unique<OwnerUser>( "ccst", 1, slots_needed, true ));
+
+            MarketSimulator simulated_market( move(usersToSimulate), true, false );
+
+            simulated_market.run_to_completion();
+        }
     }
     return toRet;
 }
 
 size_t dice_roll()
 {
-    return (rand() % 6) + 1;
+    return (rand() % 1000) + 1;
 }
 
 list<flow> make_random_users(size_t number)
@@ -101,10 +117,23 @@ int main(){
     size_t total_round_robin_delay = 0;
     */
 
-    const int num_trials = 1000;
+    const int num_trials = 1;
     for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args = make_random_users( 3 ); // makes this number of random users for market
+        //list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
+        list<flow> usr_args = {{"A", 0, 1000}, {"B", 1, 998}, {"C", 1, 997}, {"D", 1, 996}, {"E", 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
+        /*
+        unordered_set<size_t> start_times;
+        bool has_two_starting_at_same_time = false;
+        for ( auto &arg : usr_args )
+        {
+            has_two_starting_at_same_time |= start_times.count(arg.flow_start_time);
+            start_times.insert(arg.flow_start_time);
+        }
+        if ( has_two_starting_at_same_time ) {
+            continue;
+        }
+        */
         auto market = sim_users(usr_args, true, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
@@ -136,5 +165,6 @@ int main(){
     }
     cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
     cout << "average delay ratio " << ((double) total_market_delay / (double) total_srtf_delay) << endl;
+    cout << "worst utility let down was " << worst_let_down << endl;
     return 1;
 }

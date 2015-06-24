@@ -211,6 +211,9 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         }
 
         expected_utility_ = get_benefit( completion_time ) - money_spent_ + money_earned( mkt.money_exchanged(), name_ );
+        if ( expected_utility_ < best_expected_utility_ ) {
+            cout << name_ << " got swindled!" << endl;
+        }
         best_expected_utility_ = max( best_expected_utility_, expected_utility_ );
     }
 

@@ -19,7 +19,7 @@ using namespace std;
 double worst_let_down = std::numeric_limits<double>::lowest();
 size_t dice_roll_num_sides = 1000;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool print_end_stats )
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool run_verbose, const bool print_end_stats )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
     if ( print_start_stats ) {
@@ -47,7 +47,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
 
     usersToSimulate.emplace_back(make_unique<OwnerUser>( 0, 1, slots_needed, true ));
 
-    MarketSimulator simulated_market( move(usersToSimulate), false, false );
+    MarketSimulator simulated_market( move(usersToSimulate), run_verbose, false );
 
     simulated_market.run_to_completion();
     //cout << "market required " << simulated_market.total_roundtrips() << " round trips" << endl;
@@ -119,7 +119,7 @@ void thousandThreeUserDSixTest() {
     for (int i = 0; i < 1000; i++)
     {
         list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_users(usr_args, false, false);
+        auto market = sim_users(usr_args, false, false, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -174,7 +174,7 @@ int main(){
             continue;
         }
         */
-        auto market = sim_users(usr_args, true, false);
+        auto market = sim_users(usr_args, true, true, false);
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -197,7 +197,7 @@ int main(){
 
             cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
         }
-        auto market2 = sim_users(usr_args, false, true);
+        auto market2 = sim_users(usr_args, false, false, true);
         assert(market2 == market);
 
         cout << "finished trial " << i << " of " << num_trials << endl << endl;

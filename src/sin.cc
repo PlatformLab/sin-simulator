@@ -17,6 +17,7 @@
 using namespace std;
 
 double worst_let_down = std::numeric_limits<double>::lowest();
+size_t dice_roll_num_sides = 1000;
 
 const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool print_end_stats )
 {
@@ -84,7 +85,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
 
 size_t dice_roll()
 {
-    return (rand() % 1000) + 1;
+    return ( rand() % dice_roll_num_sides ) + 1;
 }
 
 list<flow> make_random_users(size_t number)
@@ -106,7 +107,45 @@ list<flow> make_random_users(size_t number)
     return toRet;
 }
 
+void thousandThreeUserDSixTest() {
+    size_t old_num_sides = dice_roll_num_sides;
+    dice_roll_num_sides = 6;
+
+    size_t market_matched_srtf = 0;
+    size_t market_didnt_match_srtf = 0;
+    size_t total_market_delay = 0;
+    size_t total_srtf_delay = 0;
+
+    for (int i = 0; i < 1000; i++)
+    {
+        list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
+        auto market = sim_users(usr_args, false, false);
+        auto srtf = simulate_shortest_remaining_time_first(usr_args);
+
+        size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
+        size_t srtf_sum_fcts = schedule_sum_flow_completion_times( usr_args, srtf );
+
+        assert( market_sum_fcts >= srtf_sum_fcts );
+
+        total_market_delay += market_sum_fcts;
+        total_srtf_delay += srtf_sum_fcts;
+
+        if ( market_sum_fcts == srtf_sum_fcts ) {
+            market_matched_srtf++;
+        } else {
+            market_didnt_match_srtf++;
+        }
+    }
+    assert( market_matched_srtf == 984 );
+    assert( total_srtf_delay == 15666 );
+    assert( total_market_delay == 15690 );
+
+    dice_roll_num_sides = old_num_sides;
+}
+
 int main(){
+    thousandThreeUserDSixTest();
+
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
     size_t total_market_delay = 0;
@@ -144,8 +183,7 @@ int main(){
         total_market_delay += market_sum_fcts;
         total_srtf_delay += srtf_sum_fcts;
 
-        if ( market_sum_fcts == srtf_sum_fcts )
-        {
+        if ( market_sum_fcts == srtf_sum_fcts ) {
             market_matched_srtf++;
             cout << "market matched srtf, market was:"<< endl;
             printSlots(market);

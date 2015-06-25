@@ -199,7 +199,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 {
     auto &order_book = mkt.order_book();
     /* order book empty or flow hasn't started yet */
-    if ( order_book.empty() or order_book.front().time < flow_start_time_)
+    if ( order_book.empty() or order_book.front().time < flow_start_time_ or mkt.version() == previous_market_version_ )
     {
         return;
     }
@@ -243,6 +243,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     if ( num_order_book_slots_owned > 0 or num_packets_to_buy > 0) {
         price_owned_slots( mkt );//make offers for owned slots
     }
+    previous_market_version_ = mkt.version();
 }
 
 bool FlowCompletionTimeUser::done( const Market& mkt )

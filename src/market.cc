@@ -7,7 +7,7 @@ using namespace std;
 
 void Market::advance_time()
 {
-    version_++;
+    // version_++; don't increment version here as it doesn't really mean something changed in the market
     if ( not order_book_.empty() ) {
 
         const SingleSlot &front = order_book().front();

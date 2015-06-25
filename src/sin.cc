@@ -144,24 +144,24 @@ void thousandThreeUserDSixTest() {
 }
 
 int main(){
-    thousandThreeUserDSixTest();
+    //thousandThreeUserDSixTest();
 
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
     size_t total_market_delay = 0;
     size_t total_srtf_delay = 0;
-
     /*
     size_t round_robin_num_matched = 0;
     size_t round_robin_num_didnt_match = 0;
     size_t total_round_robin_delay = 0;
     */
 
-    const int num_trials = 1000;
+    dice_roll_num_sides = 3;
+    const int num_trials = 10000000;
     for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args =  make_random_users( 10 ); // makes this number of random users for market
-        if ( i <= 884 )
+        list<flow> usr_args =  make_random_users( 4 ); // makes this number of random users for market
+        if (i <= 448)
             continue;
         //list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
         /*
@@ -187,20 +187,26 @@ int main(){
 
         if ( market_sum_fcts == srtf_sum_fcts ) {
             market_matched_srtf++;
+            /*
             cout << "market matched srtf, market was:"<< endl;
             printSlots(market);
+            */
         } else {
             market_didnt_match_srtf++;
 
+            /*
             cout << "market didnt match srtf! Market was:"<< endl;
             printSlots(market);
             cout << "and srtf was:" << endl;
             printSlots(srtf);
 
             cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
+            */
         }
+        /*
         auto market2 = sim_users(usr_args, false, false, true);
         assert(market2 == market);
+        */
 
         cout << "finished trial " << i << " of " << num_trials << endl << endl;
     }

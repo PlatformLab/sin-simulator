@@ -157,11 +157,13 @@ int main(){
     size_t total_round_robin_delay = 0;
     */
 
-    const int num_trials = 1;
+    const int num_trials = 1000;
     for (int i = 0; i < num_trials; i++)
     {
-        //list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
-        list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
+        list<flow> usr_args =  make_random_users( 10 ); // makes this number of random users for market
+        if ( i <= 884 )
+            continue;
+        //list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
         /*
         unordered_set<size_t> start_times;
         bool has_two_starting_at_same_time = false;

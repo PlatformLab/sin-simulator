@@ -42,7 +42,7 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const size_t &uid, const size_t 
 /* Returns the benefit score for a given flow completion time */
 double FlowCompletionTimeUser::get_benefit(size_t flow_completion_time) const
 {
-    assert( flow_completion_time >= flow_start_time_ );
+    //assert( flow_completion_time >= flow_start_time_ );
     return - (double) ( flow_completion_time + 1 - flow_start_time_ );
 }
 
@@ -54,7 +54,7 @@ inline bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
 /* Price slot to increase the overall utility by .01 if it was sold and the best replacement was bought. */
 double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_book, const size_t last_slot_time, const double current_benefit ) const
 {
-    size_t replacement_idx = pick_n_slots_to_buy( order_book, 1, last_slot_time ).front();
+    size_t replacement_idx = pick_replacement_slot( order_book, last_slot_time );
 
     double benefit_with_replacement = get_benefit( max( last_slot_time, order_book.at( replacement_idx ).time ) );
 
@@ -107,6 +107,34 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
     }
 }
 
+size_t FlowCompletionTimeUser::pick_replacement_slot( const deque<SingleSlot> &order_book, const size_t latest_time_already_owned ) const
+{
+    size_t best_idx = -1;
+    double best_utility = std::numeric_limits<double>::lowest();
+
+    for ( size_t idx = 0; idx < order_book.size(); idx++ ) {
+        const SingleSlot &slot = order_book.at( idx );
+
+        if ( can_buy( slot ) ) {
+            size_t last_slot_time = max( slot.time, latest_time_already_owned );
+            double benefit = get_benefit( last_slot_time );
+            double utility = benefit - slot.best_offer().cost;
+
+            if (utility > best_utility) {
+                best_utility = utility;
+                best_idx = idx;
+            } else if ( best_utility > benefit ) {
+                /* The benefit only gets worse as we move later, so if benefit is less than best utility,
+                   it would require the sum costs of the slots purchased to be negative to be better,
+                   which we assume to be impossible, so we break */
+                break;
+            }
+        }
+    }
+    assert( best_idx != size_t(-1) );
+    return best_idx;
+}
+
 /* fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots then keeps a
    copy of the set of cheapest slots with the most utility and returns that */
 vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, const size_t num_packets_to_buy, const size_t latest_time_already_owned ) const
@@ -133,7 +161,7 @@ vector<size_t> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSl
                 if ( costs_and_indices_to_buy.size() > num_packets_to_buy ) {
                     total_cost -= costs_and_indices_to_buy.top().first;
                     costs_and_indices_to_buy.pop();
-                    assert( costs_and_indices_to_buy.size() == num_packets_to_buy );
+                    //assert( costs_and_indices_to_buy.size() == num_packets_to_buy );
                 }
             }
 

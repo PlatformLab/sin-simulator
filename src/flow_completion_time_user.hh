@@ -30,6 +30,7 @@ class FlowCompletionTimeUser : public AbstractUser
 
     std::vector<size_t> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book,
             const size_t num_packets_to_buy, const size_t latest_time_already_owned ) const;
+    size_t pick_replacement_slot( const std::deque<SingleSlot> &order_book, const size_t latest_time_already_owned ) const;
 
     public:
     FlowCompletionTimeUser( const size_t &uid, const size_t flow_start_time, const size_t num_packets );

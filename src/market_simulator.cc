@@ -44,16 +44,15 @@ void MarketSimulator::users_take_actions_until_finished()
 
         users_.at(idx_to_run)->take_actions(mkt_);
         total_roundtrips_++;
-        if ( before_version == mkt_.version() ) { // user didn't do anything
-            idxs_finished.insert(idx_to_run);
-        } else {
-            idxs_finished.clear(); // let everyone run again if someone changed market
+        if ( before_version != mkt_.version() ) { // let everyone run again if someone changed market
+            idxs_finished.clear();
             if (verbose_) {
                 cout << users_.at(idx_to_run)->uid_ << " took actions:" << endl;
                 print_slots();
                 cout << "_____________________" << endl;
             }
         }
+        idxs_finished.insert(idx_to_run); // the user that just went is finished unless someone else changes the market
 
         idx_to_run = next_idx( idx_to_run );
     }

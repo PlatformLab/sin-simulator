@@ -52,8 +52,9 @@ inline bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
 }
 
 /* Price slot to increase the overall utility by .01 if it was sold and the best replacement was bought. */
-double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_book, const size_t last_slot_time, const double current_benefit ) const
+double FlowCompletionTimeUser::get_sell_price( Market &mkt, const size_t last_slot_time, const double current_benefit )
 {
+    auto &order_book = mkt.order_book();
     size_t replacement_idx = pick_replacement_slot( order_book, last_slot_time );
     cout << "user " << uid_to_string( uid_ ) << " replacement idx for last owned slot time " << last_slot_time << " is " << replacement_idx << endl;
 
@@ -63,13 +64,25 @@ double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_bo
 
     double utility_delta = benefit_delta - order_book.at( replacement_idx ).best_offer().cost;
 
+    if ( utility_delta > 0 ) {
+        // buy the damn thing
+        cout << "replacement slot so good we just gonna buy it" << endl;
+        const double slot_cost = order_book.at( replacement_idx ).best_offer().cost;
+        mkt.add_bid_to_slot( replacement_idx, { slot_cost, uid_ } );
+
+        /* assert we succesfully got it */
+        assert( order_book.at( replacement_idx ).owner == uid_ );
+        money_spent_ += slot_cost;
+
+        return .01;
+    }
     return .01 - utility_delta;
 }
 
 void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
 {
     auto &order_book = mkt.order_book();
-    assert ( mkt.num_owned_in_order_book(uid_) + mkt.num_owned_in_packets_sent(uid_) == flow_num_packets_ );
+    //assert ( mkt.num_owned_in_order_book(uid_) + mkt.num_owned_in_packets_sent(uid_) == flow_num_packets_ );
 
     size_t last_owned_slot_time = last_slot_time( order_book, uid_ );
     double current_benefit = get_benefit( last_owned_slot_time );
@@ -91,11 +104,11 @@ void FlowCompletionTimeUser::price_owned_slots( Market &mkt )
                            break;
                        }
                    }
-                   sell_price = get_sell_price( order_book, last_owned_slot_time, current_benefit );
+                   sell_price = get_sell_price( mkt, last_owned_slot_time, current_benefit );
             } else {
                 /* haven't set sell price yet */
                 if ( sell_price < 0 ) {
-                    sell_price = get_sell_price( order_book, last_owned_slot_time, current_benefit );
+                    sell_price = get_sell_price( mkt, last_owned_slot_time, current_benefit );
                 }
             }
 
@@ -208,11 +221,12 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     const size_t num_packets_sent = mkt.num_owned_in_packets_sent(uid_);
     const size_t num_order_book_slots_owned = mkt.num_owned_in_order_book(uid_);
 
-    /* makes sure num_packets_to_buy is non-negative */
+    /* makes sure num_packets_to_buy is non-negative
     assert ( flow_num_packets_ >= ( num_packets_sent + num_order_book_slots_owned ) );
+ */
 
-    size_t num_packets_to_buy = flow_num_packets_ - num_packets_sent - num_order_book_slots_owned; 
-
+    int num_packets_to_buy = (int) flow_num_packets_ - (int) num_packets_sent - (int) num_order_book_slots_owned; 
+    num_packets_to_buy  = max ( num_packets_to_buy, 0 );
     /* if we have something to buy, buy things */
     if ( num_packets_to_buy > 0 ) {
         size_t completion_time = 0;

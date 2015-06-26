@@ -2,6 +2,15 @@
 
 #include "pretty_print.hh"
 
+std::string uid_to_string( const size_t uid )
+{
+    if ( uid ) {
+        return std::string( 1, 'A' + uid - 1 );
+    } else {
+        return std::string("ccast");
+    }
+}
+
 void print_cost( const PacketSent * ) { }
 
 void print_cost( const SingleSlot *p )

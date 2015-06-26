@@ -55,6 +55,7 @@ inline bool FlowCompletionTimeUser::can_buy(const SingleSlot &slot) const
 double FlowCompletionTimeUser::get_sell_price( const deque<SingleSlot> &order_book, const size_t last_slot_time, const double current_benefit ) const
 {
     size_t replacement_idx = pick_replacement_slot( order_book, last_slot_time );
+    cout << "user " << uid_to_string( uid_ ) << " replacement idx for last owned slot time " << last_slot_time << " is " << replacement_idx << endl;
 
     double benefit_with_replacement = get_benefit( max( last_slot_time, order_book.at( replacement_idx ).time ) );
 

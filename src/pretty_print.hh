@@ -4,8 +4,11 @@
 #define PRETTY_PRINT_HH
 
 #include <iostream>
+#include <string>
 #include "slot.hh"
 #include "market_event.hh"
+
+std::string uid_to_string( const size_t uid );
 
 void print_cost( const PacketSent * );
 void print_cost( const SingleSlot *p );
@@ -19,7 +22,7 @@ void print_consecutive_slot_range(T *start, T* end)
         std::cout << start->time << "-" << end->time << ": ";
     }
 
-    std::cout << start->owner;
+    std::cout << uid_to_string( start->owner );
 
     print_cost( start );
 }

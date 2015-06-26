@@ -47,7 +47,7 @@ void MarketSimulator::users_take_actions_until_finished()
         if ( before_version != mkt_.version() ) { // let everyone run again if someone changed market
             idxs_finished.clear();
             if (verbose_) {
-                cout << users_.at(idx_to_run)->uid_ << " took actions:" << endl;
+                cout << uid_to_string( users_.at(idx_to_run)->uid_ ) << " took actions:" << endl;
                 print_slots();
                 cout << "_____________________" << endl;
             }

@@ -155,14 +155,14 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             const SingleSlot &slot = order_book.at( idx );
             if ( slot.owner == uid_ ) {
                 priority_queue<pair<double, size_t>> slots_to_buy_if_slot_sold = pick_n_slots_to_buy( order_book, num_need_in_order_book, slot.time );
-                size_t benefit_delta = get_benefit ( slots_to_buy_if_slot_sold ) - benefit;
+                double benefit_delta = get_benefit ( slots_to_buy_if_slot_sold ) - (double) benefit;
                 double cost_delta = 0;
                 while ( not slots_to_buy_if_slot_sold.empty() ) {
-                    cost_delta += slots_to_buy_if_slot_sold.top().first;
+                    cost_delta -= slots_to_buy_if_slot_sold.top().first;
                     slots_to_buy_if_slot_sold.pop();
                 }
-
                 double sell_price = - benefit_delta - cost_delta + .01;
+                cout << uid_to_string(uid_) << " benefit delta for slot at time " << order_book.at(idx).time << " is " << benefit_delta << " while cost delta is " << cost_delta << " so sell price will be " << sell_price << endl;
 
                 /* only add offer to slot if it differs from existing best offer */
                 if ( not slot.has_offers() or slot.best_offer().cost != sell_price ) {
@@ -205,7 +205,17 @@ double FlowCompletionTimeUser::best_expected_utility() const
     return best_expected_utility_;
 }
 
-double FlowCompletionTimeUser::benefit( const Market& ) const
+double FlowCompletionTimeUser::benefit( const Market& mkt ) const
 {
-    return std::numeric_limits<double>::lowest();  //TODO get_benefit( last_slot_time( mkt.packets_sent(), uid_ ) );
+    assert( done_ ); // only call this at the end
+    size_t num_sent = 0;
+    for( auto &packet_sent : mkt.packets_sent() ) {
+        if ( packet_sent.owner == uid_ ) {
+            num_sent++;
+            if ( num_sent == flow_num_packets_ ) {
+                return -(double) ( packet_sent.time - flow_start_time_ + 1 );
+            }
+        }
+    }
+    return numeric_limits<double>::lowest();
 }

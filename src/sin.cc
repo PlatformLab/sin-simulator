@@ -7,6 +7,7 @@
 #include "abstract_user.hh"
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
+#include "old_flow_completion_time_user.hh"
 #include "market_simulator.hh"
 #include "market.hh"
 
@@ -19,7 +20,7 @@ using namespace std;
 double worst_let_down = std::numeric_limits<double>::lowest();
 size_t dice_roll_num_sides = 1000;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool run_verbose, const bool print_end_stats )
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool run_verbose, const bool print_end_stats, const bool old_style_user )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
     if ( print_start_stats ) {
@@ -39,7 +40,11 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
     if ( print_start_stats ) {
         cout << "User: " << uid_to_string( u.uid ) << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
     }
-        usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
+        if ( old_style_user ) {
+            usersToSimulate.emplace_back(make_unique<OldFlowCompletionTimeUser>( std::string( 1, 'A' + u.uid - 1 ), u.flow_start_time, u.num_packets ));
+        } else {
+            usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
+        }
     }
 
     // hack to size number of slots for market simulation based on time to complete srtf
@@ -119,7 +124,7 @@ void thousandThreeUserDSixTest() {
     for (int i = 0; i < 1000; i++)
     {
         list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_users(usr_args, false, false, false);
+        auto market = sim_users(usr_args, false, false, false, false );
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -176,7 +181,7 @@ int main(){
             continue;
         }
         */
-        auto market = sim_users(usr_args, true, true, false);
+        auto market = sim_users(usr_args, true, true, false, false );
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );

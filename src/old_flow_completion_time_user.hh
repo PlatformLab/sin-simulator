@@ -1,7 +1,7 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
-#ifndef FLOW_COMPLETION_TIME_USER
-#define FLOW_COMPLETION_TIME_USER
+#ifndef OLD_FLOW_COMPLETION_TIME_USER
+#define OLD_FLOW_COMPLETION_TIME_USER
 
 #include <iostream>
 #include <functional>
@@ -12,7 +12,7 @@
 #include "pretty_print.hh"
 #include "market.hh"
 
-class FlowCompletionTimeUser : public AbstractUser
+class OldFlowCompletionTimeUser : public AbstractUser
 {
     private:
     const size_t flow_start_time_;
@@ -32,7 +32,7 @@ class FlowCompletionTimeUser : public AbstractUser
             const size_t num_packets_to_buy, const size_t latest_time_already_owned ) const;
 
     public:
-    FlowCompletionTimeUser( const std::string &name, const size_t flow_start_time, const size_t num_packets );
+    OldFlowCompletionTimeUser( const size_t &uid, const size_t flow_start_time, const size_t num_packets );
 
     void take_actions( Market& mkt ) override;
 
@@ -46,4 +46,4 @@ class FlowCompletionTimeUser : public AbstractUser
     double benefit( const Market& ) const override;
 };
 
-#endif /* FLOW_COMPLETION_TIME_USER */
+#endif /* OLD_FLOW_COMPLETION_TIME_USER */

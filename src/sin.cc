@@ -41,7 +41,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
         cout << "User: " << uid_to_string( u.uid ) << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
     }
         if ( old_style_user ) {
-            usersToSimulate.emplace_back(make_unique<OldFlowCompletionTimeUser>( std::string( 1, 'A' + u.uid - 1 ), u.flow_start_time, u.num_packets ));
+            usersToSimulate.emplace_back(make_unique<OldFlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
         } else {
             usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
         }

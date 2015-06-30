@@ -40,7 +40,7 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const size_t &uid, const size_t 
 }
 
 /* Returns the benefit score for a given flow completion time */
-double FlowCompletionTimeUser::get_benefit( priority_queue<pair<double, size_t>> costs_and_indices_to_buy /* copy needed for now */ ) const
+double FlowCompletionTimeUser::get_benefit( priority_queue<pair<double, size_t>> costs_and_indices_to_buy /* copy needed for now */, const deque<SingleSlot> &order_book ) const
 {
     /* assume priority queue is size of num packets we need to buy */
     assert( not costs_and_indices_to_buy.empty() );
@@ -48,10 +48,11 @@ double FlowCompletionTimeUser::get_benefit( priority_queue<pair<double, size_t>>
     size_t latest_time = 0;
     while ( not costs_and_indices_to_buy.empty() )
     {
-        latest_time = max( latest_time, costs_and_indices_to_buy.top().second );
+        latest_time = max( latest_time, order_book.at( costs_and_indices_to_buy.top().second ).time );
         costs_and_indices_to_buy.pop();
     }
 
+    assert( latest_time >= flow_start_time_ );
     return - (double) ( latest_time - flow_start_time_ + 1 );
 }
 
@@ -93,7 +94,7 @@ priority_queue<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy
 
             /* this means we have an complete possible set of slot indices to buy */
             if ( costs_and_indices_to_buy.size() == num_packets_to_buy ) {
-                double benefit = get_benefit( costs_and_indices_to_buy );
+                double benefit = get_benefit( costs_and_indices_to_buy, order_book );
                 double utility = benefit - total_cost;
 
                 if (utility > best_utility) {
@@ -129,7 +130,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     } else {
        priority_queue<pair<double, size_t>> to_buy =  pick_n_slots_to_buy( order_book, num_need_in_order_book, size_t( -1 ) );
 
-       double benefit = get_benefit( to_buy );
+       double benefit = get_benefit( to_buy, order_book );
        while (not to_buy.empty() ) {
            const size_t idx = to_buy.top().second;
            if ( order_book.at( idx ).owner != uid_ ) { // maybe make owns( slot ) function
@@ -155,14 +156,14 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             const SingleSlot &slot = order_book.at( idx );
             if ( slot.owner == uid_ ) {
                 priority_queue<pair<double, size_t>> slots_to_buy_if_slot_sold = pick_n_slots_to_buy( order_book, num_need_in_order_book, slot.time );
-                double benefit_delta = get_benefit ( slots_to_buy_if_slot_sold ) - (double) benefit;
+                double benefit_delta = get_benefit( slots_to_buy_if_slot_sold, order_book ) - benefit;
                 double cost_delta = 0;
                 while ( not slots_to_buy_if_slot_sold.empty() ) {
                     cost_delta -= slots_to_buy_if_slot_sold.top().first;
                     slots_to_buy_if_slot_sold.pop();
                 }
                 double sell_price = - benefit_delta - cost_delta + .01;
-                cout << uid_to_string(uid_) << " benefit delta for slot at time " << order_book.at(idx).time << " is " << benefit_delta << " while cost delta is " << cost_delta << " so sell price will be " << sell_price << endl;
+                //cout << uid_to_string(uid_) << " benefit delta for slot at time " << order_book.at(idx).time << " is " << benefit_delta << " while cost delta is " << cost_delta << " so sell price will be " << sell_price << " current benefit is " << benefit << endl;
 
                 /* only add offer to slot if it differs from existing best offer */
                 if ( not slot.has_offers() or slot.best_offer().cost != sell_price ) {

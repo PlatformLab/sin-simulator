@@ -23,10 +23,10 @@ class FlowCompletionTimeUser : public AbstractUser
     double best_expected_utility_ = std::numeric_limits<double>::lowest();
     size_t previous_market_version_ = 0;
 
-    double get_benefit( std::priority_queue<std::pair<double, size_t>> costs_and_indices_to_buy, const std::deque<SingleSlot> &order_book ) const;
+    double get_benefit( std::vector<std::pair<double, size_t>> &costs_and_indices_to_buy, const std::deque<SingleSlot> &order_book ) const;
     bool can_use( const SingleSlot &slot ) const;
 
-    std::priority_queue<std::pair<double, size_t>> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book,
+    std::vector<std::pair<double, size_t>> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book,
             const size_t num_packets_to_buy, const size_t time_to_ignore ) const;
 
     public:

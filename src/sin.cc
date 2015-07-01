@@ -163,7 +163,7 @@ int main(){
     size_t total_round_robin_delay = 0;
     */
 
-    dice_roll_num_sides = 200;
+    dice_roll_num_sides = 400;
     const int num_trials = 1;
     for (int i = 0; i < num_trials; i++)
     {

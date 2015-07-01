@@ -80,7 +80,7 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
             if ( costs_and_indices_to_buy.size() < num_packets_to_buy or slot_cost < costs_and_indices_to_buy.front().first ) {
                 costs_and_indices_to_buy.push_back( {slot_cost, i} );
                 push_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() );
-                assert( is_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() ) );
+                //assert( is_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() ) );
                 total_cost += slot_cost;
 
                 /* if we added a new cheaper slot and put the priority queue over the number of
@@ -89,7 +89,7 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
                     total_cost -= costs_and_indices_to_buy.front().first;
                     pop_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() );
                     costs_and_indices_to_buy.pop_back();
-                    assert( is_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() ) );
+                    //assert( is_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() ) );
                     assert( costs_and_indices_to_buy.size() == num_packets_to_buy );
                 }
             }

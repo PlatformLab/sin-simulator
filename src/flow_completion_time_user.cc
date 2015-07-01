@@ -39,8 +39,13 @@ FlowCompletionTimeUser::FlowCompletionTimeUser( const size_t &uid, const size_t 
 {
 }
 
+inline double get_benefit( const size_t flow_completion_time, const size_t flow_start_time ) {
+    assert( flow_completion_time >= flow_start_time );
+    return - (double) ( flow_completion_time - flow_start_time + 1 );
+}
+
 /* Returns the benefit score for a given flow completion time */
-double FlowCompletionTimeUser::get_benefit( vector<pair<double, size_t>> &costs_and_indices_to_buy, const deque<SingleSlot> &order_book ) const
+inline size_t latest_idx( const vector<pair<double, size_t>> &costs_and_indices_to_buy )
 {
     /* assume priority queue is size of num packets we need to buy */
     assert( not costs_and_indices_to_buy.empty() );
@@ -50,9 +55,7 @@ double FlowCompletionTimeUser::get_benefit( vector<pair<double, size_t>> &costs_
         latest_idx = max( latest_idx, buy_pair.second );
     }
 
-    size_t latest_time = order_book.at( latest_idx ).time;
-    assert( latest_time >= flow_start_time_ );
-    return - (double) ( latest_time - flow_start_time_ + 1 );
+    return latest_idx;
 }
 
 inline bool FlowCompletionTimeUser::can_use(const SingleSlot &slot) const
@@ -70,6 +73,7 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
 
     vector<pair<double, size_t>> best_indices;
     double best_utility = std::numeric_limits<double>::lowest();
+    double benefit = std::numeric_limits<double>::lowest();
 
     for ( size_t i = 0; i < order_book.size(); i++ ) {
         const SingleSlot &slot = order_book.at( i );
@@ -83,6 +87,7 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
                 push_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() );
                 //assert( is_heap( costs_and_indices_to_buy.begin(), costs_and_indices_to_buy.end() ) );
                 total_cost += slot_cost;
+                benefit = get_benefit( slot.time, flow_start_time_ );
 
                 /* if we added a new cheaper slot and put the priority queue over the number of
                    packets we needed take the most expensive one off */
@@ -97,7 +102,6 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
 
             /* this means we have an complete possible set of slot indices to buy */
             if ( costs_and_indices_to_buy.size() == num_packets_to_buy ) {
-                double benefit = get_benefit( costs_and_indices_to_buy, order_book );
                 double utility = benefit - total_cost;
 
                 if (utility > best_utility) {
@@ -133,7 +137,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     } else {
        vector<pair<double, size_t>> to_buy =  pick_n_slots_to_buy( order_book, num_need_in_order_book, size_t( -1 ) );
 
-       double benefit = get_benefit( to_buy, order_book );
+       double benefit = get_benefit( order_book.at( latest_idx( to_buy ) ).time, flow_start_time_ );
        for ( auto &buy_pair : to_buy ) {
            const size_t idx = buy_pair.second;
            if ( order_book.at( idx ).owner != uid_ ) { // maybe make owns( slot ) function
@@ -158,7 +162,8 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
             const SingleSlot &slot = order_book.at( idx );
             if ( slot.owner == uid_ ) {
                 vector<pair<double, size_t>> slots_to_buy_if_slot_sold = pick_n_slots_to_buy( order_book, num_need_in_order_book, slot.time );
-                double benefit_delta = get_benefit( slots_to_buy_if_slot_sold, order_book ) - benefit;
+                double new_benefit = get_benefit( order_book.at( latest_idx( slots_to_buy_if_slot_sold ) ).time, flow_start_time_ );
+                double benefit_delta = new_benefit - benefit;
                 double cost_delta = 0;
                 for ( auto &buy_pair : slots_to_buy_if_slot_sold ) {
                     cost_delta -= buy_pair.first;

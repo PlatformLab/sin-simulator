@@ -45,11 +45,12 @@ double FlowCompletionTimeUser::get_benefit( vector<pair<double, size_t>> &costs_
     /* assume priority queue is size of num packets we need to buy */
     assert( not costs_and_indices_to_buy.empty() );
 
-    size_t latest_time = 0;
+    size_t latest_idx = 0;
     for ( auto &buy_pair : costs_and_indices_to_buy ) {
-        latest_time = max( latest_time, order_book.at( buy_pair.second ).time ); // change to latest idx and only lookup at the end
+        latest_idx = max( latest_idx, buy_pair.second );
     }
 
+    size_t latest_time = order_book.at( latest_idx ).time;
     assert( latest_time >= flow_start_time_ );
     return - (double) ( latest_time - flow_start_time_ + 1 );
 }

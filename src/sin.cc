@@ -141,6 +141,8 @@ void thousandThreeUserDSixTest() {
             market_didnt_match_srtf++;
         }
     }
+    cout << "market_matched_srtf " << market_matched_srtf << " total_srtf_delay " << total_srtf_delay
+    << " total_market_delay " << total_market_delay << endl;
     assert( market_matched_srtf == 984 );
     assert( total_srtf_delay == 15666 );
     assert( total_market_delay == 15690 );
@@ -161,13 +163,11 @@ int main(){
     size_t total_round_robin_delay = 0;
     */
 
-    dice_roll_num_sides = 3;
-    const int num_trials = 10000000;
+    dice_roll_num_sides = 200;
+    const int num_trials = 1;
     for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args =  make_random_users( 4 ); // makes this number of random users for market
-        if (i <= 448)
-            continue;
+        list<flow> usr_args =  make_random_users( 12 ); // makes this number of random users for market
         //list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
         /*
         unordered_set<size_t> start_times;

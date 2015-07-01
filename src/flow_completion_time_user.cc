@@ -1,6 +1,7 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include "flow_completion_time_user.hh" 
+#include <cmath>
 
 using namespace std;
 
@@ -66,7 +67,7 @@ inline bool FlowCompletionTimeUser::can_use(const SingleSlot &slot) const
 /* fills and then keeps a priority queue of the cheapest n (=num_packets_to_buy) slots then keeps a
    copy of the set of cheapest slots with the most utility and returns that */
    // returns priority queue of packets to buy and the utility of this set of packets
-vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, const size_t num_packets_to_buy, const size_t time_to_ignore ) const
+pair<vector<pair<double, size_t>>, double> FlowCompletionTimeUser::pick_n_slots_to_buy( const deque<SingleSlot> &order_book, const size_t num_packets_to_buy, const size_t time_to_ignore, const bool fill_vector ) const
 {
     vector<pair<double, size_t>> costs_and_indices_to_buy;
     double total_cost = 0;
@@ -106,7 +107,9 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
 
                 if (utility > best_utility) {
                     best_utility = utility;
-                    best_indices = costs_and_indices_to_buy;
+                    if ( fill_vector ) {
+                        best_indices = costs_and_indices_to_buy;
+                    }
                 } else if ( best_utility > benefit ) {
                     /* The benefit only gets worse as we move later, so if benefit is less than best utility,
                        it would require the sum costs of the slots purchased to be negative to be better,
@@ -117,9 +120,9 @@ vector<pair<double, size_t>> FlowCompletionTimeUser::pick_n_slots_to_buy( const 
         }
     }
 
-    assert( best_indices.size() == num_packets_to_buy );
+    assert( not fill_vector or best_indices.size() == num_packets_to_buy );
 
-    return best_indices;
+    return { best_indices, best_utility };
 }
 
 void FlowCompletionTimeUser::take_actions( Market& mkt )
@@ -135,9 +138,11 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
     if (num_need_in_order_book == 0) {
         done_ = true;
     } else {
-       vector<pair<double, size_t>> to_buy =  pick_n_slots_to_buy( order_book, num_need_in_order_book, size_t( -1 ) );
+       auto got = pick_n_slots_to_buy( order_book, num_need_in_order_book, size_t( -1 ), true );
+       vector<pair<double, size_t>> &to_buy = got.first;
 
        double benefit = get_benefit( order_book.at( latest_idx( to_buy ) ).time, flow_start_time_ );
+       double greg_benefit = got.second;
        for ( auto &buy_pair : to_buy ) {
            const size_t idx = buy_pair.second;
            if ( order_book.at( idx ).owner != uid_ ) { // maybe make owns( slot ) function
@@ -146,10 +151,13 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                mkt.add_bid_to_slot( idx, { slot_cost, uid_ } );
                assert( order_book.at( idx ).owner == uid_ ); // asssert succesfully got it
                money_spent_ += slot_cost;
+               greg_benefit += slot_cost;
            }
        }
 
-        expected_utility_ = benefit - money_spent_ + money_earned( mkt.money_exchanged(), uid_ );
+       assert(abs(benefit - greg_benefit) < .01);
+       expected_utility_ = benefit - money_spent_ + money_earned( mkt.money_exchanged(), uid_ );
+
         /*
         if ( expected_utility_ < best_expected_utility_ ) {
             cout << uid_ << " got swindled!" << endl;
@@ -161,18 +169,11 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
         for ( size_t idx = 0; idx < order_book.size(); idx++ ) {
             const SingleSlot &slot = order_book.at( idx );
             if ( slot.owner == uid_ ) {
-                vector<pair<double, size_t>> slots_to_buy_if_slot_sold = pick_n_slots_to_buy( order_book, num_need_in_order_book, slot.time );
-                double new_benefit = get_benefit( order_book.at( latest_idx( slots_to_buy_if_slot_sold ) ).time, flow_start_time_ );
-                double benefit_delta = new_benefit - benefit;
-                double cost_delta = 0;
-                for ( auto &buy_pair : slots_to_buy_if_slot_sold ) {
-                    cost_delta -= buy_pair.first;
-                }
-                double sell_price = - benefit_delta - cost_delta + .01;
-                // XXX cout << uid_to_string(uid_) << " benefit delta for slot at time " << order_book.at(idx).time << " is " << benefit_delta << " while cost delta is " << cost_delta << " so sell price will be " << sell_price << " current benefit is " << benefit << endl;
+               double utility_delta = pick_n_slots_to_buy( order_book, num_need_in_order_book, slot.time, false ).second - benefit;
+               double sell_price = -utility_delta + .01;
 
                 /* only add offer to slot if it differs from existing best offer */
-                if ( not slot.has_offers() or slot.best_offer().cost != sell_price ) {
+                if ( not slot.has_offers() or abs( slot.best_offer().cost - sell_price ) > .001 ) {
                     mkt.clear_offers_from_slot( idx, uid_ );
                     mkt.add_offer_to_slot( idx, { sell_price, uid_ } );
                 }

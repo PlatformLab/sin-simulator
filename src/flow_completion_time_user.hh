@@ -25,8 +25,8 @@ class FlowCompletionTimeUser : public AbstractUser
 
     bool can_use( const SingleSlot &slot ) const;
 
-    std::vector<std::pair<double, size_t>> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book,
-            const size_t num_packets_to_buy, const size_t time_to_ignore ) const;
+    std::pair<std::vector<std::pair<double, size_t>>, double> pick_n_slots_to_buy( const std::deque<SingleSlot> &order_book,
+            const size_t num_packets_to_buy, const size_t time_to_ignore, const bool fill_vector ) const;
 
     public:
     FlowCompletionTimeUser( const size_t &uid, const size_t flow_start_time, const size_t num_packets );

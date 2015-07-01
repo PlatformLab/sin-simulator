@@ -163,11 +163,11 @@ int main(){
     size_t total_round_robin_delay = 0;
     */
 
-    dice_roll_num_sides = 400;
+    dice_roll_num_sides = 100;
     const int num_trials = 1;
     for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args =  make_random_users( 12 ); // makes this number of random users for market
+        list<flow> usr_args =  make_random_users( 26 ); // makes this number of random users for market
         //list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
         /*
         unordered_set<size_t> start_times;

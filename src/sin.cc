@@ -59,15 +59,18 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
     simulated_market.run_to_completion();
     //cout << "market required " << simulated_market.total_roundtrips() << " round trips" << endl;
 
+    double sum_user_utilities = simulated_market.sum_user_utilities();
+    double sum_user_best_expected_utilities = simulated_market.sum_user_best_expected_utilities();
+
+    if ( abs( sum_user_best_expected_utilities - sum_user_utilities ) > 1e-9 ) {
+        worst_let_down = max( worst_let_down, sum_user_best_expected_utilities - sum_user_utilities );
+    }
+
     if ( print_stats ) {
         simulated_market.print_user_stats();
-        double sum_user_utilities = simulated_market.sum_user_utilities();
-        double sum_user_best_expected_utilities = simulated_market.sum_user_best_expected_utilities();
-        cout << "sum user utility was " << sum_user_utilities << " while sum of best expected utilties was " << sum_user_best_expected_utilities << " the difference between these is " << sum_user_best_expected_utilities -sum_user_utilities << endl;
-        if ( abs( sum_user_best_expected_utilities - sum_user_utilities ) > 1e-9 ) {
-            cout << "some users got let down " << endl;
-            worst_let_down = max( worst_let_down, sum_user_best_expected_utilities - sum_user_utilities );
-        }
+        cout << "Sum user utility was " << sum_user_utilities << " while sum of best expected utilties was ";
+        cout << sum_user_best_expected_utilities << " the difference between these is ";
+        cout << sum_user_best_expected_utilities - sum_user_utilities << endl << endl;
     }
 
     // now clean up results by getting rid of hard coded owner
@@ -129,25 +132,25 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
 
         if ( market_sum_fcts == srtf_sum_fcts ) {
             market_matched_srtf++;
-            /*
-            cout << "market matched srtf, market was:"<< endl;
-            printSlots(market);
-            */
+            if ( print_stats ) {
+                cout << "market matched srtf, market was:"<< endl;
+                printSlots(market);
+            }
         } else {
             market_didnt_match_srtf++;
 
-            /*
-            cout << "market didnt match srtf! Market was:"<< endl;
-            printSlots(market);
-            cout << "and srtf was:" << endl;
-            printSlots(srtf);
+            if ( print_stats ) {
+                cout << "market didnt match srtf! Market was:"<< endl;
+                printSlots(market);
+                cout << "and srtf was:" << endl;
+                printSlots(srtf);
 
-            cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
-            */
+                cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
+            }
         }
 
-        if ( run_verbose ) {
-            cout << "finished trial " << i << " of " << num_trials << endl << endl;
+        if ( print_stats ) {
+            cout << "finished trial " << i+1 << " of " << num_trials << endl << endl;
         }
     }
     cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
@@ -203,17 +206,14 @@ int main( int argc, char *argv[] )
                 break;
             case 'd':
                 die_size = stoul( optarg );
-                cout << "got die size " << die_size << endl;
                 assert( dice_roll );
                 break;
             case 'u':
                 num_users = stoul( optarg );
-                cout << "got num_users " << num_users << endl;
                 assert( num_users );
                 break;
             case 't':
                 num_trials = stoul( optarg );
-                cout << "got num_trials " << num_trials << endl;
                 assert( num_trials );
                 break;
             case '?':

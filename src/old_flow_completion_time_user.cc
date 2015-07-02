@@ -233,7 +233,7 @@ bool OldFlowCompletionTimeUser::done( const Market& mkt )
 
 void OldFlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
-    cout << uid_ << " had benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
+    cout << uid_to_string( uid_ ) << " had benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
     cout << ", and best expected utility " << best_expected_utility() << endl;
 }
 

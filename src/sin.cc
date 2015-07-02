@@ -20,26 +20,29 @@ using namespace std;
 double worst_let_down = std::numeric_limits<double>::lowest();
 size_t dice_roll_num_sides = 1000;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_stats, const bool run_verbose, const bool print_end_stats, const bool old_style_user )
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
-    if ( print_start_stats ) {
+
+    if ( print_stats ) {
         cout << "trial shorthand: ";
     }
-    for (auto & u : usr_args)
+    for ( auto & u : usr_args )
     {
-    if ( print_start_stats ) {
+    if ( print_stats ) {
         cout <<u.flow_start_time << u.num_packets;
     }
     }
-    if ( print_start_stats ) {
-    cout << endl;
+    if ( print_stats ) {
+        cout << endl;
     }
-    for (auto & u : usr_args)
+
+    for ( auto & u : usr_args )
     {
-    if ( print_start_stats ) {
-        cout << "User: " << uid_to_string( u.uid ) << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
-    }
+        if ( print_stats ) {
+            cout << "User: " << uid_to_string( u.uid ) << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
+        }
+
         if ( old_style_user ) {
             usersToSimulate.emplace_back(make_unique<OldFlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
         } else {
@@ -64,8 +67,9 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_start_st
             toRet.emplace_back(ps);
         }
     }
+
     assert( simulated_market.sum_user_benefits() == - (double) schedule_sum_flow_completion_times( usr_args, toRet ) );
-    if ( print_end_stats ) {
+    if ( print_stats ) {
         simulated_market.print_user_stats();
         double sum_user_utilities = simulated_market.sum_user_utilities();
         double sum_user_best_expected_utilities = simulated_market.sum_user_best_expected_utilities();
@@ -124,7 +128,7 @@ void thousandThreeUserDSixTest() {
     for (int i = 0; i < 1000; i++)
     {
         list<flow> usr_args =  make_random_users( 3 ); // makes this number of random users for market
-        auto market = sim_users(usr_args, false, false, false, false );
+        auto market = sim_users(usr_args, false, false, false );
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -167,7 +171,7 @@ int main(){
     const int num_trials = 1;
     for (int i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args =  make_random_users( 26 ); // makes this number of random users for market
+        list<flow> usr_args =  make_random_users( 12 ); // makes this number of random users for market
         //list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
         /*
         unordered_set<size_t> start_times;
@@ -181,7 +185,7 @@ int main(){
             continue;
         }
         */
-        auto market = sim_users(usr_args, true, true, false, false );
+        auto market = sim_users(usr_args, true, true, false );
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );

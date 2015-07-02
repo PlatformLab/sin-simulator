@@ -33,7 +33,7 @@ bool matches( const SingleSlot &s1, const SingleSlot *s2 )
     bool owner_matches = s1.owner == s2->owner;
     bool cost_matches = s1.has_offers() == s2->has_offers();
     if ( cost_matches and s1.has_offers() ) {
-        cost_matches = abs( s1.best_offer().cost - s2->best_offer().cost ) < .0001;
+        cost_matches = abs( s1.best_offer().cost - s2->best_offer().cost ) < 1e-9;
     }
     return owner_matches and cost_matches;
 }

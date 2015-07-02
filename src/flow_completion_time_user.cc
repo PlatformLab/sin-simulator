@@ -173,7 +173,7 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
                double sell_price = -utility_delta + .01;
 
                 /* only add offer to slot if it differs from existing best offer */
-                if ( not slot.has_offers() or abs( slot.best_offer().cost - sell_price ) > .001 ) {
+                if ( not slot.has_offers() or abs( slot.best_offer().cost - sell_price ) > 1e-9 ) {
                     mkt.clear_offers_from_slot( idx, uid_ );
                     mkt.add_offer_to_slot( idx, { sell_price, uid_ } );
                 }

@@ -15,7 +15,28 @@
 #include "shortest_remaining_time_first.hh"
 #include "round_robin.hh"
 
+#include <getopt.h>
+
 using namespace std;
+
+void usage_error( const string & program_name )
+{
+    cerr << "Usage: " << program_name << " UPLINK-TRACE DOWNLINK-TRACE [OPTION]... [COMMAND]" << endl;
+    cerr << endl;
+    cerr << "Options = --once" << endl;
+    cerr << "          --uplink-log=FILENAME --downlink-log=FILENAME" << endl;
+    cerr << "          --meter-uplink --meter-uplink-delay" << endl;
+    cerr << "          --meter-downlink --meter-downlink-delay" << endl;
+    cerr << "          --meter-all" << endl;
+    cerr << "          --uplink-queue=QUEUE_TYPE --downlink-queue=QUEUE_TYPE" << endl;
+    cerr << "          --uplink-queue-args=QUEUE_ARGS --downlink-queue-args=QUEUE_ARGS" << endl;
+    cerr << endl;
+    cerr << "          QUEUE_TYPE = infinite | droptail | drophead" << endl;
+    cerr << "          QUEUE_ARGS = \"NAME=NUMBER[, NAME2=NUMBER2, ...]\"" << endl;
+    cerr << "              (with NAME = bytes | packets)" << endl << endl;
+
+    throw runtime_error( "invalid arguments" );
+}
 
 double worst_let_down = std::numeric_limits<double>::lowest();
 size_t dice_roll_num_sides = 1000;
@@ -154,73 +175,69 @@ void thousandThreeUserDSixTest() {
     dice_roll_num_sides = old_num_sides;
 }
 
-int main(){
-    //thousandThreeUserDSixTest();
-
-    size_t market_matched_srtf = 0;
-    size_t market_didnt_match_srtf = 0;
-    size_t total_market_delay = 0;
-    size_t total_srtf_delay = 0;
-    /*
-    size_t round_robin_num_matched = 0;
-    size_t round_robin_num_didnt_match = 0;
-    size_t total_round_robin_delay = 0;
-    */
-
-    dice_roll_num_sides = 100;
-    const int num_trials = 1;
-    for (int i = 0; i < num_trials; i++)
-    {
-        list<flow> usr_args =  make_random_users( 12 ); // makes this number of random users for market
-        //list<flow> usr_args = {{1, 0, 1000}, {2, 1, 998}, {3, 1, 997}, {4, 1, 996}, {5, 1, 995}}; // make_random_users( 3 ); // makes this number of random users for market
-        /*
-        unordered_set<size_t> start_times;
-        bool has_two_starting_at_same_time = false;
-        for ( auto &arg : usr_args )
-        {
-            has_two_starting_at_same_time |= start_times.count(arg.flow_start_time);
-            start_times.insert(arg.flow_start_time);
+int main( int argc, char *argv[] )
+{
+    try {
+        if ( argc < 3 ) {
+            usage_error( argv[ 0 ] );
         }
-        if ( has_two_starting_at_same_time ) {
-            continue;
+        string sim_string;
+        size_t dice_roll, num_trials, num_users;
+        bool print_stats, run_verbose = false;
+
+        const option command_line_options[] = {
+            { "simulate",           required_argument, nullptr, 's' },
+            { "v",                        no_argument, nullptr, 'v' },
+            { "vv",                       no_argument, nullptr, 'w' },
+            { "dice-roll",          required_argument, nullptr, 'd' },
+            { "num-users",          required_argument, nullptr, 'u' },
+            { "num-trials",         required_argument, nullptr, 't' },
+            { 0,                                    0, nullptr, 0 }
+        };
+
+        while ( true ) {
+            const int opt = getopt_long( argc, argv, "u:d:", command_line_options, nullptr );
+            if ( opt == -1 ) { 
+                break;
+            }
+
+            switch ( opt ) {
+            case 's':
+                sim_string = optarg;
+                break;
+            case 'v':
+                print_stats = true;
+                print_stats &= false;
+                break;
+            case 'w':
+                run_verbose = true;
+                run_verbose  &= false;
+                break;
+            case 'd':
+                dice_roll = stoul( optarg );
+                dice_roll++;
+                break;
+            case 'u':
+                num_users = stoul( optarg );
+                num_users++;
+                break;
+            case 't':
+                num_trials = stoul( optarg );
+                num_trials++;
+                break;
+            case '?':
+                usage_error( argv[ 0 ] );
+                break;
+            default:
+                throw runtime_error( "getopt_long: unexpected return value " + to_string( opt ) );
+            }
         }
-        */
-        auto market = sim_users(usr_args, true, true, false );
-        auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
-        size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
-        size_t srtf_sum_fcts = schedule_sum_flow_completion_times( usr_args, srtf );
-        assert( market_sum_fcts >= srtf_sum_fcts );
-        total_market_delay += market_sum_fcts;
-        total_srtf_delay += srtf_sum_fcts;
-
-        if ( market_sum_fcts == srtf_sum_fcts ) {
-            market_matched_srtf++;
-            /*
-            cout << "market matched srtf, market was:"<< endl;
-            printSlots(market);
-            */
-        } else {
-            market_didnt_match_srtf++;
-
-            /*
-            cout << "market didnt match srtf! Market was:"<< endl;
-            printSlots(market);
-            cout << "and srtf was:" << endl;
-            printSlots(srtf);
-
-            cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
-            */
+        if ( optind + 1 >= argc ) {
+            usage_error( argv[ 0 ] );
         }
-        /*
-        auto market2 = sim_users(usr_args, false, false, true);
-        assert(market2 == market);
-        */
-
-        cout << "finished trial " << i << " of " << num_trials << endl << endl;
+    } catch ( const exception & e ) {
+        cerr << "got expection: " << e.what() << endl;
+        return EXIT_FAILURE;
     }
-    cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
-    cout << "average delay ratio " << ((double) total_market_delay / (double) total_srtf_delay) << endl;
-    cout << "worst utility let down was " << worst_let_down << endl;
-    return 1;
 }

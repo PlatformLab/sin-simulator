@@ -24,15 +24,16 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
     vector<unique_ptr<AbstractUser>> usersToSimulate;
 
     if ( print_stats ) {
-        cout << "trial shorthand: ";
-    }
-    for ( auto & u : usr_args )
-    {
-    if ( print_stats ) {
-        cout <<u.flow_start_time << u.num_packets;
-    }
-    }
-    if ( print_stats ) {
+        cout << "trial shorthand= ";
+        cout << usr_args.front().flow_start_time << ":" << usr_args.front().num_packets;
+        bool first = true;
+        for ( auto & u : usr_args )
+        {
+            if ( print_stats and not first ) {
+                cout << ", " << u.flow_start_time << ":" << u.num_packets;
+            }
+            first = false;
+        }
         cout << endl;
     }
 
@@ -69,8 +70,8 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
     if ( print_stats ) {
         simulated_market.print_user_stats();
         cout << "Sum user utility was " << sum_user_utilities << " while sum of best expected utilties was ";
-        cout << sum_user_best_expected_utilities << " the difference between these is ";
-        cout << sum_user_best_expected_utilities - sum_user_utilities << endl << endl;
+        cout << sum_user_best_expected_utilities << " (let down of ";
+        cout << sum_user_best_expected_utilities - sum_user_utilities << ")" << endl << endl;
     }
 
     // now clean up results by getting rid of hard coded owner
@@ -109,7 +110,7 @@ list<flow> make_random_users( const size_t num_users, const size_t die_size )
     return toRet;
 }
 
-void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const bool print_stats, const bool run_verbose )
+void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const bool print_stats, const bool run_verbose, const bool old_style_user )
 {
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
@@ -121,7 +122,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     {
         list<flow> usr_args =  make_random_users( num_users, die_size );
 
-        auto market = sim_users(usr_args, print_stats, run_verbose, false, worst_let_down );
+        auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down );
         auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
         size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -155,14 +156,20 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     }
     cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
     cout << "average delay ratio " << ( (double) total_market_delay / (double) total_srtf_delay ) << endl;
-    cout << "worst utility let down was " << worst_let_down << endl;
+    if ( worst_let_down == numeric_limits<double>::lowest() ) {
+        cout << "all users in all trials got best utility they thought they could get" << endl;
+    } else {
+        cout << "largest difference from best expected utilities to final utilities (utility let down) was " << worst_let_down << endl;
+    }
 }
 
 void usage_error( const string & program_name )
 {
-    cerr << "Usage: " << program_name << " --num-users=[NUMBER] --num-trials=[NUMBER] --die-size=[NUMBER] | --simulate [STRING]" << endl;
+    cerr << "Usage: " << program_name << " --num-users=NUMBER --num-trials=NUMBER --die-size=NUMBER | --simulate=TRIAL_STRING" << endl;
     cerr << endl;
-    cerr << "Options = --v --vv" << endl;
+    cerr << "       TRIAL_STRING = \"START:DURATION[, START2:DURATION2, ...]\"" << endl;
+    cerr << endl;
+    cerr << "Options = --v --vv --old-style-user" << endl;
     cerr << endl;
     throw runtime_error( "invalid arguments" );
 }
@@ -170,17 +177,18 @@ void usage_error( const string & program_name )
 int main( int argc, char *argv[] )
 {
     try {
-        if ( argc < 3 ) {
+        if ( argc < 2 ) {
             usage_error( argv[ 0 ] );
         }
         string sim_string = "";
         size_t die_size = 0, num_trials = 0, num_users = 0;
-        bool print_stats = false, run_verbose = false;
+        bool print_stats = false, run_verbose = false, old_style_user = false;
 
         const option command_line_options[] = {
             { "simulate",           required_argument, nullptr, 's' },
             { "v",                        no_argument, nullptr, 'v' },
             { "vv",                       no_argument, nullptr, 'w' },
+            { "old-style-user",           no_argument, nullptr, 'o' },
             { "die-size",           required_argument, nullptr, 'd' },
             { "num-users",          required_argument, nullptr, 'u' },
             { "num-trials",         required_argument, nullptr, 't' },
@@ -196,6 +204,7 @@ int main( int argc, char *argv[] )
             switch ( opt ) {
             case 's':
                 sim_string = optarg;
+                cout << "got: " << sim_string << endl;
                 break;
             case 'v':
                 print_stats = true;
@@ -203,6 +212,9 @@ int main( int argc, char *argv[] )
             case 'w':
                 print_stats = true;
                 run_verbose = true;
+                break;
+            case 'o':
+                old_style_user = true;
                 break;
             case 'd':
                 die_size = stoul( optarg );
@@ -226,11 +238,12 @@ int main( int argc, char *argv[] )
 
         if ( sim_string == "" ) {
             if ( num_users and num_trials and die_size ) {
-                run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose );
+                run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose, old_style_user );
             } else  {
                 usage_error( argv[ 0 ] );
             }
         } else {
+            cout << "got here" << endl;
             /* user inputted string */
         }
 

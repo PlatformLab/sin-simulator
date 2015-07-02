@@ -86,6 +86,32 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
     return toRet;
 }
 
+/* returns sum flow completion time for market and SRTF simulations */
+pair<size_t, size_t> run_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down )
+{
+    auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down );
+    auto srtf = simulate_shortest_remaining_time_first(usr_args);
+
+    size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
+    size_t srtf_sum_fcts = schedule_sum_flow_completion_times( usr_args, srtf );
+    assert( market_sum_fcts >= srtf_sum_fcts );
+
+    if ( print_stats ) {
+        if ( market_sum_fcts == srtf_sum_fcts ) {
+            cout << "market matched srtf, market was:"<< endl;
+            printSlots(market);
+        } else {
+            cout << "market didnt match srtf! Market was:"<< endl;
+            printSlots(market);
+            cout << "and srtf was:" << endl;
+            printSlots(srtf);
+
+            cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
+        }
+    }
+    return { market_sum_fcts, srtf_sum_fcts };
+}
+
 size_t dice_roll( const size_t die_size )
 {
     return ( rand() % die_size ) + 1;
@@ -120,34 +146,14 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
 
     for (size_t i = 0; i < num_trials; i++)
     {
-        list<flow> usr_args =  make_random_users( num_users, die_size );
-
-        auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down );
-        auto srtf = simulate_shortest_remaining_time_first(usr_args);
-
-        size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
-        size_t srtf_sum_fcts = schedule_sum_flow_completion_times( usr_args, srtf );
-        assert( market_sum_fcts >= srtf_sum_fcts );
-        total_market_delay += market_sum_fcts;
-        total_srtf_delay += srtf_sum_fcts;
-
-        if ( market_sum_fcts == srtf_sum_fcts ) {
+        list<flow> user_args =  make_random_users( num_users, die_size );
+        pair<size_t, size_t> sum_flow_completion_times = run_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down );
+        total_market_delay += sum_flow_completion_times.first;
+        total_srtf_delay += sum_flow_completion_times.second;
+        if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
             market_matched_srtf++;
-            if ( print_stats ) {
-                cout << "market matched srtf, market was:"<< endl;
-                printSlots(market);
-            }
         } else {
             market_didnt_match_srtf++;
-
-            if ( print_stats ) {
-                cout << "market didnt match srtf! Market was:"<< endl;
-                printSlots(market);
-                cout << "and srtf was:" << endl;
-                printSlots(srtf);
-
-                cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
-            }
         }
 
         if ( print_stats ) {
@@ -163,13 +169,44 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     }
 }
 
+flow make_user_from_string( const size_t uid, const string &token )
+{
+    //cout << "making user from: " << token << endl;
+
+    auto delimiter_idx = token.find_first_of( ":" );
+    if ( delimiter_idx == std::string::npos ) {
+        throw runtime_error( "invalid arguments" );
+    }
+    size_t flow_start_time = stoul( token.substr( 0, delimiter_idx ) );
+    size_t flow_num_packets = stoul( token.substr( delimiter_idx + 1 ) );
+    /* TODO extra chars after number ignored */
+    
+    //cout << " got start time " << flow_start_time << " and num packets "<<  flow_num_packets << endl;
+    return { uid, flow_start_time , flow_num_packets };
+}
+
+list<flow> make_users_from_string( const string &arg )
+{
+    size_t uid = 1;
+    list<flow> users;
+    size_t last = 0;
+    size_t next = 0;
+    while ((next = arg.find(",", last)) != string::npos) {
+        users.push_back( make_user_from_string( uid++, arg.substr( last, next - last ) ) );
+        last = next + 1;
+    }
+    users.push_back( make_user_from_string( uid++, arg.substr( last ) ) );
+    return users;
+}
+
 void usage_error( const string & program_name )
 {
     cerr << "Usage: " << program_name << " --num-users=NUMBER --num-trials=NUMBER --die-size=NUMBER | --simulate=TRIAL_STRING" << endl;
     cerr << endl;
     cerr << "       TRIAL_STRING = \"START:DURATION[, START2:DURATION2, ...]\"" << endl;
     cerr << endl;
-    cerr << "Options = --v --vv --old-style-user" << endl;
+    cerr << "Options = --v --vv" << endl;
+    cerr << "          --old-style-user" << endl;
     cerr << endl;
     throw runtime_error( "invalid arguments" );
 }
@@ -204,7 +241,6 @@ int main( int argc, char *argv[] )
             switch ( opt ) {
             case 's':
                 sim_string = optarg;
-                cout << "got: " << sim_string << endl;
                 break;
             case 'v':
                 print_stats = true;
@@ -243,8 +279,21 @@ int main( int argc, char *argv[] )
                 usage_error( argv[ 0 ] );
             }
         } else {
-            cout << "got here" << endl;
             /* user inputted string */
+            //double utility_let_down = numeric_limits<double>::lowest();
+            double ignore = 0;
+            print_stats = true;
+            run_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore );
+            /*
+            if ( sum_fcts.first = sum_fcts.second ) {
+                cout << "scenario matched SRTF" << endl;
+            } else {
+                cout << "scenario had " << sum_fcts.second - sum_fcts.first << " more delay than SRTF" << endl;
+            }
+            if ( utility_let_down != numeric_limits<double>::lowest() ) {
+
+            }
+            */
         }
 
     } catch ( const exception & e ) {

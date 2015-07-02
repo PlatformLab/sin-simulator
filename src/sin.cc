@@ -89,7 +89,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
 }
 
 /* returns sum flow completion time for market and SRTF simulations */
-pair<size_t, size_t> run_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down )
+pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down )
 {
     auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down );
     auto srtf = simulate_shortest_remaining_time_first(usr_args);
@@ -149,7 +149,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     for (size_t i = 0; i < num_trials; i++)
     {
         list<flow> user_args =  make_random_users( num_users, die_size );
-        pair<size_t, size_t> sum_flow_completion_times = run_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down );
+        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down );
         total_market_delay += sum_flow_completion_times.first;
         total_srtf_delay += sum_flow_completion_times.second;
         if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
@@ -285,7 +285,7 @@ int main( int argc, char *argv[] )
             /* run scenario from user supplied string */
             print_stats = true; /* or else we print nothing and it looks weird */
             double ignore = 0;
-            run_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore );
+            run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore );
         }
 
     } catch ( const exception & e ) {

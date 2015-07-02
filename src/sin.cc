@@ -34,7 +34,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
             }
             first = false;
         }
-        cout << endl;
+        cout << endl << endl;
     }
 
     for ( auto & u : usr_args )
@@ -68,7 +68,9 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
     }
 
     if ( print_stats ) {
+        cout << endl;
         simulated_market.print_user_stats();
+        cout << endl;
         cout << "Sum user utility was " << sum_user_utilities << " while sum of best expected utilties was ";
         cout << sum_user_best_expected_utilities << " (let down of ";
         cout << sum_user_best_expected_utilities - sum_user_utilities << ")" << endl << endl;
@@ -101,7 +103,7 @@ pair<size_t, size_t> run_trial( list<flow> usr_args, const bool print_stats, con
             cout << "market matched srtf, market was:"<< endl;
             printSlots(market);
         } else {
-            cout << "market didnt match srtf! Market was:"<< endl;
+            cout << "market didn't match srtf! Market was:"<< endl;
             printSlots(market);
             cout << "and srtf was:" << endl;
             printSlots(srtf);
@@ -274,26 +276,16 @@ int main( int argc, char *argv[] )
 
         if ( sim_string == "" ) {
             if ( num_users and num_trials and die_size ) {
+                cout << "running " << num_trials << " trials with " << num_users << " users and die size " << die_size << "..." << endl;
                 run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose, old_style_user );
             } else  {
                 usage_error( argv[ 0 ] );
             }
         } else {
-            /* user inputted string */
-            //double utility_let_down = numeric_limits<double>::lowest();
+            /* run scenario from user supplied string */
+            print_stats = true; /* or else we print nothing and it looks weird */
             double ignore = 0;
-            print_stats = true;
             run_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore );
-            /*
-            if ( sum_fcts.first = sum_fcts.second ) {
-                cout << "scenario matched SRTF" << endl;
-            } else {
-                cout << "scenario had " << sum_fcts.second - sum_fcts.first << " more delay than SRTF" << endl;
-            }
-            if ( utility_let_down != numeric_limits<double>::lowest() ) {
-
-            }
-            */
         }
 
     } catch ( const exception & e ) {

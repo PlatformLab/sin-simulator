@@ -61,7 +61,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
     // hack to size number of slots for market simulation based on time to complete srtf
     size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2;
     if ( add_evil_user ) {
-        slots_needed++;
+        slots_needed += 20;
     }
 
     usersToSimulate.emplace_back(make_unique<OwnerUser>( 0, 1, slots_needed, true ));

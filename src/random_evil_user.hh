@@ -12,6 +12,7 @@
 class RandomEvilUser : public AbstractUser
 {
     bool done_ = false;
+    size_t num_idxs_to_buy_ = 0;
 
     public:
     RandomEvilUser( const size_t &uid );

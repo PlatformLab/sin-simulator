@@ -58,14 +58,21 @@ void RandomEvilUser::take_actions( Market& mkt )
     }
 
     if ( not potential_idxs.empty() ) {
-        size_t idx_to_buy = potential_idxs.at( rand() % potential_idxs.size() );
-        assert( order_book.at( idx_to_buy ).has_offers() );
+        num_idxs_to_buy_ = ( rand() % potential_idxs.size() ) + 1;
 
-        double slot_cost = order_book.at( idx_to_buy ).best_offer().cost;
+        while ( potential_idxs.size() > num_idxs_to_buy_ ) {
+            potential_idxs.erase( potential_idxs.begin() + rand() % potential_idxs.size() );
+        }
 
-        mkt.add_bid_to_slot( idx_to_buy, { order_book.at( idx_to_buy ).best_offer().cost , uid_ } );
-        assert( order_book.at( idx_to_buy ).owner == uid_ );
-        mkt.add_offer_to_slot( idx_to_buy, { slot_cost + .85 , uid_ } );
+        for ( const size_t idx_to_buy : potential_idxs ) {
+            assert( order_book.at( idx_to_buy ).has_offers() );
+
+            double slot_cost = order_book.at( idx_to_buy ).best_offer().cost;
+
+            mkt.add_bid_to_slot( idx_to_buy, { order_book.at( idx_to_buy ).best_offer().cost , uid_ } );
+            assert( order_book.at( idx_to_buy ).owner == uid_ );
+            mkt.add_offer_to_slot( idx_to_buy, { slot_cost + .85 , uid_ } );
+        }
 
         done_ = true;
     }
@@ -79,7 +86,7 @@ bool RandomEvilUser::done( const Market& )
 void RandomEvilUser::print_stats( const Market &mkt ) const
 {
     double money = net_money( mkt.money_exchanged(), uid_ );
-    cout << uid_to_string( uid_ ) << " made net money " << money << endl;
+    cout << uid_to_string( uid_ ) << " tried to buy " << num_idxs_to_buy_ << " made net money " << money << endl;
     if ( money > 0 ) {
         cout << "EVIL USER MADE MONEY!!" << endl;
     }

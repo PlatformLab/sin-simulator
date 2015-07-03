@@ -2,6 +2,7 @@
 
 #include "random_evil_user.hh"
 #include "pretty_print.hh"
+#include <unordered_set>
 
 using namespace std;
 
@@ -21,6 +22,20 @@ static double net_money( const T &collection, const size_t &uid )
     return toRet;
 }
 
+bool all_other_users_gone( const Market& mkt, const size_t num_other_users )
+{
+    unordered_set<size_t> uids_seen;
+    for ( const auto &ps : mkt.packets_sent() ) {
+        uids_seen.insert( ps.owner );
+    }
+
+    for ( const auto &slot : mkt.order_book() ) {
+        uids_seen.insert( slot.owner );
+    }
+
+    return uids_seen.size() == num_other_users;
+}
+
     RandomEvilUser::RandomEvilUser( const size_t &uid )
 : AbstractUser( uid )
 {
@@ -28,7 +43,7 @@ static double net_money( const T &collection, const size_t &uid )
 
 void RandomEvilUser::take_actions( Market& mkt ) 
 {
-    if ( done_ ) {
+    if ( done_ or not all_other_users_gone( mkt, uid_ ) ) { // based on how we choosing uids, the uid of a single evil user will be the same as the number of other users in the market
         return;
     }
 
@@ -50,7 +65,7 @@ void RandomEvilUser::take_actions( Market& mkt )
 
         mkt.add_bid_to_slot( idx_to_buy, { order_book.at( idx_to_buy ).best_offer().cost , uid_ } );
         assert( order_book.at( idx_to_buy ).owner == uid_ );
-        mkt.add_offer_to_slot( idx_to_buy, { slot_cost + 1.9 , uid_ } );
+        mkt.add_offer_to_slot( idx_to_buy, { slot_cost + .85 , uid_ } );
 
         done_ = true;
     }

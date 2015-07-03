@@ -8,6 +8,7 @@
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
 #include "old_flow_completion_time_user.hh"
+#include "random_evil_user.hh"
 #include "market_simulator.hh"
 #include "market.hh"
 
@@ -19,7 +20,7 @@
 
 using namespace std;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down )
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down, const bool add_evil_user )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
 
@@ -49,9 +50,19 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
             usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
         }
     }
+    if ( add_evil_user )
+    {
+        usersToSimulate.emplace_back(make_unique<RandomEvilUser>( usersToSimulate.back()->uid_ + 1 ));
+        if ( print_stats ) {
+            cout << "Evil user: " << uid_to_string( usersToSimulate.back()->uid_ ) << endl;
+        }
+    }
 
     // hack to size number of slots for market simulation based on time to complete srtf
     size_t slots_needed = simulate_shortest_remaining_time_first(usr_args).back().time + 2;
+    if ( add_evil_user ) {
+        slots_needed++;
+    }
 
     usersToSimulate.emplace_back(make_unique<OwnerUser>( 0, 1, slots_needed, true ));
 
@@ -84,14 +95,16 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
         }
     }
 
-    assert( simulated_market.sum_user_benefits() == - (double) schedule_sum_flow_completion_times( usr_args, toRet ) );
+    if ( not add_evil_user ) {
+        assert( simulated_market.sum_user_benefits() == - (double) schedule_sum_flow_completion_times( usr_args, toRet ) );
+    }
     return toRet;
 }
 
 /* returns sum flow completion time for market and SRTF simulations */
-pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down )
+pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down, const bool add_evil_user )
 {
-    auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down );
+    auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down, add_evil_user );
     auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
     size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -138,7 +151,7 @@ list<flow> make_random_users( const size_t num_users, const size_t die_size )
     return toRet;
 }
 
-void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const bool print_stats, const bool run_verbose, const bool old_style_user )
+void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const bool print_stats, const bool run_verbose, const bool old_style_user, const bool add_evil_user )
 {
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
@@ -149,7 +162,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     for (size_t i = 0; i < num_trials; i++)
     {
         list<flow> user_args =  make_random_users( num_users, die_size );
-        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down );
+        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down, add_evil_user );
         total_market_delay += sum_flow_completion_times.first;
         total_srtf_delay += sum_flow_completion_times.second;
         if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
@@ -221,7 +234,7 @@ int main( int argc, char *argv[] )
         }
         string sim_string = "";
         size_t die_size = 0, num_trials = 0, num_users = 0;
-        bool print_stats = false, run_verbose = false, old_style_user = false;
+        bool print_stats = false, run_verbose = false, old_style_user = false, add_evil_user = false;
 
         const option command_line_options[] = {
             { "simulate",           required_argument, nullptr, 's' },
@@ -231,6 +244,7 @@ int main( int argc, char *argv[] )
             { "die-size",           required_argument, nullptr, 'd' },
             { "num-users",          required_argument, nullptr, 'u' },
             { "num-trials",         required_argument, nullptr, 't' },
+            { "add-evil-user",            no_argument, nullptr, 'e' },
             { 0,                                    0, nullptr, 0 }
         };
 
@@ -266,6 +280,9 @@ int main( int argc, char *argv[] )
                 num_trials = stoul( optarg );
                 assert( num_trials );
                 break;
+            case 'e':
+                add_evil_user = true;
+                break;
             case '?':
                 usage_error( argv[ 0 ] );
                 break;
@@ -277,7 +294,7 @@ int main( int argc, char *argv[] )
         if ( sim_string == "" ) {
             if ( num_users and num_trials and die_size ) {
                 cout << "running " << num_trials << " trials with " << num_users << " users and die size " << die_size << "..." << endl;
-                run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose, old_style_user );
+                run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose, old_style_user, add_evil_user );
             } else  {
                 usage_error( argv[ 0 ] );
             }
@@ -285,7 +302,7 @@ int main( int argc, char *argv[] )
             /* run scenario from user supplied string */
             print_stats = true; /* or else we print nothing and it looks weird */
             double ignore = 0;
-            run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore );
+            run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore, add_evil_user );
         }
 
     } catch ( const exception & e ) {

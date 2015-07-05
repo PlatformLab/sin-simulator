@@ -52,7 +52,7 @@ void RandomEvilUser::take_actions( Market& mkt )
 
     for ( size_t idx = 0; idx < order_book.size(); idx++ ) {
         const auto & slot = order_book.at( idx );
-        if ( slot.owner != 0 and slot.has_offers() ) {
+        if (/* slot.owner != 0 and */slot.has_offers() ) {
             potential_idxs.push_back( idx );
         }
     }

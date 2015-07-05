@@ -160,9 +160,9 @@ void FlowCompletionTimeUser::take_actions( Market& mkt )
 
         /*
         if ( expected_utility_ < best_expected_utility_ ) {
-            cout << uid_ << " got swindled!" << endl;
+            cout << uid_to_string( uid_ ) << " got swindled!" << endl;
         }
-         */
+        */
         best_expected_utility_ = max( best_expected_utility_, expected_utility_ );
 
         /* if we own anything from before or bought anything than price all slots again */

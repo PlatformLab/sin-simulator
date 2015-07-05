@@ -102,7 +102,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
 }
 
 /* returns sum flow completion time for market and SRTF simulations */
-pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down, const bool add_evil_user )
+pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down, size_t &worst_srtf_divergence, const bool add_evil_user )
 {
     auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down, add_evil_user );
     auto srtf = simulate_shortest_remaining_time_first(usr_args);
@@ -124,6 +124,7 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_sta
             cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
         }
     }
+    worst_srtf_divergence = max( worst_srtf_divergence, market_sum_fcts - srtf_sum_fcts );
     return { market_sum_fcts, srtf_sum_fcts };
 }
 
@@ -158,11 +159,12 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     size_t total_market_delay = 0;
     size_t total_srtf_delay = 0;
     double worst_let_down = numeric_limits<double>::lowest();
+    size_t worst_srtf_divergence = 0;
 
     for (size_t i = 0; i < num_trials; i++)
     {
         list<flow> user_args =  make_random_users( num_users, die_size );
-        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down, add_evil_user );
+        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down, worst_srtf_divergence, add_evil_user );
         total_market_delay += sum_flow_completion_times.first;
         total_srtf_delay += sum_flow_completion_times.second;
         if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
@@ -182,6 +184,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     } else {
         cout << "largest difference from best expected utilities to final utilities (utility let down) was " << worst_let_down << endl;
     }
+    cout << "worst srtf divergence was " << worst_srtf_divergence << endl;
 }
 
 flow make_user_from_string( const size_t uid, const string &token )
@@ -233,7 +236,7 @@ int main( int argc, char *argv[] )
             usage_error( argv[ 0 ] );
         }
         string sim_string = "";
-        size_t die_size = 0, num_trials = 0, num_users = 0;
+        size_t die_size = 0, num_trials = 1, num_users = 0;
         bool print_stats = false, run_verbose = false, old_style_user = false, add_evil_user = false;
 
         const option command_line_options[] = {
@@ -301,8 +304,14 @@ int main( int argc, char *argv[] )
         } else {
             /* run scenario from user supplied string */
             print_stats = true; /* or else we print nothing and it looks weird */
-            double ignore = 0;
-            run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, ignore, add_evil_user );
+            double worst_let_down = numeric_limits<double>::lowest();
+            size_t worst_srtf_divergence = 0;
+            for (size_t i = 0; i < num_trials; i++) {
+                run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, worst_let_down, worst_srtf_divergence, add_evil_user );
+            }
+            if ( worst_let_down != numeric_limits<double>::lowest() ) {
+                cout << "worst let down was " << worst_let_down << endl;
+            }
         }
 
     } catch ( const exception & e ) {

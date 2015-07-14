@@ -9,9 +9,9 @@
 #include "pretty_print.hh"
 #include "schedule.hh"
 
-const std::vector<PacketSent> simulate_round_robin( std::list<flow> flows ) // copy of flows so we can decrement
+const std::deque<PacketSent> simulate_round_robin( std::list<flow> flows ) // copy of flows so we can decrement
 {
-    std::vector<PacketSent> final_schedule;
+    std::deque<PacketSent> final_schedule;
     uint64_t cur_time = 0;
 
     while ( true )

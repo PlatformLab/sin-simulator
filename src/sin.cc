@@ -20,7 +20,7 @@
 
 using namespace std;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down, const bool add_evil_user )
+const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, const bool round_robin_user, double &worst_let_down, const bool add_evil_user )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
 
@@ -36,14 +36,18 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
             first = false;
         }
         cout << endl << endl;
+
+        for ( auto & u : usr_args ) {
+            cout << "User: " << uid_to_string( u.uid ) << " flow start time: " << u.flow_start_time;
+            cout << " num packets: " << u.num_packets << endl;
+        }
     }
 
-    for ( auto & u : usr_args )
-    {
-        if ( print_stats ) {
-            cout << "User: " << uid_to_string( u.uid ) << " flow start time: " << u.flow_start_time << " num packets: " << u.num_packets << endl;
-        }
+    if ( round_robin_user ) {
+        return simulate_round_robin( usr_args );
+    }
 
+    for ( auto & u : usr_args ) {
         if ( old_style_user ) {
             usersToSimulate.emplace_back(make_unique<OldFlowCompletionTimeUser>( u.uid, u.flow_start_time, u.num_packets ));
         } else {
@@ -102,9 +106,9 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const bool print_stats, c
 }
 
 /* returns sum flow completion time for market and SRTF simulations */
-pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, double &worst_let_down, size_t &worst_srtf_divergence, const bool add_evil_user )
+pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_stats, const bool run_verbose, const bool old_style_user, const bool round_robin_user, double &worst_let_down, size_t &worst_srtf_divergence, const bool add_evil_user )
 {
-    auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, worst_let_down, add_evil_user );
+    auto market = sim_users(usr_args, print_stats, run_verbose, old_style_user, round_robin_user, worst_let_down, add_evil_user );
     auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
     size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
@@ -113,15 +117,15 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const bool print_sta
 
     if ( print_stats ) {
         if ( market_sum_fcts == srtf_sum_fcts ) {
-            cout << "market matched srtf, market was:"<< endl;
+            cout << "Trial matched srtf, trial was:"<< endl;
             printSlots(market);
         } else {
-            cout << "market didn't match srtf! Market was:"<< endl;
+            cout << "trial didn't match srtf! Trial was:"<< endl;
             printSlots(market);
             cout << "and srtf was:" << endl;
             printSlots(srtf);
 
-            cout << "market had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
+            cout << "Trial had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
         }
     }
     worst_srtf_divergence = max( worst_srtf_divergence, market_sum_fcts - srtf_sum_fcts );
@@ -152,7 +156,7 @@ list<flow> make_random_users( const size_t num_users, const size_t die_size )
     return toRet;
 }
 
-void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const bool print_stats, const bool run_verbose, const bool old_style_user, const bool add_evil_user )
+void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const bool print_stats, const bool run_verbose, const bool old_style_user, const bool round_robin_user, const bool add_evil_user )
 {
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
@@ -164,7 +168,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     for (size_t i = 0; i < num_trials; i++)
     {
         list<flow> user_args =  make_random_users( num_users, die_size );
-        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, worst_let_down, worst_srtf_divergence, add_evil_user );
+        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, add_evil_user );
         total_market_delay += sum_flow_completion_times.first;
         total_srtf_delay += sum_flow_completion_times.second;
         if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
@@ -224,6 +228,7 @@ void usage_error( const string & program_name )
     cerr << "       TRIAL_STRING = \"START:DURATION[, START2:DURATION2, ...]\"" << endl;
     cerr << endl;
     cerr << "Options = --v --vv" << endl;
+    cerr << "          --round-robin-user" << endl;
     cerr << "          --old-style-user" << endl;
     cerr << endl;
     throw runtime_error( "invalid arguments" );
@@ -237,13 +242,15 @@ int main( int argc, char *argv[] )
         }
         string sim_string = "";
         size_t die_size = 0, num_trials = 1, num_users = 0;
-        bool print_stats = false, run_verbose = false, old_style_user = false, add_evil_user = false;
+        bool print_stats = false, run_verbose = false;
+        bool old_style_user = false, round_robin_user = false, add_evil_user = false;
 
         const option command_line_options[] = {
             { "simulate",           required_argument, nullptr, 's' },
             { "v",                        no_argument, nullptr, 'v' },
             { "vv",                       no_argument, nullptr, 'w' },
             { "old-style-user",           no_argument, nullptr, 'o' },
+            { "round-robin-user",         no_argument, nullptr, 'r' },
             { "die-size",           required_argument, nullptr, 'd' },
             { "num-users",          required_argument, nullptr, 'u' },
             { "num-trials",         required_argument, nullptr, 't' },
@@ -271,6 +278,9 @@ int main( int argc, char *argv[] )
             case 'o':
                 old_style_user = true;
                 break;
+            case 'r':
+                round_robin_user = true;
+                break;
             case 'd':
                 die_size = stoul( optarg );
                 assert( dice_roll );
@@ -297,7 +307,7 @@ int main( int argc, char *argv[] )
         if ( sim_string == "" ) {
             if ( num_users and num_trials and die_size ) {
                 cout << "running " << num_trials << " trials with " << num_users << " users and die size " << die_size << "..." << endl;
-                run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose, old_style_user, add_evil_user );
+                run_random_trials( num_users, num_trials, die_size, print_stats, run_verbose, old_style_user, round_robin_user, add_evil_user );
             } else  {
                 usage_error( argv[ 0 ] );
             }
@@ -307,7 +317,7 @@ int main( int argc, char *argv[] )
             double worst_let_down = numeric_limits<double>::lowest();
             size_t worst_srtf_divergence = 0;
             for (size_t i = 0; i < num_trials; i++) {
-                run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, worst_let_down, worst_srtf_divergence, add_evil_user );
+                run_single_trial( make_users_from_string( sim_string ), print_stats, run_verbose, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, add_evil_user );
             }
             if ( worst_let_down != numeric_limits<double>::lowest() ) {
                 cout << "worst let down was " << worst_let_down << endl;

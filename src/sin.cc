@@ -183,10 +183,13 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     }
     cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
     cout << "average delay ratio " << ( (double) total_market_delay / (double) total_srtf_delay ) << endl;
-    if ( worst_let_down == numeric_limits<double>::lowest() ) {
-        cout << "all users in all trials got best utility they thought they could get" << endl;
-    } else {
-        cout << "largest difference from best expected utilities to final utilities (utility let down) was " << worst_let_down << endl;
+
+    if ( not round_robin_user ) {
+        if ( worst_let_down == numeric_limits<double>::lowest() ) {
+            cout << "all users in all trials got best utility they thought they could get" << endl;
+        } else {
+            cout << "largest difference from best expected utilities to final utilities (utility let down) was " << worst_let_down << endl;
+        }
     }
     cout << "worst srtf divergence was " << worst_srtf_divergence << endl;
 }

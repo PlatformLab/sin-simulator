@@ -181,7 +181,8 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
             cout << "finished trial " << i+1 << " of " << num_trials << endl << endl;
         }
     }
-    cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result" << endl;
+    cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result ( ";
+    cout << (double) market_matched_srtf / (double) ( market_matched_srtf + market_didnt_match_srtf ) << " )" << endl;
     cout << "average delay ratio " << ( (double) total_market_delay / (double) total_srtf_delay ) << endl;
 
     if ( not round_robin_user ) {

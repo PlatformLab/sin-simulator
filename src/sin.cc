@@ -126,7 +126,7 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosi
             printSlots(srtf);
 
             cout << "Trial had " << market_sum_fcts - srtf_sum_fcts << " longer sum flow duration than srtf ( ";
-            cout << market_sum_fcts << "-" << srtf_sum_fcts << endl;
+            cout << market_sum_fcts << "-" << srtf_sum_fcts << " )" << endl;
         }
     }
     worst_srtf_divergence = max( worst_srtf_divergence, market_sum_fcts - srtf_sum_fcts );

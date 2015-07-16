@@ -73,7 +73,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_le
     MarketSimulator simulated_market( move(usersToSimulate), ( verbosity_level >= 3 ), false );
 
     simulated_market.run_to_completion();
-    //cout << "market required " << simulated_market.total_roundtrips() << " round trips" << endl;
+
 
     double sum_user_utilities = simulated_market.sum_user_utilities();
     double sum_user_best_expected_utilities = simulated_market.sum_user_best_expected_utilities();
@@ -89,6 +89,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_le
         cout << "Sum user utility was " << sum_user_utilities << " while sum of best expected utilties was ";
         cout << sum_user_best_expected_utilities << " (let down of ";
         cout << sum_user_best_expected_utilities - sum_user_utilities << ")" << endl << endl;
+        cout << "market required " << simulated_market.total_roundtrips() << " round trips" << endl;
     }
 
     // now clean up results by getting rid of hard coded owner

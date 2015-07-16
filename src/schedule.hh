@@ -13,7 +13,7 @@ struct flow {
     size_t num_packets;
 };
 
-std::unordered_map<size_t, size_t> schedule_flow_completion_times( std::list<flow> flows, std::deque<PacketSent> schedule )
+std::unordered_map<size_t, size_t> schedule_flow_durations( std::list<flow> flows, std::deque<PacketSent> schedule )
 {
     std::unordered_map<size_t, size_t> toRet;
     for (auto & packet_sent : schedule) {
@@ -25,10 +25,10 @@ std::unordered_map<size_t, size_t> schedule_flow_completion_times( std::list<flo
     return toRet;
 }
 
-size_t schedule_sum_flow_completion_times( std::list<flow> flows, std::deque<PacketSent> schedule )
+size_t schedule_sum_flow_durations( std::list<flow> flows, std::deque<PacketSent> schedule )
 {
     size_t toRet = 0;
-    for (auto &fct_pair : schedule_flow_completion_times( flows, schedule ) ) {
+    for (auto &fct_pair : schedule_flow_durations( flows, schedule ) ) {
         toRet += fct_pair.second;
     }
     return toRet;

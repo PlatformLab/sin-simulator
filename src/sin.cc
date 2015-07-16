@@ -100,7 +100,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_le
     }
 
     if ( not add_evil_user ) {
-        assert( simulated_market.sum_user_benefits() == - (double) schedule_sum_flow_completion_times( usr_args, toRet ) );
+        assert( simulated_market.sum_user_benefits() == - (double) schedule_sum_flow_durations( usr_args, toRet ) );
     }
     return toRet;
 }
@@ -111,8 +111,19 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosi
     auto market = sim_users(usr_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, add_evil_user );
     auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
-    size_t market_sum_fcts = schedule_sum_flow_completion_times( usr_args, market );
-    size_t srtf_sum_fcts = schedule_sum_flow_completion_times( usr_args, srtf );
+    const bool print_individual_flow_durations = verbosity_level >= 2;
+    if ( print_individual_flow_durations ) {
+        for (auto &fct_pair : schedule_flow_durations( usr_args, market ) ) {
+            cout << "User: " << uid_to_string( fct_pair.first ) << " had flow duration " <<
+                fct_pair.second << " in simulated schedule" << endl;
+        }
+        for (auto &fct_pair : schedule_flow_durations( usr_args, srtf ) ) {
+            cout << "User: " << uid_to_string( fct_pair.first ) << " had flow duration " <<
+                fct_pair.second << " in srtf schedule" << endl;
+        }
+    }
+    size_t market_sum_fcts = schedule_sum_flow_durations( usr_args, market );
+    size_t srtf_sum_fcts = schedule_sum_flow_durations( usr_args, srtf );
     assert( market_sum_fcts >= srtf_sum_fcts );
 
     if ( verbosity_level >= 2 ) {

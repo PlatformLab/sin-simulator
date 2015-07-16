@@ -125,7 +125,8 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosi
             cout << "and srtf was:" << endl;
             printSlots(srtf);
 
-            cout << "Trial had " << market_sum_fcts - srtf_sum_fcts << " less benefit than srtf" << endl;
+            cout << "Trial had " << market_sum_fcts - srtf_sum_fcts << " longer sum flow duration than srtf ( ";
+            cout << market_sum_fcts << "-" << srtf_sum_fcts << endl;
         }
     }
     worst_srtf_divergence = max( worst_srtf_divergence, market_sum_fcts - srtf_sum_fcts );
@@ -137,12 +138,12 @@ size_t dice_roll( const size_t die_size )
     return ( rand() % die_size ) + 1;
 }
 
-list<flow> make_random_users( const size_t num_users, const size_t die_size )
+list<flow> make_random_users( const size_t num_users, const size_t start_time_die_size, const size_t flow_length_die_size )
 {
     list<flow> toRet { };
     for ( size_t i = 0; i < num_users; i++ )
     {
-        toRet.push_back( { i+1, dice_roll( die_size ), dice_roll( die_size ) } );
+        toRet.push_back( { i+1, dice_roll( start_time_die_size ), dice_roll( flow_length_die_size ) } );
     }
 
     // normalize them to 0 start time
@@ -156,7 +157,7 @@ list<flow> make_random_users( const size_t num_users, const size_t die_size )
     return toRet;
 }
 
-void run_random_trials( const size_t num_users, const size_t num_trials, const size_t die_size, const size_t verbosity_level, const bool old_style_user, const bool round_robin_user, const bool add_evil_user )
+void run_random_trials( const size_t num_users, const size_t num_trials, const size_t start_time_die_size, const size_t flow_length_die_size, const size_t verbosity_level, const bool old_style_user, const bool round_robin_user, const bool add_evil_user )
 {
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
@@ -167,7 +168,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
 
     for (size_t i = 0; i < num_trials; i++)
     {
-        list<flow> user_args =  make_random_users( num_users, die_size );
+        list<flow> user_args =  make_random_users( num_users, start_time_die_size, flow_length_die_size );
         pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, add_evil_user );
         total_market_sum_fcts += sum_flow_completion_times.first;
         total_srtf_sum_fcts += sum_flow_completion_times.second;
@@ -229,7 +230,8 @@ list<flow> make_users_from_string( const string &arg )
 
 void usage_error( const string & program_name )
 {
-    cerr << "Usage: " << program_name << " --num-users=NUMBER --num-trials=NUMBER --die-size=NUMBER | --simulate=TRIAL_STRING" << endl;
+    cerr << "Usage: " << program_name << " --num-users=NUMBER --num-trials=NUMBER --start-time-die-size=NUMBER ";
+    cerr << "--flow-length-die-size=NUMBER | --simulate=TRIAL_STRING" << endl;
     cerr << endl;
     cerr << "       TRIAL_STRING = \"START:DURATION[, START2:DURATION2, ...]\"" << endl;
     cerr << endl;
@@ -247,22 +249,24 @@ int main( int argc, char *argv[] )
             usage_error( argv[ 0 ] );
         }
         string sim_string = "";
-        size_t die_size = 0, num_trials = 1, num_users = 0;
+        size_t start_time_die_size = 0, flow_length_die_size = 0;
+        size_t num_trials = 1, num_users = 0;
         size_t verbosity_level = 0;
         bool old_style_user = false, round_robin_user = false, add_evil_user = false;
 
         const option command_line_options[] = {
-            { "simulate",           required_argument, nullptr, 's' },
-            { "v",                        no_argument, nullptr, 'v' },
-            { "vv",                       no_argument, nullptr, 'w' },
-            { "vvv",                      no_argument, nullptr, 'x' },
-            { "old-style-user",           no_argument, nullptr, 'o' },
-            { "round-robin-user",         no_argument, nullptr, 'r' },
-            { "die-size",           required_argument, nullptr, 'd' },
-            { "num-users",          required_argument, nullptr, 'u' },
-            { "num-trials",         required_argument, nullptr, 't' },
-            { "add-evil-user",            no_argument, nullptr, 'e' },
-            { 0,                                    0, nullptr, 0 }
+            { "simulate",             required_argument, nullptr, 's' },
+            { "v",                          no_argument, nullptr, 'v' },
+            { "vv",                         no_argument, nullptr, 'w' },
+            { "vvv",                        no_argument, nullptr, 'x' },
+            { "old-style-user",             no_argument, nullptr, 'o' },
+            { "round-robin-user",           no_argument, nullptr, 'r' },
+            { "start-time-die-size",  required_argument, nullptr, 'd' },
+            { "flow-length-die-size", required_argument, nullptr, 'f' },
+            { "num-users",            required_argument, nullptr, 'u' },
+            { "num-trials",           required_argument, nullptr, 't' },
+            { "add-evil-user",              no_argument, nullptr, 'e' },
+            { 0,                                        0, nullptr, 0 }
         };
 
         while ( true ) {
@@ -291,8 +295,12 @@ int main( int argc, char *argv[] )
                 round_robin_user = true;
                 break;
             case 'd':
-                die_size = stoul( optarg );
-                assert( dice_roll );
+                start_time_die_size = stoul( optarg );
+                assert( start_time_die_size );
+                break;
+            case 'f':
+                flow_length_die_size = stoul( optarg );
+                assert( flow_length_die_size );
                 break;
             case 'u':
                 num_users = stoul( optarg );
@@ -314,9 +322,12 @@ int main( int argc, char *argv[] )
         }
 
         if ( sim_string == "" ) {
-            if ( num_users and num_trials and die_size ) {
-                cout << "running " << num_trials << " trials with " << num_users << " users and die size " << die_size << "..." << endl;
-                run_random_trials( num_users, num_trials, die_size, verbosity_level, old_style_user, round_robin_user, add_evil_user );
+            if ( num_users and num_trials and flow_length_die_size > 0 and start_time_die_size > 0 ) {
+                cout << "running " << num_trials << " trials with " << num_users;
+                cout << " users and start time die size " << start_time_die_size;
+                cout << " and start time die size " << flow_length_die_size << "..." << endl;
+                run_random_trials( num_users, num_trials, start_time_die_size, flow_length_die_size,
+                        verbosity_level, old_style_user, round_robin_user, add_evil_user );
             } else  {
                 usage_error( argv[ 0 ] );
             }

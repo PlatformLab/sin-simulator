@@ -43,8 +43,8 @@ void MarketSimulator::users_take_actions_until_finished()
         const size_t before_version = mkt_.version();
 
         users_.at(idx_to_run)->take_actions(mkt_);
-        total_roundtrips_++;
         if ( before_version != mkt_.version() ) { // let everyone run again if someone changed market
+            total_market_updates_++;
             idxs_finished.clear();
             if (verbose_) {
                 cout << uid_to_string( users_.at(idx_to_run)->uid_ ) << " took actions:" << endl;

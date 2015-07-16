@@ -20,7 +20,7 @@
 
 using namespace std;
 
-const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_level, const bool old_style_user, const bool round_robin_user, double &worst_let_down, const bool add_evil_user )
+const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_level, const bool old_style_user, const bool round_robin_user, double &worst_let_down, size_t &total_roundtrips, const bool add_evil_user )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
 
@@ -82,6 +82,7 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_le
         worst_let_down = max( worst_let_down, sum_user_best_expected_utilities - sum_user_utilities );
     }
 
+    total_roundtrips += simulated_market.total_roundtrips();
     if ( verbosity_level >= 2 ) {
         cout << endl;
         simulated_market.print_user_stats();
@@ -107,9 +108,9 @@ const deque<PacketSent> sim_users(list<flow> usr_args, const size_t verbosity_le
 }
 
 /* returns sum flow completion time for market and SRTF simulations */
-pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosity_level, const bool old_style_user, const bool round_robin_user, double &worst_let_down, size_t &worst_srtf_divergence, const bool add_evil_user )
+pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosity_level, const bool old_style_user, const bool round_robin_user, double &worst_let_down, size_t &worst_srtf_divergence, size_t &total_roundtrips, const bool add_evil_user )
 {
-    auto market = sim_users(usr_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, add_evil_user );
+    auto market = sim_users(usr_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, total_roundtrips, add_evil_user );
     auto srtf = simulate_shortest_remaining_time_first(usr_args);
 
     const bool print_individual_flow_durations = verbosity_level >= 2;
@@ -177,11 +178,12 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     size_t total_srtf_sum_fcts = 0;
     double worst_let_down = numeric_limits<double>::lowest();
     size_t worst_srtf_divergence = 0;
+    size_t total_roundtrips = 0;
 
     for (size_t i = 0; i < num_trials; i++)
     {
         list<flow> user_args =  make_random_users( num_users, start_time_die_size, flow_length_die_size );
-        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, add_evil_user );
+        pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, total_roundtrips, add_evil_user );
         total_market_sum_fcts += sum_flow_completion_times.first;
         total_srtf_sum_fcts += sum_flow_completion_times.second;
         if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
@@ -199,6 +201,7 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     cout << "average delay ratio " << ( (double) total_market_sum_fcts / (double) total_srtf_sum_fcts ) << endl;
     cout << "average flow duration for srtf " << (double) total_srtf_sum_fcts / (double) ( num_users * num_trials ) << endl;
     cout << "average flow duration for trials " << (double) total_market_sum_fcts / (double) ( num_users * num_trials ) << endl;
+    cout << "average number of roundtrips per user " << (double) total_roundtrips / (double) ( num_users * num_trials ) << endl;
 
     if ( not round_robin_user ) {
         if ( worst_let_down == numeric_limits<double>::lowest() ) {
@@ -348,12 +351,14 @@ int main( int argc, char *argv[] )
             verbosity_level = max( size_t(2), verbosity_level ); /* or else we print nothing and it looks weird */
             double worst_let_down = numeric_limits<double>::lowest();
             size_t worst_srtf_divergence = 0;
+            size_t total_roundtrips = 0;
             for (size_t i = 0; i < num_trials; i++) {
-                run_single_trial( make_users_from_string( sim_string ), verbosity_level, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, add_evil_user );
+                run_single_trial( make_users_from_string( sim_string ), verbosity_level, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, total_roundtrips, add_evil_user );
             }
             if ( worst_let_down != numeric_limits<double>::lowest() ) {
                 cout << "worst let down was " << worst_let_down << endl;
             }
+            cout << "average number of roundtrips per user " << (double) total_roundtrips / (double) ( num_users * num_trials ) << endl;
         }
 
     } catch ( const exception & e ) {

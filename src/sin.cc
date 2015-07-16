@@ -160,8 +160,8 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
 {
     size_t market_matched_srtf = 0;
     size_t market_didnt_match_srtf = 0;
-    size_t total_market_delay = 0;
-    size_t total_srtf_delay = 0;
+    size_t total_market_sum_fcts = 0;
+    size_t total_srtf_sum_fcts = 0;
     double worst_let_down = numeric_limits<double>::lowest();
     size_t worst_srtf_divergence = 0;
 
@@ -169,8 +169,8 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     {
         list<flow> user_args =  make_random_users( num_users, die_size );
         pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, print_stats, run_verbose, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, add_evil_user );
-        total_market_delay += sum_flow_completion_times.first;
-        total_srtf_delay += sum_flow_completion_times.second;
+        total_market_sum_fcts += sum_flow_completion_times.first;
+        total_srtf_sum_fcts += sum_flow_completion_times.second;
         if ( sum_flow_completion_times.first == sum_flow_completion_times.second ) {
             market_matched_srtf++;
         } else {
@@ -183,7 +183,9 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     }
     cout << market_matched_srtf << " of " << market_matched_srtf + market_didnt_match_srtf  << " scenarios matched the srtf result ( ";
     cout << (double) market_matched_srtf / (double) ( market_matched_srtf + market_didnt_match_srtf ) << " )" << endl;
-    cout << "average delay ratio " << ( (double) total_market_delay / (double) total_srtf_delay ) << endl;
+    cout << "average delay ratio " << ( (double) total_market_sum_fcts / (double) total_srtf_sum_fcts ) << endl;
+    cout << "average flow duration for srtf" << (double) total_srtf_sum_fcts / (double) ( num_users * num_trials ) << endl;
+    cout << "average flow duration for trials" << (double) total_market_sum_fcts / (double) ( num_users * num_trials ) << endl;
 
     if ( not round_robin_user ) {
         if ( worst_let_down == numeric_limits<double>::lowest() ) {

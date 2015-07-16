@@ -181,10 +181,16 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     double worst_let_down = numeric_limits<double>::lowest();
     size_t worst_srtf_divergence = 0;
     size_t total_roundtrips = 0;
+    size_t total_packets = 0;
 
     for (size_t i = 0; i < num_trials; i++)
     {
         list<flow> user_args =  make_random_users( num_users, start_time_die_size, flow_length_die_size );
+
+        for ( auto& flow : user_args ) {
+            total_packets += flow.num_packets;
+        }
+
         pair<size_t, size_t> sum_flow_completion_times = run_single_trial( user_args, verbosity_level, old_style_user, round_robin_user, worst_let_down, worst_srtf_divergence, total_roundtrips, add_evil_user );
         total_market_sum_fcts += sum_flow_completion_times.first;
         total_srtf_sum_fcts += sum_flow_completion_times.second;
@@ -204,6 +210,8 @@ void run_random_trials( const size_t num_users, const size_t num_trials, const s
     cout << "average flow duration for srtf " << (double) total_srtf_sum_fcts / (double) ( num_users * num_trials ) << endl;
     cout << "average flow duration for trials " << (double) total_market_sum_fcts / (double) ( num_users * num_trials ) << endl;
     cout << "average number of roundtrips per user " << (double) total_roundtrips / (double) ( num_users * num_trials ) << endl;
+
+    cout << "average number of roundtrips per packet " << (double) total_roundtrips / (double) total_packets << endl;
 
     if ( not round_robin_user ) {
         if ( worst_let_down == numeric_limits<double>::lowest() ) {

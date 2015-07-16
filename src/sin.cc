@@ -132,6 +132,8 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosi
         if ( market_sum_fcts == srtf_sum_fcts ) {
             cout << "Trial matched srtf, trial was:"<< endl;
             printSlots(market);
+            cout << "and srtf was:" << endl;
+            printSlots(srtf);
         } else {
             cout << "trial didn't match srtf! Trial was:"<< endl;
             printSlots(market);

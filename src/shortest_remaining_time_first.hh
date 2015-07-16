@@ -11,13 +11,24 @@ const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<f
     std::deque<PacketSent> final_schedule;
     uint64_t cur_time = 0;
 
+    size_t last_slot_uid = 9999;
     while ( not flows.empty() )
     {
         // first find shortest remaining time flow we can schedule
         auto shortest_remaining_time_flow = flows.end();
         for (auto it = flows.begin(); it != flows.end(); ++it) {
             bool can_schedule = it->flow_start_time <= cur_time;
-            bool is_shortest = shortest_remaining_time_flow == flows.end() || it->num_packets < shortest_remaining_time_flow->num_packets;
+
+            bool is_shortest = false;
+            if ( shortest_remaining_time_flow == flows.end() ) {
+                is_shortest = true;
+            } else if ( it->num_packets < shortest_remaining_time_flow->num_packets ) {
+                is_shortest = true;
+            } else if ( it->uid == last_slot_uid and it->num_packets == shortest_remaining_time_flow->num_packets ) {
+                /* tie breaks shortest flows for the one that went last */
+                is_shortest = true;
+            }
+
             if ( can_schedule and is_shortest ) {
                 shortest_remaining_time_flow = it;
             }
@@ -27,6 +38,7 @@ const std::deque<PacketSent> simulate_shortest_remaining_time_first( std::list<f
         if (shortest_remaining_time_flow != flows.end())
         {
             final_schedule.push_back( {shortest_remaining_time_flow->uid, cur_time} );
+            last_slot_uid = shortest_remaining_time_flow->uid;
 
             // decrement packets to be sent for flow we serviced, remove from list completed
             shortest_remaining_time_flow->num_packets--;

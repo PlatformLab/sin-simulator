@@ -263,6 +263,7 @@ void usage_error( const string & program_name )
     cerr << "Options = --v --vv --vvv" << endl;
     cerr << "          --round-robin-user" << endl;
     cerr << "          --old-style-user" << endl;
+    cerr << "          --random-seed=NUMBER" << endl;
     cerr << endl;
     throw runtime_error( "invalid arguments" );
 }
@@ -290,6 +291,7 @@ int main( int argc, char *argv[] )
             { "flow-length-die-size", required_argument, nullptr, 'f' },
             { "num-users",            required_argument, nullptr, 'u' },
             { "num-trials",           required_argument, nullptr, 't' },
+            { "random-seed",          required_argument, nullptr, 'z' },
             { "add-evil-user",              no_argument, nullptr, 'e' },
             { 0,                                        0, nullptr, 0 }
         };
@@ -334,6 +336,10 @@ int main( int argc, char *argv[] )
             case 't':
                 num_trials = stoul( optarg );
                 assert( num_trials );
+                break;
+            case 'z':
+                /* sets seed for rand */
+                srand( 7 * stoul( optarg ) );
                 break;
             case 'e':
                 add_evil_user = true;

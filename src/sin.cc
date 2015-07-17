@@ -116,13 +116,21 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosi
     const bool print_individual_flow_durations = verbosity_level >= 2;
     if ( print_individual_flow_durations ) {
         for (auto &fct_pair : schedule_flow_lengths_and_durations( usr_args, market ) ) {
+            cout << "User: " << uid_to_string( fct_pair.first ) << " had flow duration " << fct_pair.second.second;
+            cout << " in simulated schedule" << endl;
+            /*
             cout << "User: " << uid_to_string( fct_pair.first ) << " had flow length " << fct_pair.second.first << 
                 //" and flow duration " << fct_pair.second.second << " in simulated schedule" << endl;
                 " and flow duration / length " << (double) fct_pair.second.second / (double) fct_pair.second.first << " in simulated schedule" << endl;
+                */
         }
         for (auto &fct_pair : schedule_flow_lengths_and_durations( usr_args, srtf ) ) {
+            cout << "User: " << uid_to_string( fct_pair.first ) << " had flow duration " << fct_pair.second.second;
+            cout << " in srtf schedule" << endl;
+            /*
             cout << "User: " << uid_to_string( fct_pair.first ) << " had flow length " << fct_pair.second.first << 
                 " and flow duration / length " << (double) fct_pair.second.second / (double) fct_pair.second.first << " in srtf schedule" << endl;
+                */
         }
     }
     size_t market_sum_fcts = schedule_sum_flow_durations( usr_args, market );

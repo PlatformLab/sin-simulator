@@ -13,6 +13,21 @@ struct flow {
     size_t num_packets;
 };
 
+/* returns a map of uid to flow num packets and duration */
+std::unordered_map<size_t, std::pair<size_t, size_t>> schedule_flow_lengths_and_durations( std::list<flow> flows, std::deque<PacketSent> schedule )
+{
+    std::unordered_map<size_t, std::pair<size_t, size_t>> toRet;
+    for (auto & packet_sent : schedule) {
+        toRet[packet_sent.owner].second = packet_sent.time;
+    }
+    for (auto &flow : flows ) {
+        toRet[flow.uid].first = flow.num_packets;
+        toRet[flow.uid].second += 1 - flow.flow_start_time;
+    }
+    return toRet;
+}
+
+/* returns a map of uid to flow duration */
 std::unordered_map<size_t, size_t> schedule_flow_durations( std::list<flow> flows, std::deque<PacketSent> schedule )
 {
     std::unordered_map<size_t, size_t> toRet;

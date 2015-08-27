@@ -131,6 +131,11 @@ pair<size_t, size_t> run_single_trial( list<flow> usr_args, const size_t verbosi
             cout << "User: " << uid_to_string( fct_pair.first ) << " had flow length " << fct_pair.second.first << 
                 " and flow duration / length " << (double) fct_pair.second.second / (double) fct_pair.second.first << " in srtf schedule" << endl;
                 */
+            double cost = - (double) fct_pair.second.first;
+            double benefit = - (double) fct_pair.second.second;
+            cout << "It had fake cost " << cost << " and fake benefit " << benefit << endl;
+            cout << "It had srtf duration " << fct_pair.second.second;
+            cout << " with " << fct_pair.second.first << " packets" << endl;
         }
     }
     size_t market_sum_fcts = schedule_sum_flow_durations( usr_args, market );

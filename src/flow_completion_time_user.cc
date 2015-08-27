@@ -194,7 +194,13 @@ bool FlowCompletionTimeUser::done( const Market& mkt )
 
 void FlowCompletionTimeUser::print_stats( const Market& mkt ) const
 {
-    cout << uid_to_string( uid_ ) << " had benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
+    cout << uid_to_string( uid_ ) << " had utility " << (double) utility( mkt );
+    cout <<  " with size " << flow_num_packets_ << " packets" << endl;
+
+    cout << "It had duration " << -benefit( mkt );
+    cout <<  " with size " << flow_num_packets_ << " packets and cost per slot " << - cost( mkt )/(double) flow_num_packets_ << endl;
+
+    cout << "It had benefit " << benefit( mkt ) << ", cost " << cost( mkt ) << ", utility " << utility( mkt );
     cout << ", and best expected utility " << best_expected_utility() << endl;
 }
 

@@ -18,32 +18,14 @@
 
 class MarketSimulator {
     Market mkt_;
-    std::vector<std::unique_ptr<AbstractUser>> users_;
-    const bool verbose_;
-    const bool random_user_order_;
-    size_t total_market_updates_ = 0;
-
-    size_t next_idx( size_t last_idx );
-    void users_take_actions_until_finished();
+    std::vector<std::unique_ptr<AbstractBCP>> users_;
 
     public:
-    MarketSimulator( std::vector<std::unique_ptr<AbstractUser>> &&users, bool verbose, bool random_user_order );
+    MarketSimulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
 
     void run_to_completion();
 
-    void print_slots();
-
-    const std::deque<PacketSent> &packets_sent() const { return mkt_.packets_sent(); };
-    size_t total_market_updates() const { return total_market_updates_; };
-
-    void print_packets_sent();
-
-    std::unordered_map<size_t, double> print_money_exchanged();
-
-    void print_user_stats();
-    double sum_user_utilities();
-    double sum_user_best_expected_utilities();
-    double sum_user_benefits();
+    void print_outcome();
 };
 
 #endif /* MARKET_SIMULATOR_HH */

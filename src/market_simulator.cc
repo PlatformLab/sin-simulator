@@ -48,5 +48,5 @@ void MarketSimulator::run_to_completion()
 
 void MarketSimulator::print_outcome()
 {
-    cout << "hello world" << endl;
+    mkt_.print_intervals();
 }

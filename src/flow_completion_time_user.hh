@@ -44,6 +44,7 @@ class FlowCompletionTimeUser : public AbstractUser
                 }
             }
         }
+        done_ = true; // only run once regardless for now
     }
 
     bool done( const Market& mkt ) override

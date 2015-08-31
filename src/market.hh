@@ -36,6 +36,7 @@ class Market {
         size_t version() const { return version_; };
         bool empty();
         void advance_time();
+        void print_intervals() const;
 };
 
 #endif /* MARKET_HH */

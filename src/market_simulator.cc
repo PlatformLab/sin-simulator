@@ -4,53 +4,49 @@
 
 using namespace std;
 
+MarketSimulator::MarketSimulator( vector<unique_ptr<AbstractUser>> &&users )
+: mkt_(),
+users_(move(users))
+{
+}
+
 static bool all_users_done(const vector<unique_ptr<AbstractUser>> &users, const Market &mkt)
 {
     for ( const auto & u : users ) {
-        if (not u->done(mkt)) {
+        if (not u->done( mkt )) {
             return false;
         }
     }
     return true;
 }
 
-class MarketSimulator {
-    Market mkt_;
-    std::vector<std::unique_ptr<AbstractBCP>> users_;
-
-    void users_take_actions_until_finished()
+void MarketSimulator::users_take_actions_until_finished()
+{
+    bool all_done = true;
+    do
     {
-        bool all_done = true;
-        do
-        {
-            all_done = true;
-            for ( auto &u : users_ ) {
-                    size_t before_version = mkt_.version();
-                    u->take_actions( mkt_ );
-                    bool market_unchanged = before_version == mkt_.version();
-                    all_done &= market_unchanged;
-                }
-        } while ( not all_done )
-    }
+        all_done = true;
+        for ( auto &u : users_ ) {
+            size_t before_version = mkt_.version();
+            u->take_actions( mkt_ );
+            bool market_unchanged = before_version == mkt_.version();
 
-    public:
-    MarketSimulator( std::vector<std::unique_ptr<AbstractUser>> &&users )
-        : users_(move(users))
-    {
-
-    }
-    void run_to_completion()
-    {
-        do
-        {
-            users_take_actions_until_finished();
-            mkt_.advance_time();
+            all_done &= market_unchanged;
         }
-        while ( not market.empty() );
-    }
+    } while ( not all_done );
+}
 
-    void print_outcome()
+void MarketSimulator::run_to_completion()
+{
+    do
     {
-        cout << "hello world" << endl;
+        users_take_actions_until_finished();
+        mkt_.advance_time();
     }
-};
+    while ( not mkt_.empty() );
+}
+
+void MarketSimulator::print_outcome()
+{
+    cout << "hello world" << endl;
+}

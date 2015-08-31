@@ -15,7 +15,7 @@ class FlowCompletionTimeUser : public AbstractUser
     bool done_ = false;
 
     public:
-    OwnerUser( const size_t &uid, const size_t start_time, const size_t num_packets )
+    FlowCompletionTimeUser( const size_t uid, const size_t start_time, const size_t num_packets )
         : AbstractUser( uid ),
         start_time_( start_time ),
         num_packets_( num_packets )
@@ -30,6 +30,11 @@ class FlowCompletionTimeUser : public AbstractUser
             done_ = true;
         }
     }
-}
+
+    bool done( const Market& mkt ) override
+    {
+        return done_;
+    }
+};
 
 #endif /* FLOW_COMPLETION_TIME_USER */

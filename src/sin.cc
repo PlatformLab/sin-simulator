@@ -5,19 +5,20 @@
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
 #include "market_simulator.hh"
-#include "market.hh"
 
 using namespace std;
 
-int main( int argc, char *argv[] )
+int main() //( int argc, char *argv[] )
 {
     vector<unique_ptr<AbstractUser>> usersToSimulate;
 
     size_t uid = 0;
+    size_t slots_needed = 10;
+    usersToSimulate.emplace_back(make_unique<OwnerUser>( uid++, 1, slots_needed ));
+
     usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( uid++, 0, 5 ));
     usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( uid++, 2, 3 ));
 
-    usersToSimulate.emplace_back(make_unique<OwnerUser>( 0, 1, slots_needed, true ));
 
     MarketSimulator simulated_market( move(usersToSimulate) );
 

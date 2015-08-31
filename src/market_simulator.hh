@@ -18,7 +18,9 @@
 
 class MarketSimulator {
     Market mkt_;
-    std::vector<std::unique_ptr<AbstractBCP>> users_;
+    std::vector<std::unique_ptr<AbstractUser>> users_;
+
+    void users_take_actions_until_finished();
 
     public:
     MarketSimulator( std::vector<std::unique_ptr<AbstractUser>> &&users );

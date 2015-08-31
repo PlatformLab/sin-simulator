@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <deque>
+#include <list>
 #include <vector>
 #include <cassert>
 #include <memory>
@@ -16,14 +17,14 @@ struct MoneyExchanged {
     size_t to;
     size_t from;
     double amount;
-}
+};
 
 class Market {
     private:
         size_t time_;
         size_t version_ = 0;
-        std::deque<Interval> future_intervals_{};
-        std::deque<Interval> past_intervals_{};
+        std::list<Interval> future_intervals_{};
+        std::list<Interval> past_intervals_{};
         std::deque<MoneyExchanged> transactions_{};
 
     public:
@@ -31,7 +32,8 @@ class Market {
         double cost_for_intervals(size_t uid, size_t start, size_t end, size_t num_intervals) const;
         double buy_intervals(size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment);
 
-        size_t version() const;
+        size_t version() const { return version_; };
+        bool empty() { return future_intervals_.empty(); };
         void advance_time();
 };
 

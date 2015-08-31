@@ -26,6 +26,8 @@ class FlowCompletionTimeUser : public AbstractUser
     {
         if ( not done_ )
         {
+            double cost = mkt.cost_for_intervals( uid_, start_time_, start_time_+20, num_packets_ );
+            std::cout << "cost was " << cost << std::endl;
             // do stuff
             done_ = true;
         }

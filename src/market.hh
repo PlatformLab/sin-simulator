@@ -23,8 +23,7 @@ class Market {
     private:
         size_t time_;
         size_t version_ = 0;
-        std::list<Interval> future_intervals_{};
-        std::list<Interval> past_intervals_{};
+        std::vector<Interval> intervals_{};
         std::deque<MoneyExchanged> transactions_{};
 
     public:
@@ -33,7 +32,7 @@ class Market {
         double buy_intervals(size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment);
 
         size_t version() const { return version_; };
-        bool empty() { return future_intervals_.empty(); };
+        bool empty();
         void advance_time();
 };
 

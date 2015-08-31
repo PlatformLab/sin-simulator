@@ -26,10 +26,23 @@ class FlowCompletionTimeUser : public AbstractUser
     {
         if ( not done_ )
         {
-            double cost = mkt.cost_for_intervals( uid_, start_time_, start_time_+20, num_packets_ );
-            std::cout << "cost was " << cost << std::endl;
-            // do stuff
-            done_ = true;
+            size_t best_interval_length = 1;
+            double best_interval_cost = 0;
+
+            for ( size_t interval_length = 1; interval_length <= 1024; interval_length <<= 1 ) {
+                double cost = mkt.cost_for_intervals( uid_, start_time_, start_time_+interval_length, num_packets_ );
+                if ( cost > 0 and ( best_interval_cost == 0 or -best_interval_length-best_interval_cost < -interval_length-cost ) ) {
+                    best_interval_length = interval_length;
+                    best_interval_cost = cost;
+                }
+            }
+            if ( best_interval_cost > 0 ) {
+                double spent = mkt.buy_intervals( uid_, start_time_, start_time_+best_interval_length, num_packets_, best_interval_cost );
+                std::cout << "cost was " << best_interval_cost << " and spent " << spent << " for interval length " << best_interval_length << std::endl;
+                if ( spent > 0 ) {
+                    done_ = true;
+                }
+            }
         }
     }
 

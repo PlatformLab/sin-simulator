@@ -24,11 +24,13 @@ class Market {
         size_t time_;
         size_t version_ = 0;
         std::vector<Interval> intervals_{};
-        std::deque<MoneyExchanged> transactions_{};
+        std::vector<MoneyExchanged> transactions_{};
+
+        std::vector<Interval *> cheapest_interals_in_range(size_t uid, size_t start, size_t end, size_t num_intervals);
 
     public:
         void add_interval(size_t uid, size_t start, size_t end, double offer);
-        double cost_for_intervals(size_t uid, size_t start, size_t end, size_t num_intervals) const;
+        double cost_for_intervals(size_t uid, size_t start, size_t end, size_t num_intervals);
         double buy_intervals(size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment);
 
         size_t version() const { return version_; };

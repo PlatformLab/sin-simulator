@@ -97,6 +97,7 @@ void Market::advance_time()
     time_++;
 }
 
+/*
 void Market::print_intervals() const
 {
     for ( auto &i : intervals_ )
@@ -104,3 +105,4 @@ void Market::print_intervals() const
         cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner ) << " with sell price " << i.cost << endl;
     }
 }
+*/

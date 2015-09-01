@@ -3,35 +3,54 @@
 #ifndef MARKET_SIMULATOR_HH
 #define MARKET_SIMULATOR_HH
 
-#include <unordered_map>
 #include <iostream>
-#include <deque>
-#include <queue>
-#include <list>
-#include <algorithm>
 #include <cassert>
 #include <memory>
-#include <functional>
+#include <vector>
 
+#include "flow.hh"
+#include "link.hh"
 #include "abstract_user.hh"
 #include "market.hh"
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
-#include "flow.hh"
-#include "link.hh"
 
-class MarketSimulator {
-    Market mkt_;
-    std::vector<std::unique_ptr<AbstractUser>> users_;
+void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr<AbstractUser>> &users )
+{
+    bool all_done = true;
+    do
+    {
+        all_done = true;
+        for ( auto &u : users ) {
+            size_t before_version = mkt.version();
+            u->take_actions( mkt );
+            bool market_unchanged = before_version == mkt.version();
 
-    void users_take_actions_until_finished();
+            all_done &= market_unchanged;
+        }
+    } while ( not all_done );
+}
 
-    public:
-    MarketSimulator( std::vector<Link> &links, std::vector<Flow> &flows );
+std::vector<Interval> simulate_market( std::vector<Link> &links, std::vector<Flow> &flows )
+{
+    Market mkt = Market();
+    std::vector<std::unique_ptr<AbstractUser>> users;
 
-    void run_to_completion();
+    for ( auto &link : links ) {
+        users.push_back( std::make_unique<OwnerUser>( link ) );
+    }
+    for ( Flow &flow : flows ) {
+        users.push_back( std::make_unique<FlowCompletionTimeUser>( flow ) );
+    }
 
-    void print_outcome();
-};
+    do
+    {
+        users_take_actions_until_finished( mkt, users );
+        mkt.advance_time();
+    }
+    while ( not mkt.empty() );
+
+    return mkt.intervals();
+}
 
 #endif /* MARKET_SIMULATOR_HH */

@@ -10,25 +10,8 @@
 #include "flow.hh"
 #include "link.hh"
 
-class SRTFSimulator {
-    std::vector<Link> links_;
-    std::vector<Flow> flows_;
-
-    public:
-    SRTFSimulator( std::vector<Link> &links, std::vector<Flow> &flows )
-    : links_( links ),
-    flows_( flows )
-    { }
-
-    void run_to_completion()
-    {
-
-    }
-
-    void print_outcome()
-    {
-
-    }
-};
+std::vector<Interval> simulate_srtf( std::vector<Link> &links, std::vector<Flow> &flows ) {
+    return {};
+}
 
 #endif /* SRTF_SIMULATOR_HH */

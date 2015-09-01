@@ -34,9 +34,9 @@ class Market {
         double buy_intervals(size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment);
 
         size_t version() const { return version_; };
+        std::vector<Interval> intervals() const { return intervals_; };
         bool empty();
         void advance_time();
-        void print_intervals() const;
 };
 
 #endif /* MARKET_HH */

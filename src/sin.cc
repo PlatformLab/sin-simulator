@@ -18,12 +18,6 @@ int main() //( int argc, char *argv[] )
     vector<Link> links { { uid++, slots_needed, propagation_time, default_interval_cost } };
     vector<Flow> flows { { uid++, 0, 2 }, { uid++, 0, 2 }, { uid++, 0, 2 }, { uid++, 0, 2 } };
 
-    MarketSimulator simulated_market( links, flows );
-    simulated_market.run_to_completion();
-    simulated_market.print_outcome();
-
-    SRTFSimulator simulated_srtf( links, flows );
-    simulated_srtf.run_to_completion();
-    simulated_srtf.print_outcome();
-
+    vector<Interval> market_allocation = simulate_market( links, flows );
+    vector<Interval> srtf_allocation = simulate_srtf( links, flows );
 }

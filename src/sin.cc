@@ -3,6 +3,7 @@
 #include <iostream>
 #include "flow.hh"
 #include "link.hh"
+#include "allocation_analysis.hh"
 #include "market_simulator.hh"
 #include "srtf_simulator.hh"
 
@@ -20,4 +21,5 @@ int main() //( int argc, char *argv[] )
 
     vector<Interval> market_allocation = simulate_market( links, flows );
     vector<Interval> srtf_allocation = simulate_srtf( links, flows );
+    print_allocation( market_allocation );
 }

@@ -10,7 +10,9 @@
 #include <cassert>
 #include <memory>
 #include <functional>
+#include <algorithm>
 
+#include "pretty_print.hh"
 #include "interval.hh"
 
 struct MoneyExchanged {

@@ -1,8 +1,6 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include "market.hh"
-#include "pretty_print.hh"
-#include <algorithm>
 
 using namespace std;
 
@@ -96,13 +94,3 @@ void Market::advance_time()
 {
     time_++;
 }
-
-/*
-void Market::print_intervals() const
-{
-    for ( auto &i : intervals_ )
-    {
-        cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner ) << " with sell price " << i.cost << endl;
-    }
-}
-*/

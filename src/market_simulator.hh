@@ -15,6 +15,10 @@
 
 #include "abstract_user.hh"
 #include "market.hh"
+#include "owner_user.hh"
+#include "flow_completion_time_user.hh"
+#include "flow.hh"
+#include "link.hh"
 
 class MarketSimulator {
     Market mkt_;
@@ -23,7 +27,7 @@ class MarketSimulator {
     void users_take_actions_until_finished();
 
     public:
-    MarketSimulator( std::vector<std::unique_ptr<AbstractUser>> &&users );
+    MarketSimulator( std::vector<Link> &links, std::vector<Flow> &flows );
 
     void run_to_completion();
 

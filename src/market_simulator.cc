@@ -4,10 +4,15 @@
 
 using namespace std;
 
-MarketSimulator::MarketSimulator( vector<unique_ptr<AbstractUser>> &&users )
-: mkt_(),
-users_(move(users))
+MarketSimulator::MarketSimulator( std::vector<Link> &links, std::vector<Flow> &flows )
+: mkt_()
 {
+    for ( auto &link : links ) {
+        users_.push_back( make_unique<OwnerUser>( link ) );
+    }
+    for ( Flow &flow : flows ) {
+        users_.push_back( make_unique<FlowCompletionTimeUser>( flow ) );
+    }
 }
 
 static bool all_users_done(const vector<unique_ptr<AbstractUser>> &users, const Market &mkt)

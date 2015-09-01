@@ -4,13 +4,12 @@
 #include "flow.hh"
 #include "link.hh"
 #include "market_simulator.hh"
+#include "srtf_simulator.hh"
 
 using namespace std;
 
 int main() //( int argc, char *argv[] )
 {
-    vector<unique_ptr<AbstractUser>> usersToSimulate;
-
     size_t uid = 0;
     const size_t slots_needed = 10;
     const size_t propagation_time = 5;
@@ -20,7 +19,11 @@ int main() //( int argc, char *argv[] )
     vector<Flow> flows { { uid++, 0, 2 }, { uid++, 0, 2 }, { uid++, 0, 2 }, { uid++, 0, 2 } };
 
     MarketSimulator simulated_market( links, flows );
-
     simulated_market.run_to_completion();
     simulated_market.print_outcome();
+
+    SRTFSimulator simulated_srtf( links, flows );
+    simulated_srtf.run_to_completion();
+    simulated_srtf.print_outcome();
+
 }

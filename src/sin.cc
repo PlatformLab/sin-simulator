@@ -14,7 +14,7 @@ int main() //( int argc, char *argv[] )
 
     size_t uid = 0;
     size_t slots_needed = 10;
-    size_t propagation_time_ms = 10;
+    size_t propagation_time_ms = 5;
     usersToSimulate.emplace_back(make_unique<OwnerUser>( uid++, 1, slots_needed, propagation_time_ms ));
 
     usersToSimulate.emplace_back(make_unique<FlowCompletionTimeUser>( uid++, 0, 2 ));

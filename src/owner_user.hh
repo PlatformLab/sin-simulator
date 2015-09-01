@@ -30,7 +30,7 @@ class OwnerUser : public AbstractUser
         {
             for ( int i = 0; i < total_num_slots_; i++ )
             {
-                mkt.add_interval( uid_, i, i+propagation_time_ms_, default_slot_offer_+i );
+                mkt.add_interval( uid_, i, i+propagation_time_ms_, default_slot_offer_ );
             }
             // add a bunch of slots
             done_ = true;

@@ -9,11 +9,11 @@ bool cost_cmp(const Interval *a, const Interval *b)
     return a->cost < b->cost;
 }
 
-void Market::add_interval(size_t uid, size_t start, size_t end, double cost)
+void Market::add_interval( Interval interval )
 {
-    cout << uid_to_string( uid ) << " trying to add (" << start << ", " << end << ") at market time " << time_ << endl;
-    assert(start >= time_);
-    intervals_.push_back( { uid, start, end, cost } );
+    cout << uid_to_string( interval.owner ) << " trying to add (" << interval.start << ", " << interval.end << ") at market time " << time_ << endl;
+    assert( interval.start >= time_ );
+    intervals_.push_back( interval );
     version_++;
 }
 

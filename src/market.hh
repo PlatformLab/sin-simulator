@@ -31,7 +31,7 @@ class Market {
         std::vector<Interval *> cheapest_interals_in_range(size_t uid, size_t start, size_t end, size_t num_intervals);
 
     public:
-        void add_interval(size_t uid, size_t start, size_t end, double offer);
+        void add_interval( Interval interval );
         double cost_for_intervals(size_t uid, size_t start, size_t end, size_t num_intervals);
         double buy_intervals(size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment);
 

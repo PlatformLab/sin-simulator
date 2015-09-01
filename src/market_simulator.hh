@@ -31,15 +31,15 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
     } while ( not all_done );
 }
 
-std::vector<Interval> simulate_market( std::vector<Link> &links, std::vector<Flow> &flows )
+std::vector<Interval> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows )
 {
     Market mkt = Market();
     std::vector<std::unique_ptr<AbstractUser>> users;
 
-    for ( auto &link : links ) {
+    for ( const Link &link : links ) {
         users.push_back( std::make_unique<OwnerUser>( link ) );
     }
-    for ( Flow &flow : flows ) {
+    for ( const Flow &flow : flows ) {
         users.push_back( std::make_unique<FlowCompletionTimeUser>( flow ) );
     }
 

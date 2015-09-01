@@ -25,11 +25,10 @@ class OwnerUser : public AbstractUser
     {
         if ( not done_ )
         {
-            for ( int i = 0; i < link_.num_intervals; i++ )
+            for ( Interval &i : link_.get_intervals() )
             {
-                mkt.add_interval( uid_, i, i+link_.propagation_time, link_.default_interval_cost );
+                mkt.add_interval( i );
             }
-            // add a bunch of interavls
             done_ = true;
         }
     }

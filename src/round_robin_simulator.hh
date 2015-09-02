@@ -15,36 +15,37 @@ std::vector<Interval> simulate_round_robin( const std::vector<Link> &links, std:
     Link link = links.at(0);
     std::vector<Interval> allocation = link.get_intervals();
     
-    auto flow_iterator = flows.begin();
-    for ( Interval &interval : allocation )
+    auto cur_interval = allocation.begin();
+    while ( cur_interval != allocation.end() )
     {
-        // find a flow we can schedule
-        auto flow_to_schedule = flows.end();
-        for ( int i = 0; i < flows.size(); i++ )
-        {
-            flow_iterator++;
-            if ( flow_iterator == flows.end() )
-            {
-                flow_iterator = flows.begin();
-            }
+        bool someone_went = false;
+        bool everyone_finished = true;
 
-            if ( flow_iterator->start <= interval.start ) {
-                flow_to_schedule = flow_iterator;
-                break;
+        for (auto &flow : flows) {
+            bool flow_finished = flow.num_packets == 0;
+            everyone_finished = everyone_finished and flow_finished;
+
+            bool flow_started = cur_interval->start >= flow.start;
+
+            if (flow_started and not flow_finished) { // then schedule it
+                cur_interval->owner = flow.uid;
+                flow.num_packets--;
+                cur_interval++;
+                if ( cur_interval == allocation.end() )
+                {
+                    return allocation;
+                }
+                someone_went = true;
             }
         }
-        if ( flow_to_schedule != flows.end() )
-        {
-            interval.owner = flow_to_schedule->uid;
 
-            flow_to_schedule->num_packets--;
-            if ( flow_to_schedule->num_packets == 0 )
-            {
-                flows.erase( flow_to_schedule );
-            }
+        if (everyone_finished) {
+            return allocation;
+        }
+        if (not someone_went) { // if nobody could go then advance anyway
+            cur_interval++;
         }
     }
-
     return allocation;
 }
 

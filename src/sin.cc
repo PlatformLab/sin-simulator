@@ -6,6 +6,7 @@
 #include "market_simulator.hh"
 #include "allocation_analysis.hh"
 #include "srtf_simulator.hh"
+#include "round_robin_simulator.hh"
 
 using namespace std;
 
@@ -21,10 +22,13 @@ int main() //( int argc, char *argv[] )
 
     vector<Interval> market_allocation = simulate_market( links, flows );
     vector<Interval> srtf_allocation = simulate_srtf( links, flows );
+    vector<Interval> round_robin_allocation = simulate_round_robin( links, flows );
 
     print_flows( flows );
     cout << "market mean flow duration " << mean_flow_duration( flows, market_allocation ) << " with allocation:" << endl;
     print_allocation( market_allocation );
     cout << "srtf mean flow duration " << mean_flow_duration( flows, srtf_allocation ) << " with allocation:" << endl;
     print_allocation( srtf_allocation );
+    cout << "round robin mean flow duration " << mean_flow_duration( flows, round_robin_allocation ) << " with allocation:" << endl;
+    print_allocation( round_robin_allocation );
 }

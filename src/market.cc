@@ -26,12 +26,13 @@ vector<Interval *> Market::cheapest_interals_in_range(size_t uid, size_t start, 
         const bool can_buy = i.start >= start and i.end <= end and i.owner != uid and i.cost > 0;
         if ( can_buy )
         {
-            cheapest_intervals.push_back( &i );
-            push_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_cmp );
-
-            if ( cheapest_intervals.size() > num_intervals ) {
+            if ( cheapest_intervals.size() == num_intervals and i.cost < cheapest_intervals[0]->cost ) {
                 pop_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_cmp );
-                cheapest_intervals.pop_back();
+                cheapest_intervals.back() = &i;
+                push_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_cmp );
+            } else if ( cheapest_intervals.size() < num_intervals ) {
+                cheapest_intervals.push_back( &i );
+                push_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_cmp );
             }
         }
     }

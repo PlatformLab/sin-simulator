@@ -24,10 +24,11 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
     }
 
     // filter out intervals not allocated to flows
-    for ( auto &map_entry : toRet )
-    {
-        if ( map_entry.second.first == 0 ) {
-            toRet.erase( map_entry.first );
+    for ( auto it = toRet.begin(); it != toRet.end(); ) {
+        if ( it->second.first == 0 ) {
+            it = toRet.erase( it );
+        } else {
+            ++it;
         }
     }
 

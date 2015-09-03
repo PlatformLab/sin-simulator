@@ -10,7 +10,7 @@
 #include "flow.hh"
 #include "link.hh"
 
-std::vector<Interval> simulate_srtf( const std::vector<Link> &links, std::vector<Flow> flows ) {
+const std::vector<Interval> simulate_srtf( const std::vector<Link> &links, std::vector<Flow> flows ) {
     assert ( links.size() == 1 );
     Link link = links.at(0);
     std::vector<Interval> allocation = link.get_intervals();

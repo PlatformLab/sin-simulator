@@ -29,11 +29,12 @@ static void print_flows( const std::vector<Flow> &flows )
     }
 }
 
-static void print_allocation( const std::vector<Interval> allocation )
+static void print_intervals( const std::vector<Interval> intervals )
 {
-    for ( auto &i : allocation )
+    for ( auto &i : intervals )
     {
-        std::cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner ) << " with sell price " << i.cost << std::endl;
+        if ( i.owner != 0 ) // XXX temp
+            std::cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner ) << " with sell price " << i.cost << std::endl;
     }
 }
 

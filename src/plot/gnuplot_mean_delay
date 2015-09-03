@@ -16,5 +16,5 @@ set xtics nomirror
 set linetype 1 lc rgb "#ffeda0"
 set linetype 2 lc rgb "#feb24c"
 set linetype 3 lc rgb "#f03b20"
-plot 'mean_delay.dat' using 2:xtic(1) title column, '' using 3 title column, '' using 4 title column
+plot 'mean_delay.dat' using 3:xtic(1) title column, '' using 2 title column, '' using 4 title column
 save 'mean_delay.gnu'

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void run_single_trial( /*vector<Link> &links,*/ const vector<Flow> flows, const size_t verbosity_level )
+tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const vector<Flow> flows, const size_t verbosity_level )
 {
     const size_t slots_needed = 20;
     const size_t propagation_time = 0;
@@ -23,13 +23,24 @@ void run_single_trial( /*vector<Link> &links,*/ const vector<Flow> flows, const 
     const vector<Interval> srtf_allocation = simulate_srtf( links, flows );
     const vector<Interval> round_robin_allocation = simulate_round_robin( links, flows );
 
-    print_flows( flows );
-    cout << "market mean flow duration " << mean_flow_duration( flows, market_allocation ) << " with allocation:" << endl;
-    print_intervals( market_allocation );
-//    cout << "srtf mean flow duration " << mean_flow_duration( flows, srtf_allocation ) << " with allocation:" << endl;
-//    print_intervals( srtf_allocation );
-//    cout << "round robin mean flow duration " << mean_flow_duration( flows, round_robin_allocation ) << " with allocation:" << endl;
-//    print_intervals( round_robin_allocation );
+    double market_mean_flow_duration = mean_flow_duration( flows, market_allocation );
+    double srtf_mean_flow_duration = mean_flow_duration( flows, srtf_allocation );
+    double round_robin_mean_flow_duration = mean_flow_duration( flows, round_robin_allocation );
+
+    if ( verbosity_level > 0 ) {
+        print_flows( flows );
+        cout << "market mean flow duration " << market_mean_flow_duration  << " with allocation:" << endl;
+        print_intervals( market_allocation );
+
+        cout << "srtf mean flow duration " << srtf_mean_flow_duration << " with allocation:" << endl;
+        print_intervals( srtf_allocation );
+
+        cout << "round robin mean flow duration " << round_robin_mean_flow_duration << " with allocation:" << endl;
+        print_intervals( round_robin_allocation );
+    }
+    
+    // TODO improve this
+    return make_tuple<double, double, double>( move(market_mean_flow_duration), move(srtf_mean_flow_duration), move(round_robin_mean_flow_duration) );
 }
 
 size_t dice_roll( const size_t die_size )
@@ -86,16 +97,29 @@ vector<Flow> make_flows_from_string( const string &arg )
 
 void run_random_trials( const size_t num_flows, const size_t num_trials, const size_t die_size, const size_t verbosity_level )
 {
+    double market_mean_flow_duration = 0;
+    double srtf_mean_flow_duration = 0;
+    double round_robin_mean_flow_duration = 0;
     for (size_t i = 0; i < num_trials; i++)
     {
         vector<Flow> flows = make_random_flows( num_flows, die_size );
 
-        run_single_trial( flows, verbosity_level );
+        tuple<double,double,double> trial_mean_durations = run_single_trial( flows, verbosity_level );
+        market_mean_flow_duration += get<0>(trial_mean_durations);
+        srtf_mean_flow_duration += get<1>(trial_mean_durations);
+        round_robin_mean_flow_duration += get<2>(trial_mean_durations);
+
 
         if ( verbosity_level >= 1 ) {
             cout << "finished trial " << i+1 << " of " << num_trials << endl << endl;
         }
     }
+    /*
+    market_mean_flow_duration /= (double) num_trials;
+    srtf_mean_flow_duration /= (double) num_trials;
+    round_robin_mean_flow_duration /= (double) num_trials;
+    */
+    cout << market_mean_flow_duration << " " << srtf_mean_flow_duration << " " << round_robin_mean_flow_duration << endl;
 }
 
 void usage_error( const string & program_name )

@@ -37,7 +37,7 @@ class FlowCompletionTimeUser : public AbstractUser
             }
             if ( best_interval_cost > 0 ) {
                 double spent = mkt.buy_intervals( uid_, flow_.start, flow_.start+best_interval_length, flow_.num_packets, best_interval_cost );
-                std::cout << "cost was " << best_interval_cost << " and spent " << spent << " for interval length " << best_interval_length << std::endl;
+                //std::cout << "cost was " << best_interval_cost << " and spent " << spent << " for interval length " << best_interval_length << std::endl;
                 if ( spent > 0 ) {
                     done_ = true;
                 }

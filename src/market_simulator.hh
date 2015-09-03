@@ -22,11 +22,13 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
     {
         all_done = true;
         for ( auto &u : users ) {
-            size_t before_version = mkt.version();
-            u->take_actions( mkt );
-            bool market_unchanged = before_version == mkt.version();
+            if ( u->start_ <= mkt.time() ) {
+                size_t before_version = mkt.version();
+                u->take_actions( mkt );
+                bool market_unchanged = before_version == mkt.version();
 
-            all_done &= market_unchanged;
+                all_done &= market_unchanged;
+            }
         }
     } while ( not all_done );
 }

@@ -11,13 +11,13 @@
 
 class OwnerUser : public AbstractUser
 {
-    const Link link_;
+    const std::vector<Interval> intervals_to_add_;
     bool done_ = false;
 
     public:
     OwnerUser( Link link )
-        : AbstractUser( link.uid ),
-        link_( link )
+        : AbstractUser( link.uid, link.start ),
+        intervals_to_add_( link.get_intervals() )
     {
     }
 
@@ -25,7 +25,7 @@ class OwnerUser : public AbstractUser
     {
         if ( not done_ )
         {
-            for ( Interval &i : link_.get_intervals() )
+            for ( const Interval &i : intervals_to_add_ )
             {
                 mkt.add_interval( i );
             }

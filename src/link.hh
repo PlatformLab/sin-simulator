@@ -8,6 +8,7 @@
 
 struct Link {
     const size_t uid;
+    const size_t start;
     const size_t num_intervals;
     const size_t propagation_time;
     const double default_interval_cost;

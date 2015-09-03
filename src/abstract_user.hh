@@ -8,8 +8,9 @@ struct Market;
 class AbstractUser {
     public:
         const size_t uid_;
+        const size_t start_;
 
-        AbstractUser(const size_t &uid) : uid_(uid) { }
+        AbstractUser( const size_t &uid, const size_t &start ) : uid_( uid ), start_( start ) { }
 
         virtual void take_actions( Market& mkt ) = 0;
 

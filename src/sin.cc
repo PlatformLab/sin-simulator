@@ -15,9 +15,9 @@ using namespace std;
 tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const vector<Flow> flows, const size_t verbosity_level )
 {
     const size_t slots_needed = 1024;
-    const size_t propagation_time = 0;
+    const size_t propagation_time = 1;
     const double default_interval_cost = 1;
-    const vector<Link> links { { 0, slots_needed, propagation_time, default_interval_cost } };
+    const vector<Link> links { { 0, 0, slots_needed, propagation_time, default_interval_cost } };
 
     const vector<Interval> market_allocation = simulate_market( links, flows );
     const vector<Interval> srtf_allocation = simulate_srtf( links, flows );
@@ -32,11 +32,13 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
         cout << "market mean flow duration " << market_mean_flow_duration  << " with allocation:" << endl;
         print_intervals( market_allocation );
 
+/*
         cout << "srtf mean flow duration " << srtf_mean_flow_duration << " with allocation:" << endl;
         print_intervals( srtf_allocation );
 
         cout << "round robin mean flow duration " << round_robin_mean_flow_duration << " with allocation:" << endl;
         print_intervals( round_robin_allocation );
+        */
     }
     
     // TODO improve this

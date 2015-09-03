@@ -14,7 +14,7 @@ using namespace std;
 
 tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const vector<Flow> flows, const size_t verbosity_level )
 {
-    const size_t slots_needed = 20;
+    const size_t slots_needed = 1024;
     const size_t propagation_time = 0;
     const double default_interval_cost = 1;
     const vector<Link> links { { 0, slots_needed, propagation_time, default_interval_cost } };
@@ -114,11 +114,9 @@ void run_random_trials( const size_t num_flows, const size_t num_trials, const s
             cout << "finished trial " << i+1 << " of " << num_trials << endl << endl;
         }
     }
-    /*
     market_mean_flow_duration /= (double) num_trials;
     srtf_mean_flow_duration /= (double) num_trials;
     round_robin_mean_flow_duration /= (double) num_trials;
-    */
     cout << market_mean_flow_duration << " " << srtf_mean_flow_duration << " " << round_robin_mean_flow_duration << endl;
 }
 
@@ -199,8 +197,10 @@ int main( int argc, char *argv[] )
 
         if ( sim_string == "" ) {
             if ( num_flows and num_trials and die_size > 0 ) {
-                cout << "running " << num_trials << " trials with " << num_flows;
-                cout << " flows and die size..." << die_size << endl;
+                if ( verbosity_level > 0 ) {
+                    cout << "running " << num_trials << " trials with " << num_flows;
+                    cout << " flows and die size..." << die_size << endl;
+                }
                 run_random_trials( num_flows, num_trials, die_size, verbosity_level );
             } else  {
                 usage_error( argv[ 0 ] );

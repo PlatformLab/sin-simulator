@@ -1,0 +1,20 @@
+set terminal svg size 600,400 fixed fname 'arial' fsize 12 standalone name "delay_ratio"
+set output "mean_delay.svg"
+set title "Mean flow completion time over simulated 12Mb/s link"
+
+set style data histogram
+set style histogram cluster gap 1
+set style fill solid border -1
+
+set key left top
+
+set xlabel 'Number of concurrent flows'
+set ylabel 'Milliseconds'
+set xtics nomirror
+
+#set yrange [0:2]
+set linetype 1 lc rgb "#ffeda0"
+set linetype 2 lc rgb "#feb24c"
+set linetype 3 lc rgb "#f03b20"
+plot 'mean_delay.dat' using 2:xtic(1) title column, '' using 3 title column, '' using 4 title column
+save 'mean_delay.gnu'

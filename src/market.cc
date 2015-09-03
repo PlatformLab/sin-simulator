@@ -21,11 +21,9 @@ vector<Interval *> Market::cheapest_interals_in_range( size_t uid, size_t start,
 {
     assert( start >= time_ && "can't price intervals from past" );
     vector<Interval *> cheapest_intervals;
-    for ( auto &i : intervals_ )
-    {
+    for ( auto &i : intervals_ ) {
         const bool can_buy = i.start >= start and i.end <= end and i.owner != uid and i.cost > 0;
-        if ( can_buy )
-        {
+        if ( can_buy ) {
             if ( cheapest_intervals.size() == num_intervals and i.cost < cheapest_intervals[0]->cost ) {
                 pop_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_cmp );
                 cheapest_intervals.back() = &i;
@@ -81,8 +79,7 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
 bool Market::empty()
 {
     // return true if all interval start times have passed
-    for ( auto &i : intervals_ )
-    {
+    for ( auto &i : intervals_ ) {
         if ( i.start >= time_ )
         {
             return false;

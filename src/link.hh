@@ -16,8 +16,7 @@ struct Link {
     std::vector<Interval> get_intervals() const
     {
         std::vector<Interval> toRet;
-        for ( int i = 0; i < num_intervals; i++ )
-        {
+        for ( int i = 0; i < num_intervals; i++ ) {
             toRet.push_back( { uid, i, i+propagation_time, default_interval_cost } );
         }
         return toRet;

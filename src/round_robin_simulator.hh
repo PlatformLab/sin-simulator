@@ -17,8 +17,7 @@ const std::vector<Interval> simulate_round_robin( const std::vector<Link> &links
     std::vector<Interval> allocation = link.get_intervals();
     
     auto cur_interval = allocation.begin();
-    while ( cur_interval != allocation.end() )
-    {
+    while ( cur_interval != allocation.end() ) {
         bool someone_went = false;
         bool everyone_finished = true;
 
@@ -32,8 +31,7 @@ const std::vector<Interval> simulate_round_robin( const std::vector<Link> &links
                 cur_interval->owner = flow.uid;
                 flow.num_packets--;
                 cur_interval++;
-                if ( cur_interval == allocation.end() )
-                {
+                if ( cur_interval == allocation.end() ) {
                     return allocation;
                 }
                 someone_went = true;

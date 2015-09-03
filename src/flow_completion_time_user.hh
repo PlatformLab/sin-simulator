@@ -23,8 +23,7 @@ class FlowCompletionTimeUser : public AbstractUser
 
     void take_actions( Market& mkt ) override
     {
-        if ( not done_ )
-        {
+        if ( not done_ ) {
             size_t best_interval_length = 1;
             double best_interval_cost = 0;
 

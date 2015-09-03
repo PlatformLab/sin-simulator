@@ -18,8 +18,7 @@
 void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr<AbstractUser>> &users )
 {
     bool all_done = true;
-    do
-    {
+    do {
         all_done = true;
         for ( auto &u : users ) {
             if ( u->start_ <= mkt.time() ) {
@@ -45,12 +44,10 @@ const std::vector<Interval> simulate_market( const std::vector<Link> &links, con
         users.push_back( std::make_unique<FlowCompletionTimeUser>( flow ) );
     }
 
-    do
-    {
+    do {
         users_take_actions_until_finished( mkt, users );
         mkt.advance_time();
-    }
-    while ( not mkt.empty() );
+    } while ( not mkt.empty() );
 
     return mkt.intervals();
 }

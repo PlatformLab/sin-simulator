@@ -11,7 +11,10 @@ class AbstractUser {
         const size_t start_;
 
         AbstractUser( const size_t &uid, const size_t &start )
-            : uid_( uid ), start_( start ) { }
+            : uid_( uid ),
+            start_( start )
+        {
+        }
 
         virtual void take_actions( Market& mkt ) = 0;
 

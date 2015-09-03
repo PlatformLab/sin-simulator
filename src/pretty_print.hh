@@ -23,16 +23,14 @@ static std::string uid_to_string( const size_t uid )
 static void print_flows( const std::vector<Flow> &flows )
 {
 
-    for ( auto &flow : flows )
-    {
+    for ( auto &flow : flows ) {
         std::cout << "User " << uid_to_string( flow.uid ) << " flow start time: " << flow.start << " num packets: " << flow.num_packets << std::endl;
     }
 }
 
 static void print_intervals( const std::vector<Interval> intervals )
 {
-    for ( auto &i : intervals )
-    {
+    for ( auto &i : intervals ) {
         if ( i.owner != 0 ) // XXX temp
             std::cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner ) << " with sell price " << i.cost << std::endl;
     }

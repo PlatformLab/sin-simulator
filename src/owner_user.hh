@@ -23,10 +23,8 @@ class OwnerUser : public AbstractUser
 
     void take_actions( Market& mkt ) override
     {
-        if ( not done_ )
-        {
-            for ( const Interval &i : intervals_to_add_ )
-            {
+        if ( not done_ ) {
+            for ( const Interval &i : intervals_to_add_ ) {
                 mkt.add_interval( i );
             }
             done_ = true;

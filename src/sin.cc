@@ -53,8 +53,7 @@ size_t dice_roll( const size_t die_size )
 const vector<Flow> make_random_flows( const size_t num_flows, const size_t die_size )
 {
     vector<Flow> toRet { };
-    for ( size_t i = 0; i < num_flows; i++ )
-    {
+    for ( size_t i = 0; i < num_flows; i++ ) {
         toRet.push_back( { i+1, dice_roll( die_size ), dice_roll( die_size ) } );
     }
 
@@ -102,8 +101,7 @@ void run_random_trials( const size_t num_flows, const size_t num_trials, const s
     double market_mean_flow_duration = 0;
     double srtf_mean_flow_duration = 0;
     double round_robin_mean_flow_duration = 0;
-    for (size_t i = 0; i < num_trials; i++)
-    {
+    for (size_t i = 0; i < num_trials; i++) {
         vector<Flow> flows = make_random_flows( num_flows, die_size );
 
         double market, srtf, round_robin;

@@ -16,8 +16,7 @@ const std::vector<Interval> simulate_srtf( const std::vector<Link> &links, std::
     Link link = links.at(0);
     std::vector<Interval> allocation = link.get_intervals();
 
-    for ( Interval &interval : allocation )
-    {
+    for ( Interval &interval : allocation ) {
         // first find shortest remaining time flow we can schedule
         auto srtf_flow = flows.end();
         for ( auto potential_flow = flows.begin(); potential_flow != flows.end(); ++potential_flow ) {
@@ -29,14 +28,12 @@ const std::vector<Interval> simulate_srtf( const std::vector<Link> &links, std::
         }
 
         // we can schedule a flow now (otherwise they all have later start times and we advance time with allocation)
-        if ( srtf_flow != flows.end() )
-        {
+        if ( srtf_flow != flows.end() ) {
             interval.owner = srtf_flow->uid;
 
             // decrement packets to be sent for flow we serviced, remove from list completed
             srtf_flow->num_packets--;
-            if ( srtf_flow->num_packets == 0 )
-            {
+            if ( srtf_flow->num_packets == 0 ) {
                 flows.erase( srtf_flow );
             }
         }

@@ -10,7 +10,8 @@
 #include "interval.hh"
 
 /* returns a map of uid to flow num packets and duration */
-std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durations( const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
+std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durations(
+        const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
 {
     std::unordered_map<size_t, std::pair<size_t, size_t>> toRet;
     for ( auto & interval : allocation ) {
@@ -38,8 +39,7 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
 double mean_flow_duration( const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
 {
     size_t sum_durations = 0;
-    for ( const auto &flow_stats : get_flow_lengths_and_durations( flows, allocation ) )
-    {
+    for ( const auto &flow_stats : get_flow_lengths_and_durations( flows, allocation ) ) {
         sum_durations += flow_stats.second.second;
     }
     return (double) sum_durations / (double) flows.size();

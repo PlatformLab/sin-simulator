@@ -17,7 +17,7 @@ void Market::add_interval( Interval interval )
     version_++;
 }
 
-vector<Interval *> Market::cheapest_interals_in_range(size_t uid, size_t start, size_t end, size_t num_intervals)
+vector<Interval *> Market::cheapest_interals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals )
 {
     assert( start >= time_ && "can't price intervals from past" );
     vector<Interval *> cheapest_intervals;
@@ -40,7 +40,7 @@ vector<Interval *> Market::cheapest_interals_in_range(size_t uid, size_t start, 
     return cheapest_intervals;
 }
 
-double Market::cost_for_intervals(size_t uid, size_t start, size_t end, size_t num_intervals)
+double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t num_intervals )
 {
     vector<Interval *> cheapest_intervals = cheapest_interals_in_range( uid, start, end, num_intervals );
     if ( cheapest_intervals.size() == num_intervals ) {
@@ -54,7 +54,7 @@ double Market::cost_for_intervals(size_t uid, size_t start, size_t end, size_t n
     }
 }
 
-double Market::buy_intervals(size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment)
+double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment )
 {
     vector<Interval *> cheapest_intervals = cheapest_interals_in_range( uid, start, end, num_intervals );
     if ( cheapest_intervals.size() == num_intervals ) {

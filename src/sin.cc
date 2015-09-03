@@ -42,7 +42,7 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
     }
     
     // TODO improve this
-    return make_tuple<double, double, double>( move(market_mean_flow_duration), move(srtf_mean_flow_duration), move(round_robin_mean_flow_duration) );
+    return tie<double, double, double>( market_mean_flow_duration, srtf_mean_flow_duration, round_robin_mean_flow_duration );
 }
 
 size_t dice_roll( const size_t die_size )
@@ -106,11 +106,11 @@ void run_random_trials( const size_t num_flows, const size_t num_trials, const s
     {
         vector<Flow> flows = make_random_flows( num_flows, die_size );
 
-        tuple<double,double,double> trial_mean_durations = run_single_trial( flows, verbosity_level );
-        market_mean_flow_duration += get<0>(trial_mean_durations);
-        srtf_mean_flow_duration += get<1>(trial_mean_durations);
-        round_robin_mean_flow_duration += get<2>(trial_mean_durations);
-
+        double market, srtf, round_robin;
+        tie<double,double,double>( market, srtf, round_robin ) = run_single_trial( flows, verbosity_level );
+        market_mean_flow_duration += market;
+        srtf_mean_flow_duration += srtf;
+        round_robin_mean_flow_duration += round_robin;
 
         if ( verbosity_level >= 1 ) {
             cout << "finished trial " << i+1 << " of " << num_trials << endl << endl;

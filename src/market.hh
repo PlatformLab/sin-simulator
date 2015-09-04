@@ -14,6 +14,7 @@
 
 #include "pretty_print.hh"
 #include "interval.hh"
+#include "meta_interval.hh"
 
 struct MoneyExchanged {
     size_t to;
@@ -26,6 +27,7 @@ class Market {
         size_t time_;
         size_t version_ = 0;
         std::vector<Interval> intervals_{};
+        std::vector<MetaInterval> meta_intervals_{};
         std::vector<MoneyExchanged> transactions_{};
 
         std::vector<Interval *> cheapest_interals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals );
@@ -33,7 +35,8 @@ class Market {
     public:
         void add_interval( Interval interval );
         double cost_for_intervals( size_t uid, size_t start, size_t end, size_t num_intervals );
-        double buy_intervals( size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment );
+        double buy_intervals( size_t uid, size_t start, size_t end, size_t num_intervals,
+                double max_payment, std::vector<std::pair<size_t, double>> offers );
 
         size_t version() const { return version_; };
         size_t time() const { return time_; };

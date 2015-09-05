@@ -77,6 +77,7 @@ std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double
                         best_meta_interval = m;
                         best_offer = offer_pair;
                         intervals_to_move = intervals_to_use;
+                        replacements = potential_replacements;
                     }
                 }
             }
@@ -107,23 +108,24 @@ double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t 
 
 double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment, vector<pair<size_t, double>> offers )
 {
-    auto best_meta_interval = best_meta_interval( uid, start, end, num_intervals );
-    double cheapest_with_meta_intervals = std::get<0>( best_meta_interval );
+    auto meta_interval_results = best_meta_interval( uid, start, end, num_intervals );
+    double cheapest_with_meta_intervals = std::get<0>( meta_interval_results );
     vector<Interval *> cheapest_intervals = cheapest_intervals_in_range( uid, start, end, num_intervals );
-    if ( cheapest_intervals.size() == num_intervals or cheapest_with_meta_intervals > 0 ) {
-        double total_cost = 0;
-        if ( cheapest_intervals.size() == num_intervals ) {
-            for ( auto &i : cheapest_intervals ) {
-                total_cost += i->cost;
-            }
-        }
-        if (
 
-        if ( total_cost <= max_payment ) {
+    double cheapest_with_intervals = 0;
+    if ( cheapest_intervals.size() == num_intervals ) {
+        double total_cost = 0;
+        for ( auto &i : cheapest_intervals ) {
+            cheapest_with_intervals += i->cost;
+        }
+    }
+    if ( cheapest_with_intervals or cheapest_with_meta_intervals ) {
+        if ( ( cheapest_with_intervals and cheapest_with_meta_intervals and cheapest_with_intervals < cheapest_with_meta_intervals )
+            or cheapest_with_intervals and not cheapest_with_meta_intervals ) {
+            assert( cheapest_with_intervals <= max_payment );
+
             MetaInterval new_meta_interval;
             new_meta_interval.owner = uid;
-            new_meta_interval.start = numeric_limits<size_t>::max();
-            new_meta_interval.end = numeric_limits<size_t>::min();
             new_meta_interval.offers = move( offers );
 
             // buy the slots
@@ -132,17 +134,49 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
                 i->owner = uid;
                 i->cost = numeric_limits<double>::lowest();
 
-                new_meta_interval.intervals.emplace_back( i );
-                new_meta_interval.start = std::min( new_meta_interval.start, i->start ); 
-                new_meta_interval.end = std::max( new_meta_interval.end, i->end );
+                new_meta_interval.intervals.insert( i );
             }
             meta_intervals_.push_back( new_meta_interval );
 
             version_++;
-            return total_cost;
+            return cheapest_with_intervals;
+        } else { // use meta intervals
+            std::vector<MetaInterval>::iterator best_meta_interval;
+            std::pair<size_t, double> best_offer;
+            std::vector<Interval *> intervals_to_move;
+            std::vector<Interval *> replacements;
+            std::tie<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double>, std::vector<Interval *>, std::vector<Interval *>>
+                ( cheapest_with_meta_intervals, best_meta_interval, best_offer, intervals_to_move, replacements ) = meta_interval_results;
+
+            double total_payments = 0;
+            transactions_.push_back( { best_meta_interval->owner, uid, best_offer.second } );
+            cout << "paying " << best_offer.second << "for meta slot" <<endl;
+            total_payments += best_offer.second;
+
+            cout << replacements.size() << " replacements and intervals to move "  << intervals_to_move.size() << endl;
+            assert( replacements.size() == intervals_to_move.size() );
+            for ( auto *i : replacements ) {
+                transactions_.push_back( { i->owner, uid, i->cost } );
+                total_payments += i->cost;
+                cout << "paying " << i->cost << "for replacement slot for " << uid_to_string( best_meta_interval->owner ) << endl;
+                i->owner = best_meta_interval->owner;
+                i->cost = numeric_limits<double>::lowest();
+
+                best_meta_interval->intervals.insert( i );
+            }
+            for ( auto *i : intervals_to_move ) {
+                i->owner = uid;
+                i->cost = numeric_limits<double>::lowest();
+                best_meta_interval->intervals.erase( i );
+            }
+            version_++;
+            cout << uid_to_string( uid ) << " made total payments " << total_payments << " and expected " << cheapest_with_meta_intervals << endl;
+            assert( total_payments == cheapest_with_meta_intervals );
+            return total_payments;
         }
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 bool Market::empty()

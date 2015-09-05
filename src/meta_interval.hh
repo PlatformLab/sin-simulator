@@ -4,12 +4,11 @@
 #define META_INTERVAL_HH
 
 #include <vector>
+#include <unordered_set>
 
 struct MetaInterval {
     size_t owner;
-    size_t start;
-    size_t end;
-    std::vector<Interval *> intervals;
+    std::unordered_set<Interval *> intervals;
     std::vector<std::pair<size_t, double>> offers;
 };
 

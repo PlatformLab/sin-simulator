@@ -30,7 +30,8 @@ class Market {
         std::vector<MetaInterval> meta_intervals_{};
         std::vector<MoneyExchanged> transactions_{};
 
-        std::vector<Interval *> cheapest_interals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals );
+        std::vector<Interval *> cheapest_intervals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals );
+        std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double>, std::vector<Interval *>, std::vector<Interval *>> best_meta_interval( size_t uid, size_t start, size_t end, size_t num_intervals );
 
     public:
         void add_interval( Interval interval );

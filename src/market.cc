@@ -11,13 +11,13 @@ bool cost_cmp(const Interval *a, const Interval *b)
 
 void Market::add_interval( Interval interval )
 {
-//    cout << uid_to_string( interval.owner ) << " trying to add (" << interval.start << ", " << interval.end << ") at market time " << time_ << endl;
+    //    cout << uid_to_string( interval.owner ) << " trying to add (" << interval.start << ", " << interval.end << ") at market time " << time_ << endl;
     assert( interval.start >= time_ );
     intervals_.push_back( interval );
     version_++;
 }
 
-vector<Interval *> Market::cheapest_interals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals )
+vector<Interval *> Market::cheapest_intervals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals )
 {
     assert( start >= time_ && "can't price intervals from past" );
 
@@ -39,27 +39,57 @@ vector<Interval *> Market::cheapest_interals_in_range( size_t uid, size_t start,
     return cheapest_intervals;
 }
 
-double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t num_intervals )
-{
+std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double>, std::vector<Interval *>, std::vector<Interval *>> Market::best_meta_interval ( size_t uid, size_t start, size_t end, size_t num_intervals ) {
     double cheapest_with_meta_intervals = 0;
-    for ( auto &m : meta_intervals_ ) {
-        const bool can_buy = m.start >= start and m.end <= end and m.owner != uid and m.intervals.size() >= num_intervals;
-        if ( can_buy ) {
-            for ( auto &offer_pair : m.offers ) {
+    std::vector<MetaInterval>::iterator best_meta_interval = meta_intervals_.end();
+    std::pair<size_t, double> best_offer;
+    std::vector<Interval *> intervals_to_move;
+    std::vector<Interval *> replacements;
+
+    for ( auto m = meta_intervals_.begin(); m != meta_intervals_.end(); ++m ) {
+        const bool can_buy = m->owner != uid and m->intervals.size() >= num_intervals;
+        std::vector<Interval *> intervals_to_use;
+        for ( auto &i : m->intervals ) {
+            if ( i->start >= start and i->end <= end ) {
+                intervals_to_use.push_back( i );
+                if ( intervals_to_use.size() == num_intervals ) {
+                    break;
+                }
+            }
+        }
+
+        if ( can_buy and intervals_to_use.size() == num_intervals ) {
+            for ( auto &offer_pair : m->offers ) {
                 size_t alternative_end = offer_pair.first;
                 double cost_to_move = offer_pair.second;
-                double cost_for_replacements = cost_for_intervals( m.owner, m.start, alternative_end, num_intervals );
-                double cost_using_this_meta_interval = cost_for_replacements + cost_to_move;
-                if ( cost_for_replacements > 0 ) {
+                std::vector<Interval *> potential_replacements = cheapest_intervals_in_range( m->owner, start, alternative_end, num_intervals );
+                if ( potential_replacements.size() == num_intervals ) {
+                    double cost_for_replacements = 0;
+                    for ( auto &i : potential_replacements ) {
+                        cost_for_replacements += i->cost;
+                    }
+
+                    double cost_using_this_meta_interval = cost_for_replacements + cost_to_move;
+                    std::cout << "using this meta interval would cost " << cost_using_this_meta_interval << endl;
+                    std::cout << "cost to move " << cost_to_move << " and replacements " << cost_for_replacements << endl;
                     if ( cheapest_with_meta_intervals == 0 or cost_using_this_meta_interval < cheapest_with_meta_intervals ) {
                         cheapest_with_meta_intervals = cost_using_this_meta_interval;
+                        best_meta_interval = m;
+                        best_offer = offer_pair;
+                        intervals_to_move = intervals_to_use;
                     }
                 }
             }
         }
     }
+    return std::tie( cheapest_with_meta_intervals, best_meta_interval, best_offer, intervals_to_move, replacements );
+}
 
-    vector<Interval *> cheapest_intervals = cheapest_interals_in_range( uid, start, end, num_intervals );
+double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t num_intervals )
+{
+    double cheapest_with_meta_intervals = std::get<0>( best_meta_interval( uid, start, end, num_intervals ) );
+
+    vector<Interval *> cheapest_intervals = cheapest_intervals_in_range( uid, start, end, num_intervals );
     double cheapest_with_intervals = 0;
 
     if ( cheapest_intervals.size() == num_intervals ) {
@@ -77,16 +107,23 @@ double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t 
 
 double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_intervals, double max_payment, vector<pair<size_t, double>> offers )
 {
-    vector<Interval *> cheapest_intervals = cheapest_interals_in_range( uid, start, end, num_intervals );
-    if ( cheapest_intervals.size() == num_intervals ) {
+    auto best_meta_interval = best_meta_interval( uid, start, end, num_intervals );
+    double cheapest_with_meta_intervals = std::get<0>( best_meta_interval );
+    vector<Interval *> cheapest_intervals = cheapest_intervals_in_range( uid, start, end, num_intervals );
+    if ( cheapest_intervals.size() == num_intervals or cheapest_with_meta_intervals > 0 ) {
         double total_cost = 0;
-        for ( auto &i : cheapest_intervals ) {
-            total_cost += i->cost;
+        if ( cheapest_intervals.size() == num_intervals ) {
+            for ( auto &i : cheapest_intervals ) {
+                total_cost += i->cost;
+            }
         }
+        if (
 
         if ( total_cost <= max_payment ) {
             MetaInterval new_meta_interval;
             new_meta_interval.owner = uid;
+            new_meta_interval.start = numeric_limits<size_t>::max();
+            new_meta_interval.end = numeric_limits<size_t>::min();
             new_meta_interval.offers = move( offers );
 
             // buy the slots

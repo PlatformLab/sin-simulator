@@ -34,7 +34,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
 
 const std::vector<Interval> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
 {
-    Market mkt = Market();
+    Market mkt = Market( verbose );
     std::vector<std::unique_ptr<AbstractUser>> users;
 
     for ( const Link &link : links ) {

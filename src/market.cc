@@ -71,8 +71,8 @@ std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double
 
                     double cost_using_this_meta_interval = cost_for_replacements + cost_to_move;
                     if ( verbose_ ) {
-                        std::cout << "using this meta interval would cost " << cost_using_this_meta_interval << endl;
-                        std::cout << "cost to move " << cost_to_move << " and replacements " << cost_for_replacements << endl;
+                        //std::cout << uid_to_string( uid ) << ": using this meta interval would cost $" << cost_using_this_meta_interval;
+                        //std::cout << " ($" << cost_to_move << " to move and $" << cost_for_replacements << " for replacements)" << endl;
                     }
                     if ( cheapest_with_meta_intervals == 0 or cost_using_this_meta_interval < cheapest_with_meta_intervals ) {
                         cheapest_with_meta_intervals = cost_using_this_meta_interval;
@@ -154,15 +154,15 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
             transactions_.push_back( { best_meta_interval->owner, uid, best_offer.second } );
             total_payments += best_offer.second;
             if ( verbose_ ) {
-                cout << "paying " << best_offer.second << "for meta slot" << endl;
-                cout << replacements.size() << " replacements and intervals to move "  << intervals_to_move.size() << endl;
+                cout << uid_to_string( uid ) << " paying $" << best_offer.second << " for meta interval move end to " << best_offer.first << " for $" << best_offer.second << endl;
+                //cout << replacements.size() << " replacements and intervals to move "  << intervals_to_move.size() << endl;
             }
             assert( replacements.size() == intervals_to_move.size() );
             for ( auto *i : replacements ) {
                 transactions_.push_back( { i->owner, uid, i->cost } );
                 total_payments += i->cost;
                 if ( verbose_ ) {
-                    cout << "paying " << i->cost << " for replacement slot for " << uid_to_string( best_meta_interval->owner ) << endl;
+                    cout << uid_to_string( uid ) << ": paying " << i->cost << " for replacement slot for " << uid_to_string( best_meta_interval->owner ) << endl;
                 }
                 i->owner = best_meta_interval->owner;
                 i->cost = numeric_limits<double>::lowest();

@@ -32,7 +32,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
     } while ( not all_done );
 }
 
-const std::vector<Interval> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows )
+const std::vector<Interval> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
 {
     Market mkt = Market();
     std::vector<std::unique_ptr<AbstractUser>> users;
@@ -49,6 +49,10 @@ const std::vector<Interval> simulate_market( const std::vector<Link> &links, con
         mkt.advance_time();
     } while ( not mkt.empty() );
 
+    if ( verbose ) {
+        std::cout << "market transactions:" << std::endl;
+        print_transactions( mkt.transactions() );
+    }
     return mkt.intervals();
 }
 

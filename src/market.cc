@@ -158,7 +158,7 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
             for ( auto *i : replacements ) {
                 transactions_.push_back( { i->owner, uid, i->cost } );
                 total_payments += i->cost;
-                cout << "paying " << i->cost << "for replacement slot for " << uid_to_string( best_meta_interval->owner ) << endl;
+                cout << "paying " << i->cost << " for replacement slot for " << uid_to_string( best_meta_interval->owner ) << endl;
                 i->owner = best_meta_interval->owner;
                 i->cost = numeric_limits<double>::lowest();
 

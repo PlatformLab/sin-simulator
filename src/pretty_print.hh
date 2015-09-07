@@ -9,6 +9,7 @@
 #include <cassert>
 #include "flow.hh"
 #include "interval.hh"
+#include "transaction.hh"
 
 
 static std::string uid_to_string( const size_t uid )
@@ -20,9 +21,15 @@ static std::string uid_to_string( const size_t uid )
     }
 }
 
+static void print_transactions( const std::vector<Transaction> &transactions )
+{
+    for ( auto &t : transactions ) {
+        std::cout << t.amount << " from " << uid_to_string( t.from ) << " to " << uid_to_string( t.to ) << std::endl;
+    }
+}
+
 static void print_flows( const std::vector<Flow> &flows )
 {
-
     for ( auto &flow : flows ) {
         std::cout << "User " << uid_to_string( flow.uid ) << " flow start time: " << flow.start << " num packets: " << flow.num_packets << std::endl;
     }

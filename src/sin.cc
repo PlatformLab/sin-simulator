@@ -19,7 +19,7 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
     const double default_interval_cost = 1;
     const vector<Link> links { { 0, 0, slots_needed, propagation_time, default_interval_cost } };
 
-    const vector<Interval> market_allocation = simulate_market( links, flows );
+    const vector<Interval> market_allocation = simulate_market( links, flows, verbosity_level > 0 );
     const vector<Interval> srtf_allocation = simulate_srtf( links, flows );
     const vector<Interval> round_robin_allocation = simulate_round_robin( links, flows );
 

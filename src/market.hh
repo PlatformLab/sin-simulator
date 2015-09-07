@@ -12,15 +12,10 @@
 #include <functional>
 #include <algorithm>
 
-#include "pretty_print.hh"
 #include "interval.hh"
+#include "transaction.hh"
 #include "meta_interval.hh"
-
-struct MoneyExchanged {
-    size_t to;
-    size_t from;
-    double amount;
-};
+#include "pretty_print.hh"
 
 class Market {
     private:
@@ -28,7 +23,7 @@ class Market {
         size_t version_ = 0;
         std::vector<Interval> intervals_{};
         std::vector<MetaInterval> meta_intervals_{};
-        std::vector<MoneyExchanged> transactions_{};
+        std::vector<Transaction> transactions_{};
 
         std::vector<Interval *> cheapest_intervals_in_range( size_t uid, size_t start, size_t end, size_t num_intervals );
         std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double>, std::vector<Interval *>, std::vector<Interval *>> best_meta_interval( size_t uid, size_t start, size_t end, size_t num_intervals );
@@ -42,6 +37,7 @@ class Market {
         size_t version() const { return version_; };
         size_t time() const { return time_; };
         std::vector<Interval> intervals() const { return intervals_; };
+        std::vector<Transaction> transactions() const { return transactions_; };
         bool empty();
         void advance_time();
 };

@@ -47,36 +47,37 @@ std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double
     std::vector<Interval *> replacements;
 
     for ( auto m = meta_intervals_.begin(); m != meta_intervals_.end(); ++m ) {
-        const bool can_buy = m->owner != uid and m->intervals.size() >= num_intervals;
-        std::vector<Interval *> intervals_to_use;
-        for ( auto &i : m->intervals ) {
-            if ( i->start >= start and i->end <= end ) {
-                intervals_to_use.push_back( i );
-                if ( intervals_to_use.size() == num_intervals ) {
-                    break;
+        if ( m->owner != uid and m->intervals.size() >= num_intervals ) {
+            std::vector<Interval *> intervals_to_use;
+            for ( auto &i : m->intervals ) {
+                if ( i->start >= start and i->end <= end ) {
+                    intervals_to_use.push_back( i );
+                    if ( intervals_to_use.size() == num_intervals ) {
+                        break;
+                    }
                 }
             }
-        }
 
-        if ( can_buy and intervals_to_use.size() == num_intervals ) {
-            for ( auto &offer_pair : m->offers ) {
-                size_t alternative_end = offer_pair.first;
-                double cost_to_move = offer_pair.second;
-                std::vector<Interval *> potential_replacements = cheapest_intervals_in_range( m->owner, start, alternative_end, num_intervals );
-                if ( potential_replacements.size() == num_intervals ) {
-                    double cost_for_replacements = 0;
-                    for ( auto &i : potential_replacements ) {
-                        cost_for_replacements += i->cost;
-                    }
+            if ( intervals_to_use.size() == num_intervals ) {
+                for ( auto &offer_pair : m->offers ) {
+                    size_t alternative_end = offer_pair.first;
+                    double cost_to_move = offer_pair.second;
+                    std::vector<Interval *> potential_replacements = cheapest_intervals_in_range( m->owner, start, alternative_end, num_intervals );
+                    if ( potential_replacements.size() == num_intervals ) {
+                        double cost_for_replacements = 0;
+                        for ( auto &i : potential_replacements ) {
+                            cost_for_replacements += i->cost;
+                        }
 
-                    double cost_using_this_meta_interval = cost_for_replacements + cost_to_move;
+                        double cost_using_this_meta_interval = cost_for_replacements + cost_to_move;
 
-                    if ( cheapest_with_meta_intervals == 0 or cost_using_this_meta_interval <= cheapest_with_meta_intervals ) {
-                        cheapest_with_meta_intervals = cost_using_this_meta_interval;
-                        best_meta_interval = m;
-                        best_offer = offer_pair;
-                        intervals_to_move = intervals_to_use;
-                        replacements = potential_replacements;
+                        if ( cheapest_with_meta_intervals == 0 or cost_using_this_meta_interval <= cheapest_with_meta_intervals ) {
+                            cheapest_with_meta_intervals = cost_using_this_meta_interval;
+                            best_meta_interval = m;
+                            best_offer = offer_pair;
+                            intervals_to_move = intervals_to_use;
+                            replacements = potential_replacements;
+                        }
                     }
                 }
             }

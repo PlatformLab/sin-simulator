@@ -28,7 +28,7 @@ class FlowCompletionTimeUser : public AbstractUser
             double best_interval_cost = 0;
 
             //for ( size_t interval_length = 1; interval_length <= 1024; interval_length <<= 1 ) {
-            for ( size_t interval_length = num_packets_; interval_length <= 1024; interval_length++ ) {
+            for ( size_t interval_length = num_packets_; interval_length <= 512; interval_length++ ) {
                 double cost = mkt.cost_for_intervals( uid_, start_, start_+interval_length, num_packets_ );
                 if ( mkt.verbose() ) {
                 //    std::cout << uid_to_string( uid_ ) << ": $" << cost << " for interval length " << interval_length << std::endl;
@@ -41,7 +41,7 @@ class FlowCompletionTimeUser : public AbstractUser
             if ( best_interval_cost > 0 ) {
                 std::vector<std::pair<size_t, double>> offers { }; 
                 //for ( size_t extra_length = 1; extra_length <= 64; extra_length <<= 1 ) {
-                for ( size_t extra_length = 1; extra_length <= 32; extra_length++ ) {
+                for ( size_t extra_length = 1; extra_length <= 256; extra_length++ ) {
                     //std::cout << "start_ " << start_ << "best_interval_length " <<  best_interval_length << "extra_length " << extra_length << std::endl;
                     offers.push_back( { start_ + best_interval_length + extra_length, (double) extra_length + .01 } );
                 }

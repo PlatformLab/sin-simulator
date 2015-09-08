@@ -18,12 +18,12 @@ vector<Interval *> Market::cheapest_intervals_in_range( size_t uid, size_t start
 
     vector<Interval *> cheapest_intervals;
     for ( auto &i : intervals_ ) {
-        const bool can_buy = i.start >= start and i.end <= end and i.owner != uid and i.cost > 0;
-        if ( can_buy ) {
-            auto cost_compare = [ uid ] (const Interval *a, const Interval *b)
+        if ( i.start >= start and i.end <= end ) {
+            auto cost_compare = [ uid ] ( const Interval *a, const Interval *b )
             { double acost = a->owner == uid ? 0 : a->cost; double bcost = b->owner == uid ? 0 : b->cost; return acost < bcost; };
 
-            if ( cheapest_intervals.size() == num_intervals and i.cost < cheapest_intervals[0]->cost ) {
+            double i_cost = ( i.owner == uid ) ? 0 : i.cost;
+            if ( cheapest_intervals.size() == num_intervals and i_cost < cheapest_intervals[0]->cost ) {
                 pop_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_compare );
                 cheapest_intervals.back() = &i;
                 push_heap( cheapest_intervals.begin(), cheapest_intervals.end(), cost_compare );
@@ -92,13 +92,15 @@ double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t 
     vector<Interval *> cheapest_intervals = cheapest_intervals_in_range( uid, start, end, num_intervals );
     double cheapest_with_intervals = 0;
 
-    if ( cheapest_intervals.size() != num_intervals ) {
-        cheapest_with_intervals = numeric_limits<double>::max();
-    } else {
+    if ( cheapest_intervals.size() == num_intervals ) {
         for ( auto &i : cheapest_intervals ) {
             double i_cost = ( i->owner == uid ) ? 0 : i->cost;
             cheapest_with_intervals += i_cost;
+            cout << "cheapest " << i->start << " owned by " << uid_to_string( i->owner ) << " with cost " << i_cost << endl;
         }
+        cout << "cheapest with intervals was " << cheapest_with_intervals << endl;
+    } else {
+        cheapest_with_intervals = numeric_limits<double>::max();
     }
 
     return min( cheapest_with_intervals, cheapest_with_meta_intervals );
@@ -122,6 +124,7 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
 
     if ( cheapest_with_intervals <= cheapest_with_meta_intervals and cheapest_with_intervals != numeric_limits<double>::max() ) {
         assert( cheapest_with_intervals <= max_payment );
+        double market_changed = false;
 
         MetaInterval new_meta_interval;
         new_meta_interval.owner = uid;
@@ -130,17 +133,19 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
         // buy the slots
         for ( auto *i : cheapest_intervals ) {
             if ( i->owner != uid ) {
-
+                market_changed = true;
                 transactions_.push_back( { i->owner, uid, i->cost } );
                 i->owner = uid;
-                i->cost = numeric_limits<double>::lowest();
+                i->cost = numeric_limits<double>::max();
 
             }
             new_meta_interval.intervals.insert( i ); // TODO uhh do we double add these then?
         }
         meta_intervals_.push_back( new_meta_interval );
 
-        version_++;
+        if ( market_changed ) {
+            version_++;
+        }
         return cheapest_with_intervals;
     } else if ( cheapest_with_meta_intervals < cheapest_with_intervals ) { 
         std::vector<MetaInterval>::iterator best_meta_interval;
@@ -164,13 +169,13 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
                 total_payments += i->cost;
             }
             i->owner = best_meta_interval->owner;
-            i->cost = numeric_limits<double>::lowest();
+            i->cost = numeric_limits<double>::max();
 
             best_meta_interval->intervals.insert( i );
         }
         for ( auto *i : intervals_to_move ) {
             i->owner = uid;
-            i->cost = numeric_limits<double>::lowest();
+            i->cost = numeric_limits<double>::max();
             best_meta_interval->intervals.erase( i );
         }
 
@@ -189,6 +194,18 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
     } else {
         return numeric_limits<double>::max();
     }
+}
+
+size_t Market::intervals_owned_by_user( const size_t uid ) const
+{
+    size_t toRet = 0;
+
+    for ( auto &i : intervals_ ) {
+        if ( i.start < time_ and i.owner == uid ) {
+            toRet++;
+        }
+    }
+    return toRet;
 }
 
 bool Market::empty()

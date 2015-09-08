@@ -41,6 +41,9 @@ class Market {
         size_t version() const { return version_; };
         size_t verbose() const { return verbose_; };
         size_t time() const { return time_; };
+
+        size_t intervals_owned_by_user( const size_t uid ) const;
+
         std::vector<Interval> intervals() const { return intervals_; };
         std::vector<Transaction> transactions() const { return transactions_; };
         bool empty();

@@ -25,7 +25,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
                 size_t before_version = mkt.version();
                 u->take_actions( mkt );
                 bool market_unchanged = before_version == mkt.version();
-                if (not market_unchanged ) {
+                if ( not market_unchanged ) {
                     std::cout << "market after " << uid_to_string( u->uid_ ) << ":" << std::endl;
                     print_intervals( mkt.intervals() );
                 }

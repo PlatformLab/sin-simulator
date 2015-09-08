@@ -30,11 +30,6 @@ class OwnerUser : public AbstractUser
             done_ = true;
         }
     }
-
-    bool done( const Market& mkt ) override
-    {
-        return done_;
-    }
 };
 
 #endif /* OWNER_USER */

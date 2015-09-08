@@ -12,7 +12,7 @@
 class FlowCompletionTimeUser : public AbstractUser
 {
     const size_t num_packets_;
-    bool done_ = false;
+    size_t done_ = 0;
 
     public:
     FlowCompletionTimeUser( Flow flow )
@@ -23,9 +23,10 @@ class FlowCompletionTimeUser : public AbstractUser
 
     void take_actions( Market& mkt ) override
     {
-        if ( not done_ ) {
+        if ( done_ < 2 ) {
+            std::cout << uid_to_string( uid_ ) << " running a second time!!!!!" << std::endl;
             size_t best_interval_length = 1;
-            double best_interval_cost = 0;
+            double best_interval_cost = std::numeric_limits<double>::max();
 
             //for ( size_t interval_length = 1; interval_length <= 1024; interval_length <<= 1 ) {
             for ( size_t interval_length = num_packets_; interval_length <= 512; interval_length++ ) {
@@ -38,7 +39,7 @@ class FlowCompletionTimeUser : public AbstractUser
                     best_interval_cost = cost;
                 }
             }
-            if ( best_interval_cost > 0 ) {
+            if ( best_interval_cost < std::numeric_limits<double>::max() ) {
                 std::vector<std::pair<size_t, double>> offers { }; 
                 //for ( size_t extra_length = 1; extra_length <= 64; extra_length <<= 1 ) {
                 for ( size_t extra_length = 1; extra_length <= 256; extra_length++ ) {
@@ -52,13 +53,8 @@ class FlowCompletionTimeUser : public AbstractUser
                     done_ = true;
                 }
             }
+            //done_++;
         }
-        done_ = true; // only run once regardless for now
-    }
-
-    bool done( const Market& mkt ) override
-    {
-        return done_;
     }
 };
 

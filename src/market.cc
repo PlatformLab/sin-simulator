@@ -70,11 +70,8 @@ std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double
                     }
 
                     double cost_using_this_meta_interval = cost_for_replacements + cost_to_move;
-                    if ( verbose_ ) {
-                        //std::cout << uid_to_string( uid ) << ": using this meta interval would cost $" << cost_using_this_meta_interval;
-                        //std::cout << " ($" << cost_to_move << " to move and $" << cost_for_replacements << " for replacements)" << endl;
-                    }
-                    if ( cheapest_with_meta_intervals == 0 or cost_using_this_meta_interval < cheapest_with_meta_intervals ) {
+
+                    if ( cheapest_with_meta_intervals == 0 or cost_using_this_meta_interval <= cheapest_with_meta_intervals ) {
                         cheapest_with_meta_intervals = cost_using_this_meta_interval;
                         best_meta_interval = m;
                         best_offer = offer_pair;
@@ -174,6 +171,13 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
                 i->cost = numeric_limits<double>::lowest();
                 best_meta_interval->intervals.erase( i );
             }
+
+            // change offer prices to reflect an offer was taken ( if interval end moves back one time unit that means the cost to move back two time units should be cheaper than before )
+            const double offers_price_offset = best_offer.second;
+            for ( auto &offer_pair : best_meta_interval->offers ) {
+                    offer_pair.second -= offers_price_offset;
+            }
+
             version_++;
             if ( verbose_ ) {
                 cout << uid_to_string( uid ) << " made total payments " << total_payments << " and expected " << cheapest_with_meta_intervals << endl;

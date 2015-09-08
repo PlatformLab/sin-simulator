@@ -31,7 +31,7 @@ class FlowCompletionTimeUser : public AbstractUser
             for ( size_t interval_length = num_packets_; interval_length <= 1024; interval_length++ ) {
                 double cost = mkt.cost_for_intervals( uid_, start_, start_+interval_length, num_packets_ );
                 if ( mkt.verbose() ) {
-                    std::cout << uid_to_string( uid_ ) << ": $" << cost << " for interval length " << interval_length << std::endl;
+                //    std::cout << uid_to_string( uid_ ) << ": $" << cost << " for interval length " << interval_length << std::endl;
                 }
                 if ( cost > 0 and ( best_interval_cost == 0 or -best_interval_length-best_interval_cost < -interval_length-cost ) ) {
                     best_interval_length = interval_length;

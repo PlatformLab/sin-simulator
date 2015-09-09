@@ -12,7 +12,7 @@ set xlabel 'Number of concurrent flows'
 set ylabel 'Milliseconds'
 set xtics nomirror
 
-#set yrange [0:2]
+set yrange [0:]
 set linetype 1 lc rgb "#ffeda0"
 set linetype 2 lc rgb "#feb24c"
 set linetype 3 lc rgb "#f03b20"

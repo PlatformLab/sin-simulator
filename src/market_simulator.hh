@@ -15,7 +15,7 @@
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
 
-void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr<AbstractUser>> &users )
+void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr<AbstractUser>> &users, bool verbose )
 {
     bool all_done = true;
     do {
@@ -25,7 +25,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
                 size_t before_version = mkt.version();
                 u->take_actions( mkt );
                 bool market_unchanged = before_version == mkt.version();
-                if ( not market_unchanged ) {
+                if ( verbose and not market_unchanged ) {
                     std::cout << "market after " << uid_to_string( u->uid_ ) << ":" << std::endl;
                     print_intervals( mkt.intervals() );
                     print_meta_intervals( mkt.meta_intervals() );
@@ -50,7 +50,7 @@ const std::vector<Interval> simulate_market( const std::vector<Link> &links, con
     }
 
     do {
-        users_take_actions_until_finished( mkt, users );
+        users_take_actions_until_finished( mkt, users, verbose );
         mkt.advance_time();
     } while ( not mkt.empty() );
 

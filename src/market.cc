@@ -44,6 +44,23 @@ std::tuple<double, std::vector<MetaInterval>::iterator, std::pair<size_t, double
     std::vector<Interval *> intervals_to_move;
     std::vector<Interval *> replacements;
 
+    /* filters out invalid meta_intervals */
+    for ( auto m = meta_intervals_.begin(); m != meta_intervals_.end(); ) {
+        bool valid = true;
+        for ( auto &i : m->intervals ) {
+            if ( i->start < time_ or i->owner != m->owner ) {
+                valid = false;
+                break;
+            }
+        }
+        if ( valid ) {
+            m++;
+        } else {
+            m = meta_intervals_.erase( m );
+            //cout << "WOW erased meta interval from " << uid_to_string( m->owner ) << endl;
+        }
+    }
+
     for ( auto m = meta_intervals_.begin(); m != meta_intervals_.end(); ++m ) {
         if ( m->owner != uid and m->intervals.size() >= num_intervals ) {
             std::vector<Interval *> intervals_to_use;

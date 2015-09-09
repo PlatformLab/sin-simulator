@@ -27,13 +27,13 @@ class FlowCompletionTimeUser : public AbstractUser
         const size_t num_to_buy = num_owned < num_packets_ ? num_packets_ - num_owned : 0;
 
         if ( num_to_buy > 0 ) {
-            //std::cout << uid_to_string( uid_ ) << "owns " << num_owned << "!!! trying to buy " << num_to_buy << std::endl;
+           // std::cout << uid_to_string( uid_ ) << "owns " << num_owned << "!!! trying to buy " << num_to_buy << std::endl;
             size_t best_interval_length = 1;
             double best_interval_cost = std::numeric_limits<double>::max();
             size_t start_time = std::max( mkt.time(), start_ );
 
             //for ( size_t interval_length = 1; interval_length <= 1024; interval_length <<= 1 ) {
-            for ( size_t interval_length = num_to_buy - 1; interval_length <= 512; interval_length++ ) {
+            for ( size_t interval_length = num_to_buy - 1; interval_length <= 1024; interval_length++ ) {
                 double cost = mkt.cost_for_intervals( uid_, start_time, start_time+interval_length, num_to_buy );
                 if ( mkt.verbose() ) {
                     std::cout << uid_to_string( uid_ ) << ": $" << cost << " for interval "<< start_time << ", " << start_time + interval_length << std::endl;

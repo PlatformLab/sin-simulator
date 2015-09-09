@@ -28,6 +28,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
                 if ( not market_unchanged ) {
                     std::cout << "market after " << uid_to_string( u->uid_ ) << ":" << std::endl;
                     print_intervals( mkt.intervals() );
+                    print_meta_intervals( mkt.meta_intervals() );
                 }
 
                 all_done &= market_unchanged;

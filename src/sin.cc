@@ -32,10 +32,10 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
         cout << "market mean flow duration " << market_mean_flow_duration  << " with allocation:" << endl;
         print_intervals( market_allocation );
 
-/*
         cout << "srtf mean flow duration " << srtf_mean_flow_duration << " with allocation:" << endl;
         print_intervals( srtf_allocation );
 
+/*
         cout << "round robin mean flow duration " << round_robin_mean_flow_duration << " with allocation:" << endl;
         print_intervals( round_robin_allocation );
         */

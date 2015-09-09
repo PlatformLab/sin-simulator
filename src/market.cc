@@ -96,9 +96,9 @@ double Market::cost_for_intervals( size_t uid, size_t start, size_t end, size_t 
         for ( auto &i : cheapest_intervals ) {
             double i_cost = ( i->owner == uid ) ? 0 : i->cost;
             cheapest_with_intervals += i_cost;
-            cout << "cheapest " << i->start << " owned by " << uid_to_string( i->owner ) << " with cost " << i_cost << endl;
+            //cout << "cheapest " << i->start << " owned by " << uid_to_string( i->owner ) << " with cost " << i_cost << endl;
         }
-        cout << "cheapest with intervals was " << cheapest_with_intervals << endl;
+        //cout << "cheapest with intervals was " << cheapest_with_intervals << endl;
     } else {
         cheapest_with_intervals = numeric_limits<double>::max();
     }
@@ -141,9 +141,9 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
             }
             new_meta_interval.intervals.insert( i ); // TODO uhh do we double add these then?
         }
-        meta_intervals_.push_back( new_meta_interval );
 
         if ( market_changed ) {
+            meta_intervals_.push_back( new_meta_interval );
             version_++;
         }
         return cheapest_with_intervals;
@@ -159,7 +159,7 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
         transactions_.push_back( { best_meta_interval->owner, uid, best_offer.second } );
         total_payments += best_offer.second;
         if ( verbose_ ) {
-            cout << uid_to_string( uid ) << " paying $" << best_offer.second << " for meta interval move end to " << best_offer.first << " for $" << best_offer.second << endl;
+            cout << uid_to_string( uid ) << " paying $" << best_offer.second << " for meta interval from " << uid_to_string( best_meta_interval->owner ) << " moving end to " << best_offer.first << " for $" << best_offer.second << endl;
             //cout << replacements.size() << " replacements and intervals to move "  << intervals_to_move.size() << endl;
         }
         assert( replacements.size() == intervals_to_move.size() );
@@ -184,6 +184,16 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
         for ( auto &offer_pair : best_meta_interval->offers ) {
             offer_pair.second -= offers_price_offset;
         }
+
+        // add new meta interval
+        MetaInterval new_meta_interval;
+        new_meta_interval.owner = uid;
+        new_meta_interval.offers = move( offers );
+        for ( auto *i : intervals_to_move ) {
+            new_meta_interval.intervals.insert( i );
+        }
+        meta_intervals_.push_back( new_meta_interval );
+
 
         version_++;
         if ( verbose_ ) {

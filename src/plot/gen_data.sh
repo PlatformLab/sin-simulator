@@ -1,7 +1,7 @@
 SIN_LOCATION=../sin
 MEAN_DELAY_FILE=mean_delay.dat
 
-NUM_TRIALS=4
+NUM_TRIALS=2
 DIE_SIZE=40
 
 echo '"num flows" "SIN" "SRTF" "Rate Sharing" ' > $MEAN_DELAY_FILE

@@ -45,6 +45,7 @@ class Market {
         size_t intervals_owned_by_user( const size_t uid ) const;
 
         std::vector<Interval> intervals() const { return intervals_; };
+        std::vector<MetaInterval> meta_intervals() const { return meta_intervals_; };
         std::vector<Transaction> transactions() const { return transactions_; };
         bool empty();
         void advance_time();

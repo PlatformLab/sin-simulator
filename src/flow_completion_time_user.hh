@@ -26,8 +26,8 @@ class FlowCompletionTimeUser : public AbstractUser
         const size_t num_owned = mkt.intervals_owned_by_user( uid_ );
         const size_t num_to_buy = num_owned < num_packets_ ? num_packets_ - num_owned : 0;
 
-        if ( num_to_buy > 0 and done_ < 2 ) {
-            std::cout << uid_to_string( uid_ ) << "owns " << num_owned << "!!! trying to buy " << num_to_buy << std::endl;
+        if ( num_to_buy > 0 ) {
+            //std::cout << uid_to_string( uid_ ) << "owns " << num_owned << "!!! trying to buy " << num_to_buy << std::endl;
             size_t best_interval_length = 1;
             double best_interval_cost = std::numeric_limits<double>::max();
             size_t start_time = std::max( mkt.time(), start_ );
@@ -59,7 +59,7 @@ class FlowCompletionTimeUser : public AbstractUser
                 double spent = mkt.buy_intervals( uid_, start_time, start_time+best_interval_length, num_to_buy, best_interval_cost, offers );
                 //std::cout << uid_to_string( uid_ ) << " cost was " << best_interval_cost << " and spent " << spent << " for interval length " << best_interval_length << std::endl;
                 if ( spent > 0 ) {
-                    std::cout << uid_to_string( uid_ ) << " spent " << spent << " for interval "<< start_time << ", " << start_time+best_interval_length << std::endl;
+                    //std::cout << uid_to_string( uid_ ) << " spent " << spent << " for interval "<< start_time << ", " << start_time+best_interval_length << std::endl;
                 }
             }
             //done_++;

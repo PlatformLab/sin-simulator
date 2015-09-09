@@ -9,6 +9,7 @@
 #include <cassert>
 #include "flow.hh"
 #include "interval.hh"
+#include "meta_interval.hh"
 #include "transaction.hh"
 
 
@@ -38,9 +39,34 @@ static void print_flows( const std::vector<Flow> &flows )
 static void print_intervals( const std::vector<Interval> intervals )
 {
     for ( auto &i : intervals ) {
-        if ( i.owner != 0 ) // XXX temp
-            std::cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner ) << " with sell price " << i.cost << std::endl;
+        if ( i.owner != 0 ) { // XXX temp not printing ccast right now
+            std::cout << "[" << i.start << "," << i.end << "] owned by " << uid_to_string( i.owner );
+
+            if ( i.cost < std::numeric_limits<double>::max() ) {
+                std::cout << " with sell price " << i.cost << std::endl;
+            } else {
+                std::cout << std::endl;
+            }
+        }
     }
+}
+
+static void print_meta_intervals( const std::vector<MetaInterval> meta_intervals )
+{
+    for ( auto &m : meta_intervals ) {
+            std::cout << "meta interval from: " << uid_to_string( m.owner ) << " with intervals: ";
+
+            for ( auto &i : m.intervals ) {
+                std::cout << "[" << i->start << "," << i->end << " " << uid_to_string( i->owner ) << "]";
+            }
+
+            std::cout << std::endl << " and offers: ";
+
+            for ( auto &o : m.offers ) {
+                std::cout << "(" << o.first << "," << o.second << ")";
+            }
+            std::cout << std::endl;
+        }
 }
 
 #endif /* PRETTY_PRINT_HH */

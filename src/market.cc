@@ -147,6 +147,7 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
         new_meta_interval.owner = uid;
         new_meta_interval.offers = move( offers );
 
+        bool add_meta_interval = true;
         // buy the slots
         for ( auto *i : cheapest_intervals ) {
             if ( i->owner != uid ) {
@@ -157,10 +158,23 @@ double Market::buy_intervals( size_t uid, size_t start, size_t end, size_t num_i
 
             }
             new_meta_interval.intervals.insert( i ); // TODO uhh do we double add these then?
+            for ( auto &m : meta_intervals_ ) {
+                if ( m.owner == uid ) {
+                    for ( auto *existing_i : m.intervals ) {
+                        if ( i == existing_i ) {
+                            add_meta_interval = false;
+                        }
+                    }
+                }
+            }
+
         }
 
-        if ( market_changed ) {
+        if ( add_meta_interval ) {
             meta_intervals_.push_back( new_meta_interval );
+            market_changed = true;
+        }
+        if ( market_changed ) {
             version_++;
         }
         return cheapest_with_intervals;

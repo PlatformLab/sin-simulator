@@ -33,7 +33,7 @@ class FlowCompletionTimeUser : public AbstractUser
             size_t start_time = std::max( mkt.time(), start_ );
 
             //for ( size_t interval_length = 1; interval_length <= 1024; interval_length <<= 1 ) {
-            for ( size_t interval_length = num_to_buy - 1; interval_length <= 1024; interval_length++ ) {
+            for ( size_t interval_length = num_to_buy - 1; interval_length <= 16; interval_length+=2 ) {
                 double cost = mkt.cost_for_intervals( uid_, start_time, start_time+interval_length, num_to_buy );
                 if ( mkt.verbose() ) {
                     std::cout << uid_to_string( uid_ ) << ": $" << cost << " for interval "<< start_time << ", " << start_time + interval_length << std::endl;
@@ -51,7 +51,7 @@ class FlowCompletionTimeUser : public AbstractUser
             if ( best_interval_cost < std::numeric_limits<double>::max() ) {
                 std::vector<std::pair<size_t, double>> offers { }; 
                 //for ( size_t extra_length = 1; extra_length <= 64; extra_length <<= 1 ) {
-                for ( size_t extra_length = 1; extra_length <= 256; extra_length++ ) {
+                for ( size_t extra_length = 1; extra_length <= 16; extra_length++ ) {
                     //std::cout << "start_time " << tart_time << "best_interval_length " <<  best_interval_length << "extra_length " << extra_length << std::endl;
                     offers.push_back( { start_time + best_interval_length + extra_length, (double) extra_length + .01 } );
                 }

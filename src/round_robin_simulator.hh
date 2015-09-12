@@ -10,14 +10,14 @@
 #include "flow.hh"
 #include "link.hh"
 
-const std::vector<Interval> simulate_round_robin( const std::vector<Link> &links, std::vector<Flow> flows )
+const std::vector<Opportunity> simulate_round_robin( const std::vector<Link> &links, std::vector<Flow> flows )
 {
     assert ( links.size() == 1 );
     Link link = links.at(0);
-    std::vector<Interval> allocation = link.get_intervals();
+    std::vector<Opportunity> allocation = link.get_opportunities();
     
-    auto cur_interval = allocation.begin();
-    while ( cur_interval != allocation.end() ) {
+    auto cur_opportunity = allocation.begin();
+    while ( cur_opportunity != allocation.end() ) {
         bool someone_went = false;
         bool everyone_finished = true;
 
@@ -25,13 +25,13 @@ const std::vector<Interval> simulate_round_robin( const std::vector<Link> &links
             bool flow_finished = flow.num_packets == 0;
             everyone_finished = everyone_finished and flow_finished;
 
-            bool flow_started = cur_interval->start >= flow.start;
+            bool flow_started = cur_opportunity->interval.start >= flow.start;
 
             if ( flow_started and not flow_finished ) { // then schedule it
-                cur_interval->owner = flow.uid;
+                cur_opportunity->owner = flow.uid;
                 flow.num_packets--;
-                cur_interval++;
-                if ( cur_interval == allocation.end() ) {
+                cur_opportunity++;
+                if ( cur_opportunity == allocation.end() ) {
                     return allocation;
                 }
                 someone_went = true;
@@ -42,7 +42,7 @@ const std::vector<Interval> simulate_round_robin( const std::vector<Link> &links
             return allocation;
         }
         if ( not someone_went ) { // if nobody could go then advance anyway
-            cur_interval++;
+            cur_opportunity++;
         }
     }
     return allocation;

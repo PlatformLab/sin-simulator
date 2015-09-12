@@ -14,6 +14,7 @@
 #include "abstract_user.hh"
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
+#include "pretty_print.hh"
 
 void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr<AbstractUser>> &users, bool verbose )
 {
@@ -25,6 +26,9 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
                 size_t before_version = mkt.version();
                 u->take_actions( mkt );
                 bool market_unchanged = before_version == mkt.version();
+                if ( verbose ) {
+                    // stupid w-unused-parameter
+                }
 
                 all_done &= market_unchanged;
             }
@@ -32,7 +36,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
     } while ( not all_done );
 }
 
-const std::vector<Interval> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
+const std::vector<Opportunity> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
 {
     Market mkt = Market( verbose );
     std::vector<std::unique_ptr<AbstractUser>> users;
@@ -53,7 +57,7 @@ const std::vector<Interval> simulate_market( const std::vector<Link> &links, con
         std::cout << "market transactions:" << std::endl;
         print_transactions( mkt.transactions() );
     }
-    return mkt.intervals();
+    return mkt.backing_opportunities();
 }
 
 #endif /* MARKET_SIMULATOR_HH */

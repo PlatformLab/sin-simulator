@@ -11,6 +11,12 @@ struct Interval {
     {
         return start >= other.start and end <= other.end;
     }
+
+    /*
+    bool operator==(const Interval& other) {
+        return start == other.start and end == other.end;
+    }
+    */
 };
 
 #endif /* INTERVAL_HH */

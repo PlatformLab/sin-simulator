@@ -13,9 +13,9 @@
 #include <algorithm>
 
 #include "interval.hh"
+#include "opportunity.hh"
+#include "offer.hh"
 #include "transaction.hh"
-#include "meta_interval.hh"
-#include "pretty_print.hh"
 
 class Market {
     private:
@@ -30,16 +30,20 @@ class Market {
             : verbose_( verbose )
         { }
 
-        void add_offer( Offer offer );
-        std::vector<Offer> offers_in_interval( Interval i ) const;
-        bool buy_offer( Offer o );
+        void add_offer( Offer &offer );
+        std::vector<Offer> offers_in_interval( Interval &i ) const;
+        bool buy_offer( size_t uid, Offer &o );
+
+        const std::vector<Opportunity> backing_opportunities( ) const;
+        const std::vector<Transaction> transactions( ) const { return transactions_; };
+
+        bool empty() const;
 
         size_t version() const { return version_; };
         size_t verbose() const { return verbose_; };
         size_t time() const { return time_; };
-
-        void advance_time() { time_++: };
-        void increment_version() { version_++: };
+        void advance_time() { time_++; };
+        void increment_version() { version_++; };
 };
 
 #endif /* MARKET_HH */

@@ -11,21 +11,22 @@
 
 class OwnerUser : public AbstractUser
 {
-    const std::vector<Interval> intervals_to_add_;
+    const std::vector<Opportunity> opportunities_to_add_;
     bool done_ = false;
 
     public:
     OwnerUser( Link link )
         : AbstractUser( link.uid, link.start ),
-        intervals_to_add_( link.get_intervals() )
+        opportunities_to_add_( link.get_opportunities() )
     {
     }
 
     void take_actions( Market& mkt ) override
     {
         if ( not done_ ) {
-            for ( const Interval &i : intervals_to_add_ ) {
-                mkt.add_offer( { uid, i, 1, 1.0 } );
+            for ( const Opportunity &o : opportunities_to_add_ ) {
+                Offer toAdd = { uid_, o.interval, 1, 1.0, { o } };
+                mkt.add_offer( toAdd );
             }
             done_ = true;
         }

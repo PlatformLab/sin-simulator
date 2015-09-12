@@ -7,16 +7,16 @@
 #include <unordered_map>
 #include <vector>
 #include <cassert>
-#include "interval.hh"
+#include "opportunity.hh"
 
 /* returns a map of uid to flow num packets and duration */
 std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durations(
-        const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
+        const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
 {
     std::unordered_map<size_t, std::pair<size_t, size_t>> toRet;
-    for ( auto & interval : allocation ) {
-        toRet[interval.owner].first = 0; // used to find intervals not associated with flows later
-        toRet[interval.owner].second = interval.end;
+    for ( auto & opportunity : allocation ) {
+        toRet[opportunity.owner].first = 0; // used to find opportunities not associated with flows later
+        toRet[opportunity.owner].second = opportunity.interval.end;
     }
 
     for (auto &flow : flows ) {
@@ -24,7 +24,7 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
         toRet[flow.uid].second += 1 - flow.start;
     }
 
-    // filter out intervals not allocated to flows
+    // filter out opportunities not allocated to flows
     for ( auto it = toRet.begin(); it != toRet.end(); ) {
         if ( it->second.first == 0 ) {
             it = toRet.erase( it );
@@ -36,7 +36,7 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
     return toRet;
 }
 
-double mean_flow_duration( const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
+double mean_flow_duration( const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
 {
     size_t sum_durations = 0;
     for ( const auto &flow_stats : get_flow_lengths_and_durations( flows, allocation ) ) {

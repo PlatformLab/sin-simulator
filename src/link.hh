@@ -11,13 +11,12 @@ struct Link {
     const size_t start;
     const size_t num_intervals;
     const size_t propagation_time;
-    const double default_interval_cost;
 
     std::vector<Interval> get_intervals() const
     {
         std::vector<Interval> toRet;
         for ( size_t i = 0; i < num_intervals; i++ ) {
-            toRet.push_back( { uid, i, i+propagation_time, default_interval_cost } );
+            toRet.push_back( { i, i+propagation_time } );
         }
         return toRet;
     }

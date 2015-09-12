@@ -25,7 +25,7 @@ class OwnerUser : public AbstractUser
     {
         if ( not done_ ) {
             for ( const Interval &i : intervals_to_add_ ) {
-                mkt.add_interval( i );
+                mkt.add_offer( { uid, i, 1, 1.0 } );
             }
             done_ = true;
         }

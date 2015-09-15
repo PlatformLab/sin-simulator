@@ -4,7 +4,7 @@
 
 using namespace std;
 
-std::vector<std::shared_ptr<Opportunity>> Market::add_opportunities( const std::vector<Opportunity> &opportunties )
+const std::vector<std::shared_ptr<Opportunity>> Market::add_opportunities( const std::vector<Opportunity> &opportunties )
 {
     std::vector<std::shared_ptr<Opportunity>> toRet;
 
@@ -38,7 +38,7 @@ const std::vector<Offer> Market::offers_in_interval( Interval &i ) const
     return toRet;
 }
 
-std::vector<std::shared_ptr<Opportunity>> Market::buy_offer( size_t uid, Offer &o )
+const std::vector<std::shared_ptr<Opportunity>> Market::buy_offer( size_t uid, Offer &o )
 {
     auto market_offer = offers_.find( o );
     if ( market_offer != offers_.end() ) {

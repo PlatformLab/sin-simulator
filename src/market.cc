@@ -21,7 +21,7 @@ std::vector<std::shared_ptr<Opportunity>> Market::add_opportunities( const std::
 bool Market::add_offer( Offer &offer )
 {
     // TODO double check they own backing intervals for offer
-    offers_.emplace_back( offer ); 
+    offers_.insert( offer ); 
 
     increment_version();
     return true;
@@ -38,32 +38,29 @@ const std::vector<Offer> Market::offers_in_interval( Interval &i ) const
     return toRet;
 }
 
-std::vector<std::shared_ptr<Opportunity>> Market::buy_offer( size_t uid, const Offer &o )
+std::vector<std::shared_ptr<Opportunity>> Market::buy_offer( size_t uid, Offer &o )
 {
-    for ( auto it = offers_.begin(); it != offers_.end(); ) {
-        //if ( (*it) == o ) {
-            for ( auto &opportunity : it->backing_opportunities ) {
-                // transfer underlying asset?
-                auto mutableIt = opportunities_.find( opportunity );
-                assert( mutableIt != opportunities_.end( ) );
+    auto market_offer = offers_.find( o );
+    if ( market_offer != offers_.end() ) {
+        for ( auto &market_opportunity : market_offer->backing_opportunities ) {
+            // transfer underlying asset?
+            auto mutableIt = opportunities_.find( market_opportunity );
+            assert( mutableIt != opportunities_.end() );
 
-                (*mutableIt)->owner = uid;
-                assert( opportunity->owner == uid ); // shared pointer working and const version of opportunity is not a copy
-            }
-            transactions_.push_back( { o.seller_uid, uid, o.cost } );  // to, from, amount
-            it = offers_.erase( it );
+            (*mutableIt)->owner = uid;
+            assert( market_opportunity->owner == uid ); // shared pointer working and const version of opportunity is not a copy
+        }
+        transactions_.push_back( { o.seller_uid, uid, o.cost } );  // to, from, amount
 
-            increment_version();
-        //} else {
-            ++it;
-        //}
+        increment_version();
+
+        return o.backing_opportunities;
+    } else {
+        return { };
     }
-
-    increment_version();
-    return o.backing_opportunities;
 }
 
-const std::vector<Opportunity> Market::opportunities( ) const
+const std::vector<Opportunity> Market::opportunities() const
 {
     std::vector<Opportunity> toRet;
     for ( auto &ptr : opportunities_ ) {

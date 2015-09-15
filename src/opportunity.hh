@@ -10,11 +10,9 @@ struct Opportunity {
     size_t owner; /*  uid of who is sending their packet for this opportunity */
     Interval interval;
 
-    /*
     bool operator==(const Opportunity &other) {
-        return owner == other.owner and interval == other.interval;
+        return provider == other.provider and owner == other.owner and interval == other.interval;
     }
-    */
 };
 
 

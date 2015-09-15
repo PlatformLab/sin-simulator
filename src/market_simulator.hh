@@ -57,7 +57,7 @@ const std::vector<Opportunity> simulate_market( const std::vector<Link> &links, 
         std::cout << "market transactions:" << std::endl;
         print_transactions( mkt.transactions() );
     }
-    return mkt.backing_opportunities();
+    return mkt.opportunities();
 }
 
 #endif /* MARKET_SIMULATOR_HH */

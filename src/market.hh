@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <algorithm>
+#include <set>
 
 #include "interval.hh"
 #include "opportunity.hh"
@@ -21,6 +22,7 @@ class Market {
     private:
         size_t time_ = 0;
         size_t version_ = 0;
+        std::set<std::shared_ptr<Opportunity>> opportunities_ { };
         std::vector<Offer> offers_ { };
         std::vector<Transaction> transactions_ { };
         const bool verbose_;
@@ -30,11 +32,12 @@ class Market {
             : verbose_( verbose )
         { }
 
-        void add_offer( Offer &offer );
-        std::vector<Offer> offers_in_interval( Interval &i ) const;
-        bool buy_offer( size_t uid, Offer &o );
+        std::vector<std::shared_ptr<Opportunity>> add_opportunities( const std::vector<Opportunity> &opportunties );
+        bool add_offer( Offer &offer );
+        const std::vector<Offer> offers_in_interval( Interval &i ) const;
+        std::vector<std::shared_ptr<Opportunity>> buy_offer( size_t uid, const Offer &o ); /* returns backing opportunities they now own */
 
-        const std::vector<Opportunity> backing_opportunities( ) const;
+        const std::vector<Opportunity> opportunities( ) const;
         const std::vector<Transaction> transactions( ) const { return transactions_; };
 
         bool empty() const;

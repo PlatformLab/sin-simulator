@@ -6,7 +6,8 @@
 #include "interval.hh"
 
 struct Opportunity {
-    size_t owner;
+    size_t provider; /* uid of who will actually carry the packet */
+    size_t owner; /*  uid of who is sending their packet for this opportunity */
     Interval interval;
 
     /*

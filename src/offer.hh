@@ -12,7 +12,7 @@ struct Offer {
     Interval interval;
     size_t num_packets;
     double cost;
-    std::vector<Opportunity> backing_opportunities;
+    std::vector<std::shared_ptr<Opportunity>> backing_opportunities;
 
     /*
     bool operator==(const Offer& other) {

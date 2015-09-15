@@ -16,7 +16,7 @@ struct Link {
     {
         std::vector<Opportunity> toRet;
         for ( size_t i = 0; i < num_opportunities; i++ ) {
-            toRet.push_back( { uid, { i, i+propagation_time } } );
+            toRet.push_back( { uid, uid, { i, i+propagation_time } } );
         }
         return toRet;
     }

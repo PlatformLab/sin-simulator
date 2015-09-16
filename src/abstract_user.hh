@@ -9,7 +9,7 @@ class AbstractUser {
     public:
         const size_t uid_;
         const size_t start_;
-        std::vector<Opportunity> opportunities_ = { };
+        std::vector<Opportunity> opportunities_ { };
 
         AbstractUser( const size_t &uid, const size_t &start )
             : uid_( uid ),

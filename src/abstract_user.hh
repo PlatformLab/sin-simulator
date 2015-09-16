@@ -9,15 +9,15 @@ class AbstractUser {
     public:
         const size_t uid_;
         const size_t start_;
+        std::vector<Opportunity> opportunities_ = { };
 
         AbstractUser( const size_t &uid, const size_t &start )
             : uid_( uid ),
             start_( start )
-        {
-        }
+        { }
 
         virtual void take_actions( Market& mkt ) = 0;
-
+        virtual std::vector<Opportunity> opportunities() const { return opportunities_; }
         virtual ~AbstractUser() = default;
 };
 

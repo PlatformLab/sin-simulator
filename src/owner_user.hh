@@ -24,10 +24,12 @@ class OwnerUser : public AbstractUser
     void take_actions( Market& mkt ) override
     {
         if ( not done_ ) {
-            const std::vector<std::shared_ptr<Opportunity>> added_opportunities = mkt.add_opportunities( opportunities_to_add_ );
-            for ( auto &o_ptr : added_opportunities ) {
-                Offer toAdd = { uid_, o_ptr->interval, 1, 1.0, { o_ptr } };
-                mkt.add_offer( toAdd );
+            //const std::vector<std::shared_ptr<Opportunity>> added_opportunities = mkt.add_opportunities( opportunities_to_add_ );
+            for ( auto &o : opportunities_to_add_ ) {
+                Offer toAdd = { uid_, o.interval, 1, 1.0 };
+                bool result = mkt.add_offer( toAdd );
+                assert( result );
+                opportunities_ = opportunities_to_add_;
             }
             done_ = true;
         }

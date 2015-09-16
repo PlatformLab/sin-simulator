@@ -33,12 +33,10 @@ class Market {
             : verbose_( verbose )
         { }
 
-        const std::vector<std::shared_ptr<Opportunity>> add_opportunities( const std::vector<Opportunity> &opportunties );
         bool add_offer( Offer &offer );
         const std::vector<Offer> offers_in_interval( Interval &i ) const;
-        const std::vector<std::shared_ptr<Opportunity>> buy_offer( size_t uid, Offer &o ); /* returns backing opportunities they now own */
+        bool buy_offer( size_t uid, const Offer &o ); /* returns backing opportunities they now own */
 
-        const std::vector<Opportunity> opportunities() const;
         const std::vector<Transaction> transactions() const { return transactions_; };
 
         bool empty() const;

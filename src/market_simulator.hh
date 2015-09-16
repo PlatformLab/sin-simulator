@@ -57,7 +57,13 @@ const std::vector<Opportunity> simulate_market( const std::vector<Link> &links, 
         std::cout << "market transactions:" << std::endl;
         print_transactions( mkt.transactions() );
     }
-    return mkt.opportunities();
+
+    std::vector<Opportunity> toRet;
+    for ( auto &u : users ) {
+        std::vector<Opportunity> toAdd = u->opportunities();
+        toRet.insert( toRet.end(), toAdd.begin(), toAdd.end() );
+    }
+    return toRet;
 }
 
 #endif /* MARKET_SIMULATOR_HH */

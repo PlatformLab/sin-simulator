@@ -15,10 +15,15 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
 {
     std::unordered_map<size_t, std::pair<size_t, size_t>> toRet;
     for ( auto & opportunity : allocation ) {
-        toRet[opportunity.owner].first = 0; // used to find opportunities not associated with flows later
-        toRet[opportunity.owner].second = opportunity.interval.end;
+        toRet[opportunity.owner] = { 0, 0 };
     }
 
+    // find flow completion time
+    for ( auto & opportunity : allocation ) {
+        toRet[opportunity.owner].second = std::max( opportunity.interval.end, toRet[opportunity.owner].second );
+    }
+
+    // record flow duration and calculate flow duration from flow completion time we found above
     for (auto &flow : flows ) {
         if ( toRet.count( flow.uid ) > 0 ) { // only count flow if it shows up in opportunties
             toRet[flow.uid].first = flow.num_packets;

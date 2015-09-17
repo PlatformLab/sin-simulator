@@ -63,6 +63,9 @@ const std::vector<Opportunity> simulate_market( const std::vector<Link> &links, 
         std::vector<Opportunity> toAdd = u->opportunities();
         toRet.insert( toRet.end(), toAdd.begin(), toAdd.end() );
     }
+    std::sort(toRet.begin(), toRet.end(), []( const Opportunity &a, const Opportunity &b ) {
+            return a.interval.end < b.interval.end;   
+            });
     return toRet;
 }
 

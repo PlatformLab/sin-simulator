@@ -37,7 +37,7 @@ class FlowCompletionTimeUser : public AbstractUser
 
         size_t start_time = std::max( mkt.time(), start_ );
 
-        for ( size_t interval_length = num_to_buy - 1; interval_length <= 5; interval_length++ ) {
+        for ( size_t interval_length = num_to_buy - 1; interval_length <= 16; interval_length++ ) {
             Interval interval = { start_time, start_time+interval_length };
             std::cout << "exploring offers on interval " << interval_to_string( interval ) << std::endl;
             const std::vector<Offer> interval_offers = mkt.offers_in_interval( interval );
@@ -58,18 +58,21 @@ class FlowCompletionTimeUser : public AbstractUser
                 }
             }
             if ( cheapest_offers.size() == num_packets_ ) {
-                const double benefit = -( start_time+interval_length-start_ );
+                //std::cout << "start_time " << start_time << " interval_length " << interval_length << " start_ " << start_<< std::endl;
+                assert( start_time + interval_length >= start_ ); // no underflow
+                const double benefit = -(double) ( start_time + interval_length - start_ );
                 double cost = 0; 
                 for ( auto &o : cheapest_offers ) {
                     cost += o.cost;
                 }
                 const double utility = benefit - cost;
                 if ( utility > best_offers_utility ) {
+                //    std::cout << "best seen so far " << utility << ", previous was "<< best_offers_utility<< std::endl;
                     best_offers = std::move( cheapest_offers );
                     best_offers_utility = utility;
                 }
             } else {
-                std::cout << "can't buy enough packets on this interval " << std::endl;
+                //std::cout << "can't buy enough packets on this interval " << std::endl;
             }
 
             /*

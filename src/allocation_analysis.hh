@@ -9,17 +9,44 @@
 #include <cassert>
 #include "opportunity.hh"
 
+/* checks that all flows have had their packets allocated */
+static bool allocation_valid( const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
+{
+    std::unordered_map<size_t, size_t> uid_to_num_sent;
+    for ( auto &opportunity : allocation ) {
+        auto search = uid_to_num_sent.find( opportunity.owner );
+
+        if ( search == uid_to_num_sent.end() ) {
+            uid_to_num_sent.emplace( opportunity.owner, 1 );
+        } else {
+            search->second++;
+        }
+    }
+
+    for (auto &flow : flows ) {
+        auto search = uid_to_num_sent.find( flow.uid );
+        if ( search == uid_to_num_sent.end() ) {
+            std::cout << "failed because uid not found" << std::endl;
+            return false;
+        } else if ( search->second != flow.num_packets ) {
+            std::cout << "num packets recorded was " << search->second << " for flow of size " << flow.num_packets << std::endl;
+        }
+    }
+
+    return true;
+}
+
 /* returns a map of uid to flow num packets and duration */
 std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durations(
         const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
 {
     std::unordered_map<size_t, std::pair<size_t, size_t>> toRet;
-    for ( auto & opportunity : allocation ) {
+    for ( auto &opportunity : allocation ) {
         toRet[opportunity.owner] = { 0, 0 };
     }
 
     // find flow completion time
-    for ( auto & opportunity : allocation ) {
+    for ( auto &opportunity : allocation ) {
         toRet[opportunity.owner].second = std::max( opportunity.interval.end, toRet[opportunity.owner].second );
     }
 
@@ -45,6 +72,7 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
 
 double mean_flow_duration( const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
 {
+    assert( allocation_valid( flows, allocation ) );
     size_t sum_durations = 0;
     for ( const auto &flow_stats : get_flow_lengths_and_durations( flows, allocation ) ) {
         sum_durations += flow_stats.second.second;

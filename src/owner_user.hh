@@ -34,6 +34,8 @@ class OwnerUser : public AbstractUser
             done_ = true;
         }
     }
+
+    std::vector<Opportunity> opportunities() { return { }; }
 };
 
 #endif /* OWNER_USER */

@@ -5,17 +5,22 @@
 
 #include <iostream>
 #include <algorithm>
+#include <unordered_set>
 #include "abstract_user.hh"
 #include "pretty_print.hh"
 #include "market.hh"
 #include "flow.hh"
+#include "opportunity.hh"
 #include "offer.hh"
 
 
 class FlowCompletionTimeUser : public AbstractUser
 {
     const size_t num_packets_;
+    size_t num_packets_allocated_ = 0;
     bool done_ = false;
+    std::unordered_set<Offer> offers_posted_ { };
+    std::vector<Opportunity> opportunities_ { };
 
     public:
     FlowCompletionTimeUser( Flow flow )
@@ -24,12 +29,34 @@ class FlowCompletionTimeUser : public AbstractUser
     {
     }
 
+    std::vector<Opportunity> opportunities() { return { }; }
+
+    void check_taken_offers( Market& mkt )
+    {
+        for ( const Offer &o : mkt.taken_offers() ) {
+            auto search = offers_posted_.find( o );
+            if ( search != offers_posted_.end() ) {
+                // someone took an offer we posted
+
+                if ( o.exchange_for_interval.first ) {
+
+                } else {
+                    // not a trading offer, we have less packets allocated now
+                    num_packets_allocated_ -= o.num_packets;
+                }
+
+                offers_posted_.erase( search );
+            }
+        }
+    }
+
     void take_actions( Market& mkt ) override
     {
-        if ( done_ )
+        check_taken_offers( mkt );
+        if ( num_packets_allocated_ >= num_packets_ )
             return;
 
-        size_t num_to_buy = num_packets_;
+        size_t num_to_buy = num_packets_-num_packets_allocated_;
         std::cout << uid_to_string( uid_ ) << " trying to buy " << num_to_buy << " opportunties" << std::endl;
 
         std::vector<Offer> best_offers;
@@ -84,18 +111,17 @@ class FlowCompletionTimeUser : public AbstractUser
         }
         if ( best_offers_utility < std::numeric_limits<double>::max() ) {
             // we can buy some offers
-            bool all_successful = true;
             for ( const Offer &o : best_offers ) {
                 std::cout << "User " << uid_to_string( uid_ ) << " buying offer on interval " <<  interval_to_string( o.interval ) << " for $" << o.cost << std::endl;
                 bool success = mkt.buy_offer( uid_, o );
                 if ( success ) {
                     Opportunity toAdd = { size_t( -1 ), uid_, { o.interval.start, o.interval.end } };
                     opportunities_.push_back( toAdd );
+                    num_packets_allocated_++;
                 } else {
-                    all_successful = false;
+                    assert( false && "thought we could buy offer but we couldn't");
                 }
             }
-            done_ = all_successful;
         } else {
                 std::cout << "no offers we could take" << std::endl;
         }

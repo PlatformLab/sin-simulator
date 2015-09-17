@@ -37,7 +37,7 @@ class FlowCompletionTimeUser : public AbstractUser
 
         size_t start_time = std::max( mkt.time(), start_ );
 
-        for ( size_t interval_length = num_to_buy - 1; interval_length <= 16; interval_length++ ) {
+        for ( size_t interval_length = num_to_buy - 1; interval_length <= 64; interval_length++ ) {
             Interval interval = { start_time, start_time+interval_length };
             std::cout << "exploring offers on interval " << interval_to_string( interval ) << std::endl;
             const std::vector<Offer> interval_offers = mkt.offers_in_interval( interval );

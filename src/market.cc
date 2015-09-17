@@ -7,9 +7,7 @@ using namespace std;
 
 bool Market::add_offer( Offer &offer )
 {
-    // TODO double check they own backing intervals for offer
     offers_.insert( offer ); 
-
     increment_version();
     return true;
 }
@@ -30,8 +28,8 @@ bool Market::buy_offer( size_t uid, const Offer &o )
     auto market_offer = offers_.find( o );
     if ( market_offer != offers_.end() ) {
         transactions_.push_back( { o.seller_uid, uid, o.cost } );  // to, from, amount
-        // TODO track taken offers
 
+        taken_offers.push_back( move( *market_offer ) );
         offers_.erase( market_offer );
         increment_version();
 

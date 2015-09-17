@@ -26,7 +26,7 @@ class OwnerUser : public AbstractUser
         if ( not done_ ) {
             //const std::vector<std::shared_ptr<Opportunity>> added_opportunities = mkt.add_opportunities( opportunities_to_add_ );
             for ( auto &o : opportunities_to_add_ ) {
-                Offer toAdd = { uid_, o.interval, 1, 1.0 };
+                Offer toAdd = { uid_, o.interval, 1, 1.0, { false, { 0,0 } } };
                 bool result = mkt.add_offer( toAdd );
                 assert( result );
                 //opportunities_ = opportunities_to_add_; TODO maybe add back later

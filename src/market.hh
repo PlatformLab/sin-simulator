@@ -25,6 +25,7 @@ class Market {
         size_t version_ = 0;
         std::set<std::shared_ptr<Opportunity>> opportunities_ { };
         std::unordered_set<Offer> offers_ { };
+        std::vector<Offer> taken_offers_ { };
         std::vector<Transaction> transactions_ { };
         const bool verbose_;
 
@@ -36,6 +37,8 @@ class Market {
         bool add_offer( Offer &offer );
         const std::vector<Offer> offers_in_interval( Interval &i ) const;
         bool buy_offer( size_t uid, const Offer &o ); /* returns backing opportunities they now own */
+
+        const std::vector<Offer> taken_offers() const { return taken_offers_; };
 
         const std::vector<Transaction> transactions() const { return transactions_; };
 

@@ -15,7 +15,6 @@
 #include <unordered_set>
 
 #include "interval.hh"
-#include "opportunity.hh"
 #include "offer.hh"
 #include "transaction.hh"
 
@@ -23,7 +22,6 @@ class Market {
     private:
         size_t time_ = 0;
         size_t version_ = 0;
-        std::set<std::shared_ptr<Opportunity>> opportunities_ { };
         std::unordered_set<Offer> offers_ { };
         std::vector<Offer> taken_offers_ { };
         std::vector<Transaction> transactions_ { };
@@ -35,8 +33,8 @@ class Market {
         { }
 
         bool add_offer( Offer &offer );
-        const std::vector<Offer> offers_in_interval( Interval &i ) const;
-        bool buy_offer( size_t uid, const Offer &o ); /* returns backing opportunities they now own */
+        const std::vector<Offer> offers_in_interval( const size_t start, const size_t end ) const;
+        bool buy_offer( size_t uid, const Offer &o ); /* returns if buy successful */
 
         const std::vector<Offer> taken_offers() const { return taken_offers_; };
 

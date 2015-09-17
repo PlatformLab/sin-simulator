@@ -4,16 +4,13 @@
 #define INTERVAL_HH
 
 struct Interval {
+    size_t owner;
     size_t start;
     size_t end;
-
-    bool contained_within( const Interval &other ) const
-    {
-        return start >= other.start and end <= other.end;
-    }
+    size_t num_packets;
 
     bool operator==(const Interval& other) const {
-        return start == other.start and end == other.end;
+        return owner == other.owner and start == other.start and end == other.end and num_packets == other.num_packets;
     }
 };
 
@@ -26,11 +23,10 @@ namespace std {
                 using std::size_t;
                 using std::hash;
 
-                // Compute individual hash values for first,
-                // second and third and combine them using XOR
-                // and bit shifting:
-
-                return ( hash<size_t>()(i.start) ) ^ ( hash<size_t>()(i.end) << 1 );
+                return ( hash<size_t>()(i.owner) )
+                    ^ ( hash<size_t>()(i.start) + 1 )
+                    ^ ( hash<size_t>()(i.end) + 2 )
+                    ^ ( hash<size_t>()(i.num_packets) + 3 );
             }
         };
 }

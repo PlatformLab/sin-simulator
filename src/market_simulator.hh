@@ -36,7 +36,7 @@ void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr
     } while ( not all_done );
 }
 
-const std::vector<Opportunity> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
+const std::vector<Interval> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
 {
     Market mkt = Market( verbose );
     std::vector<std::unique_ptr<AbstractUser>> users;
@@ -58,13 +58,13 @@ const std::vector<Opportunity> simulate_market( const std::vector<Link> &links, 
         print_transactions( mkt.transactions() );
     }
 
-    std::vector<Opportunity> toRet;
+    std::vector<Interval> toRet;
     for ( auto &u : users ) {
-        std::vector<Opportunity> toAdd = u->opportunities();
+        std::vector<Interval> toAdd = u->intervals();
         toRet.insert( toRet.end(), toAdd.begin(), toAdd.end() );
     }
-    std::sort(toRet.begin(), toRet.end(), []( const Opportunity &a, const Opportunity &b ) {
-            return a.interval.end < b.interval.end;   
+    std::sort(toRet.begin(), toRet.end(), []( const Interval &a, const Interval &b ) {
+            return a.end < b.end;   
             });
     return toRet;
 }

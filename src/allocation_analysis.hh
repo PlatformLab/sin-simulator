@@ -7,19 +7,19 @@
 #include <unordered_map>
 #include <vector>
 #include <cassert>
-#include "opportunity.hh"
+#include "interval.hh"
 
 /* checks that all flows have had their packets allocated */
-static bool allocation_valid( const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
+static bool allocation_valid( const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
 {
     std::unordered_map<size_t, size_t> uid_to_num_sent;
-    for ( auto &opportunity : allocation ) {
-        auto search = uid_to_num_sent.find( opportunity.owner );
+    for ( auto &i : allocation ) {
+        auto search = uid_to_num_sent.find( i.owner );
 
         if ( search == uid_to_num_sent.end() ) {
-            uid_to_num_sent.emplace( opportunity.owner, 1 );
+            uid_to_num_sent.emplace( i.owner, i.num_packets );
         } else {
-            search->second++;
+            search->second += i.num_packets;
         }
     }
 
@@ -38,27 +38,27 @@ static bool allocation_valid( const std::vector<Flow> &flows, const std::vector<
 
 /* returns a map of uid to flow num packets and duration */
 std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durations(
-        const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
+        const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
 {
     std::unordered_map<size_t, std::pair<size_t, size_t>> toRet;
-    for ( auto &opportunity : allocation ) {
-        toRet[opportunity.owner] = { 0, 0 };
+    for ( auto &i : allocation ) {
+        toRet[ i.owner ] = { 0, 0 };
     }
 
     // find flow completion time
-    for ( auto &opportunity : allocation ) {
-        toRet[opportunity.owner].second = std::max( opportunity.interval.end, toRet[opportunity.owner].second );
+    for ( auto &i : allocation ) {
+        toRet[ i.owner ].second = std::max( i.end, toRet[ i.owner ].second );
     }
 
     // record flow duration and calculate flow duration from flow completion time we found above
     for (auto &flow : flows ) {
-        if ( toRet.count( flow.uid ) > 0 ) { // only count flow if it shows up in opportunties
-            toRet[flow.uid].first = flow.num_packets;
-            toRet[flow.uid].second += 1 - flow.start;
+        if ( toRet.count( flow.uid ) > 0 ) { // only count flow if it shows up in intevals
+            toRet[ flow.uid ].first = flow.num_packets;
+            toRet[ flow.uid ].second += 1 - flow.start;
         }
     }
 
-    // filter out opportunities not allocated to flows
+    // filter out intevals not allocated to flows
     for ( auto it = toRet.begin(); it != toRet.end(); ) {
         if ( it->second.first == 0 ) {
             it = toRet.erase( it );
@@ -70,7 +70,7 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
     return toRet;
 }
 
-double mean_flow_duration( const std::vector<Flow> &flows, const std::vector<Opportunity> &allocation )
+double mean_flow_duration( const std::vector<Flow> &flows, const std::vector<Interval> &allocation )
 {
     assert( allocation_valid( flows, allocation ) );
     size_t sum_durations = 0;

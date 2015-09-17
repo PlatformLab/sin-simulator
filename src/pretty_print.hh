@@ -9,14 +9,8 @@
 #include <cassert>
 #include "flow.hh"
 #include "interval.hh"
-#include "opportunity.hh"
 #include "transaction.hh"
 
-
-static std::string interval_to_string( const Interval &i )
-{
-    return std::string("[") + std::to_string(i.start) + "," + std::to_string(i.end) + "]";
-}
 
 static std::string uid_to_string( const size_t uid )
 {
@@ -25,6 +19,11 @@ static std::string uid_to_string( const size_t uid )
     } else {
         return std::string("ccast");
     }
+}
+
+static std::string interval_to_string( const Interval &i )
+{
+    return std::string( "[" ) + std::to_string( i.start ) + "," + std::to_string( i.end ) + "] " + std::to_string( i.num_packets ) + " packets owned by " + uid_to_string( i.owner );
 }
 
 __attribute__ ((unused)) static void print_transactions( const std::vector<Transaction> &transactions )
@@ -41,13 +40,14 @@ __attribute__ ((unused)) static void print_flows( const std::vector<Flow> &flows
     }
 }
 
-__attribute__ ((unused)) static void print_opportunities( const std::vector<Opportunity> opportunities )
+__attribute__ ((unused)) static void print_intervals( const std::vector<Interval> intervals )
 {
-    for ( auto &o : opportunities ) {
-        if ( o.owner != 0 ) { // XXX temp not printing ccast right now
-            std::cout << interval_to_string( o.interval ) << " owned by " << uid_to_string( o.owner ) << std::endl;
+    for ( auto &i : intervals ) {
+        if ( i.owner != 0 ) { // XXX temp not printing ccast right now
+            std::cout << interval_to_string( i ) << std::endl;
         }
     }
 }
+
 
 #endif /* PRETTY_PRINT_HH */

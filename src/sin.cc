@@ -1,6 +1,7 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 #include <iostream>
+#include "interval.hh"
 #include "flow.hh"
 #include "link.hh"
 #include "market_simulator.hh"
@@ -18,9 +19,9 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
     const size_t propagation_time = 0;
     const vector<Link> links { { 0, 0, slots_needed, propagation_time } };
 
-    const vector<Opportunity> market_allocation = simulate_market( links, flows, verbosity_level > 0 );
-    const vector<Opportunity> srtf_allocation = simulate_srtf( links, flows );
-    const vector<Opportunity> round_robin_allocation = simulate_round_robin( links, flows );
+    const vector<Interval> market_allocation = simulate_market( links, flows, verbosity_level > 0 );
+    const vector<Interval> srtf_allocation = simulate_srtf( links, flows );
+    const vector<Interval> round_robin_allocation = simulate_round_robin( links, flows );
 
     double market_mean_flow_duration = mean_flow_duration( flows, market_allocation );
     double srtf_mean_flow_duration = mean_flow_duration( flows, srtf_allocation );
@@ -29,14 +30,14 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
     if ( verbosity_level > 0 ) {
         print_flows( flows );
         cout << "market mean flow duration " << market_mean_flow_duration  << " with allocation:" << endl;
-        print_opportunities( market_allocation );
+        print_intervals( market_allocation );
 
         cout << "srtf mean flow duration " << srtf_mean_flow_duration << " with allocation:" << endl;
-        print_opportunities( srtf_allocation );
+        print_intervals( srtf_allocation );
 
 /*
         cout << "round robin mean flow duration " << round_robin_mean_flow_duration << " with allocation:" << endl;
-        print_opportunities( round_robin_allocation );
+        print_intervals( round_robin_allocation );
         */
     }
     

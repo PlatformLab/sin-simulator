@@ -10,7 +10,7 @@
 #include "pretty_print.hh"
 #include "market.hh"
 #include "flow.hh"
-#include "opportunity.hh"
+#include "interval.hh"
 #include "offer.hh"
 
 
@@ -20,7 +20,7 @@ class FlowCompletionTimeUser : public AbstractUser
     size_t num_packets_allocated_ = 0;
     bool done_ = false;
     std::unordered_set<Offer> offers_posted_ { };
-    std::vector<Opportunity> opportunities_ { };
+    std::vector<Interval> intervals_ { };
 
     public:
     FlowCompletionTimeUser( Flow flow )
@@ -29,7 +29,7 @@ class FlowCompletionTimeUser : public AbstractUser
     {
     }
 
-    std::vector<Opportunity> opportunities() { return { }; }
+    std::vector<Interval> intervals() { return intervals_; }
 
     void check_taken_offers( Market& mkt )
     {
@@ -42,7 +42,7 @@ class FlowCompletionTimeUser : public AbstractUser
 
                 } else {
                     // not a trading offer, we have less packets allocated now
-                    num_packets_allocated_ -= o.num_packets;
+                    num_packets_allocated_ -= o.interval.num_packets;
                 }
 
                 offers_posted_.erase( search );
@@ -57,7 +57,7 @@ class FlowCompletionTimeUser : public AbstractUser
             return;
 
         size_t num_to_buy = num_packets_-num_packets_allocated_;
-        std::cout << uid_to_string( uid_ ) << " trying to buy " << num_to_buy << " opportunties" << std::endl;
+        std::cout << uid_to_string( uid_ ) << " trying to buy " << num_to_buy << " packet deliveries" << std::endl;
 
         std::vector<Offer> best_offers;
         double best_offers_utility = std::numeric_limits<double>::lowest();
@@ -65,12 +65,11 @@ class FlowCompletionTimeUser : public AbstractUser
         size_t start_time = std::max( mkt.time(), start_ );
 
         for ( size_t interval_length = num_to_buy - 1; interval_length <= 64; interval_length++ ) {
-            Interval interval = { start_time, start_time+interval_length };
-            std::cout << "exploring offers on interval " << interval_to_string( interval ) << std::endl;
-            const std::vector<Offer> interval_offers = mkt.offers_in_interval( interval );
+            std::cout << "exploring offers on between " << start_time << " and " << start_time+interval_length << std::endl;
+            const std::vector<Offer> interval_offers = mkt.offers_in_interval( start_time, start_time+interval_length );
             std::vector<Offer> cheapest_offers { };
             for ( const auto &o : interval_offers ) {
-                assert( o.num_packets == 1 ); // XXX silly
+                assert( o.interval.num_packets == 1 ); // XXX silly
                 assert( o.seller_uid != uid_ ); // XXX silly
 
                 auto cost_compare = [] ( const Offer a, const Offer b ) { return a.cost < b.cost; };
@@ -115,8 +114,8 @@ class FlowCompletionTimeUser : public AbstractUser
                 std::cout << "User " << uid_to_string( uid_ ) << " buying offer on interval " <<  interval_to_string( o.interval ) << " for $" << o.cost << std::endl;
                 bool success = mkt.buy_offer( uid_, o );
                 if ( success ) {
-                    Opportunity toAdd = { size_t( -1 ), uid_, { o.interval.start, o.interval.end } };
-                    opportunities_.push_back( toAdd );
+                    Interval toAdd = { uid_, o.interval.start, o.interval.end, 1 };
+                    intervals_.push_back( toAdd );
                     num_packets_allocated_++;
                 } else {
                     assert( false && "thought we could buy offer but we couldn't");

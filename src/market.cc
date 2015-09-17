@@ -12,11 +12,11 @@ bool Market::add_offer( Offer &offer )
     return true;
 }
 
-const std::vector<Offer> Market::offers_in_interval( Interval &i ) const
+const std::vector<Offer> Market::offers_in_interval( const size_t start, const size_t end ) const
 {
     std::vector<Offer> toRet;
     for ( const Offer &o : offers_ ) {
-        if ( o.interval.contained_within( i ) ) {
+        if ( start <= o.interval.start and end >= o.interval.end ) {
             toRet.push_back( o );
         }
     }

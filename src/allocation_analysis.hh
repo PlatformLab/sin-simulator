@@ -20,8 +20,10 @@ std::unordered_map<size_t, std::pair<size_t, size_t>> get_flow_lengths_and_durat
     }
 
     for (auto &flow : flows ) {
-        toRet[flow.uid].first = flow.num_packets;
-        toRet[flow.uid].second += 1 - flow.start;
+        if ( toRet.count( flow.uid ) > 1 ) { // only count flow if it shows up in opportunties
+            toRet[flow.uid].first = flow.num_packets;
+            toRet[flow.uid].second += 1 - flow.start;
+        }
     }
 
     // filter out opportunities not allocated to flows

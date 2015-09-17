@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 #include "abstract_user.hh"
+#include "pretty_print.hh"
 #include "market.hh"
 #include "flow.hh"
 #include "offer.hh"
@@ -14,7 +15,7 @@
 class FlowCompletionTimeUser : public AbstractUser
 {
     const size_t num_packets_;
-    size_t done_ = 0;
+    bool done_ = false;
 
     public:
     FlowCompletionTimeUser( Flow flow )
@@ -25,6 +26,9 @@ class FlowCompletionTimeUser : public AbstractUser
 
     void take_actions( Market& mkt ) override
     {
+        if ( done_ )
+            return;
+
         size_t num_to_buy = num_packets_;
 
         std::vector<const Offer *> best_offers;
@@ -35,6 +39,7 @@ class FlowCompletionTimeUser : public AbstractUser
         for ( size_t interval_length = num_to_buy - 1; interval_length <= 16; interval_length++ ) {
             Interval interval = { start_time, start_time+interval_length };
             const std::vector<Offer> interval_offers = mkt.offers_in_interval( interval );
+            std::cout << "got num offers " << interval_offers.size() << std::endl;
             std::vector<const Offer *> cheapest_offers { };
             for ( const auto &o : interval_offers ) {
                 assert( o.num_packets == 1 ); // XXX silly
@@ -74,6 +79,18 @@ class FlowCompletionTimeUser : public AbstractUser
         }
         if ( best_offers_utility < std::numeric_limits<double>::max() ) {
             // we can buy some offers
+            bool all_successful = true;
+            for ( const Offer *o : best_offers ) {
+                std::cout << "User " << uid_to_string( uid_ ) << " buying offer on interval " <<  o->interval.start << ", " << o->interval.end << " for $" << o->cost << std::endl;
+                bool success = mkt.buy_offer( uid_, *o );
+                if ( success ) {
+                    Opportunity toAdd = { size_t( -1 ), uid_, { o->interval.start, o->interval.end } };
+                    opportunities_.push_back( toAdd );
+                } else {
+                    all_successful = false;
+                }
+            }
+            done_ = all_successful;
         }
     }
 };

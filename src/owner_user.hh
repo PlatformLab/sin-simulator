@@ -29,7 +29,7 @@ class OwnerUser : public AbstractUser
                 Offer toAdd = { uid_, o.interval, 1, 1.0 };
                 bool result = mkt.add_offer( toAdd );
                 assert( result );
-                opportunities_ = opportunities_to_add_;
+                //opportunities_ = opportunities_to_add_; TODO maybe add back later
             }
             done_ = true;
         }

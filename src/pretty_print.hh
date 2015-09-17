@@ -39,7 +39,7 @@ void print_opportunities( const std::vector<Opportunity> opportunities )
 {
     for ( auto &o : opportunities ) {
         if ( o.owner != 0 ) { // XXX temp not printing ccast right now
-            std::cout << "[" << o.interval.start << "," << o.interval.end << "] owned by " << uid_to_string( o.owner );
+            std::cout << "[" << o.interval.start << "," << o.interval.end << "] owned by " << uid_to_string( o.owner ) << std::endl;
         }
     }
 }

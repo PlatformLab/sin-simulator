@@ -14,7 +14,7 @@ using namespace std;
 
 tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const vector<Flow> flows, const size_t verbosity_level )
 {
-    const size_t slots_needed = 1024;
+    const size_t slots_needed = 10;
     const size_t propagation_time = 0;
     const vector<Link> links { { 0, 0, slots_needed, propagation_time } };
 

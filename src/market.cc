@@ -1,5 +1,6 @@
 /* -*-mode:c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
+#include "pretty_print.hh"
 #include "market.hh"
 
 using namespace std;
@@ -34,8 +35,10 @@ bool Market::buy_offer( size_t uid, const Offer &o )
         offers_.erase( market_offer );
         increment_version();
 
+        cout << "offer on interval " << interval_to_string( o.interval ) << " taken" << endl;
         return true;
     } else {
+        cout << "offer on interval " << interval_to_string( o.interval ) << " not found" << endl;
         return false;
     }
 }

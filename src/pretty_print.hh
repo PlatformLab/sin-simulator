@@ -9,8 +9,14 @@
 #include <cassert>
 #include "flow.hh"
 #include "interval.hh"
+#include "opportunity.hh"
 #include "transaction.hh"
 
+
+static std::string interval_to_string( const Interval &i )
+{
+    return std::string("[") + std::to_string(i.start) + "," + std::to_string(i.end) + "]";
+}
 
 static std::string uid_to_string( const size_t uid )
 {
@@ -28,18 +34,18 @@ __attribute__ ((unused)) static void print_transactions( const std::vector<Trans
     }
 }
 
-void print_flows( const std::vector<Flow> &flows )
+__attribute__ ((unused)) static void print_flows( const std::vector<Flow> &flows )
 {
     for ( auto &flow : flows ) {
         std::cout << "User " << uid_to_string( flow.uid ) << " flow start time: " << flow.start << " num packets: " << flow.num_packets << std::endl;
     }
 }
 
-void print_opportunities( const std::vector<Opportunity> opportunities )
+__attribute__ ((unused)) static void print_opportunities( const std::vector<Opportunity> opportunities )
 {
     for ( auto &o : opportunities ) {
         if ( o.owner != 0 ) { // XXX temp not printing ccast right now
-            std::cout << "[" << o.interval.start << "," << o.interval.end << "] owned by " << uid_to_string( o.owner ) << std::endl;
+            std::cout << interval_to_string( o.interval ) << " owned by " << uid_to_string( o.owner ) << std::endl;
         }
     }
 }

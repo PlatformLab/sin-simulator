@@ -30,25 +30,25 @@ class FlowCompletionTimeUser : public AbstractUser
             return;
 
         size_t num_to_buy = num_packets_;
+        std::cout << uid_to_string( uid_ ) << " trying to buy " << num_to_buy << " opportunties" << std::endl;
 
         std::vector<const Offer *> best_offers;
-        double best_offers_utility = std::numeric_limits<double>::max();
+        double best_offers_utility = std::numeric_limits<double>::lowest();
 
         size_t start_time = std::max( mkt.time(), start_ );
 
-        for ( size_t interval_length = num_to_buy - 1; interval_length <= 16; interval_length++ ) {
+        for ( size_t interval_length = num_to_buy - 1; interval_length <= 5; interval_length++ ) {
             Interval interval = { start_time, start_time+interval_length };
+            std::cout << "exploring offers on interval " << interval.start << ", " << interval.end << std::endl;
             const std::vector<Offer> interval_offers = mkt.offers_in_interval( interval );
-            std::cout << "got num offers " << interval_offers.size() << std::endl;
             std::vector<const Offer *> cheapest_offers { };
             for ( const auto &o : interval_offers ) {
                 assert( o.num_packets == 1 ); // XXX silly
-                const size_t uid = uid_;
-                auto cost_compare = [ uid ] ( const Offer *a, const Offer *b )
-                { double acost = a->seller_uid == uid ? 0 : a->cost; double bcost = b->seller_uid == uid ? 0 : b->cost; return acost < bcost; };
+                assert( o.seller_uid != uid_ ); // XXX silly
 
-                double offer_cost = ( o.seller_uid == uid_ ) ? 0 : o.cost;
-                if ( cheapest_offers.size() == num_to_buy and offer_cost < cheapest_offers[0]->cost ) {
+                auto cost_compare = [] ( const Offer *a, const Offer *b ) { return a->cost < b->cost; };
+
+                if ( cheapest_offers.size() == num_to_buy and o.cost < cheapest_offers[0]->cost ) {
                     std::pop_heap( cheapest_offers.begin(), cheapest_offers.end(), cost_compare );
                     cheapest_offers.back() = &o;
                     std::push_heap( cheapest_offers.begin(), cheapest_offers.end(), cost_compare );
@@ -68,6 +68,8 @@ class FlowCompletionTimeUser : public AbstractUser
                     best_offers = std::move( cheapest_offers );
                     best_offers_utility = utility;
                 }
+            } else {
+                std::cout << "can't buy enough packets on this interval " << std::endl;
             }
 
             /*
@@ -91,6 +93,8 @@ class FlowCompletionTimeUser : public AbstractUser
                 }
             }
             done_ = all_successful;
+        } else {
+                std::cout << "no offers we could take" << std::endl;
         }
     }
 };

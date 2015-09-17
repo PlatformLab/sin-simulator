@@ -10,11 +10,11 @@
 
 #include "flow.hh"
 #include "link.hh"
+#include "pretty_print.hh"
 #include "market.hh"
 #include "abstract_user.hh"
 #include "owner_user.hh"
 #include "flow_completion_time_user.hh"
-#include "pretty_print.hh"
 
 void users_take_actions_until_finished( Market &mkt, std::vector<std::unique_ptr<AbstractUser>> &users, bool verbose )
 {

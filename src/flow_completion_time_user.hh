@@ -16,9 +16,8 @@
 
 class FlowCompletionTimeUser : public AbstractUser
 {
-    const size_t num_packets_;
-    size_t num_packets_allocated_ = 0;
-    bool done_ = false;
+    const size_t num_packets_; // size of flow
+    size_t num_opportunities_owned = 0;
     std::unordered_set<Offer> offers_posted_ { };
     std::vector<Interval> intervals_ { };
 
@@ -51,23 +50,33 @@ class FlowCompletionTimeUser : public AbstractUser
         }
     }
 
-    const std::vector<Offer> cheapest_offers_in_interval( const Market& mkt, const size_t start, const size_t end, const size_t num_to_buy )
+    const std::vector<Offer> cheapest_offers_in_interval( const Market& mkt, const size_t start, const size_t end, const size_t num_to_buy, bool recursive )
     {
         std::vector<Offer> toRet { }; // vector that stores priority queue of cheapest offers
 
         auto cost_compare = [] ( const Offer &a, const Offer &b ) { return a.cost < b.cost; };
 
         for ( const Offer &o : mkt.offers_in_interval( start, end ) ) {
-            assert( o.interval.num_packets == 1 ); // XXX silly
             assert( o.seller_uid != uid_ ); // XXX silly
 
-            if ( toRet.size() == num_to_buy and o.cost < toRet[0].cost ) {
-                std::pop_heap( toRet.begin(), toRet.end(), cost_compare );
-                toRet.back() = o;
-                std::push_heap( toRet.begin(), toRet.end(), cost_compare );
-            } else if ( toRet.size() < num_to_buy ) {
-                toRet.push_back( o );
-                std::push_heap( toRet.begin(), toRet.end(), cost_compare );
+            if ( exchange_for_interval.first ) {
+                if ( recursive ) {
+                    const size_t recursize_start = exchange_for_interval.second.start;
+                    const size_t recursize_end = exchange_for_interval.second.end;
+                    const size_t recursize_num_packets = exchange_for_interval.second.num_packets;
+                    const std::vector<Offer> toAdd = cheapest_offers_in_interval( mkt, recursive_start, recursive_end, recursive_num_packets, false );
+                }
+            } else {
+                assert( o.interval.num_packets == 1 ); // XXX silly
+
+                if ( toRet.size() == num_to_buy and o.cost < toRet[0].cost ) {
+                    std::pop_heap( toRet.begin(), toRet.end(), cost_compare );
+                    toRet.back() = o;
+                    std::push_heap( toRet.begin(), toRet.end(), cost_compare );
+                } else if ( toRet.size() < num_to_buy ) {
+                    toRet.push_back( o );
+                    std::push_heap( toRet.begin(), toRet.end(), cost_compare );
+                }
             }
         }
 
@@ -91,7 +100,7 @@ class FlowCompletionTimeUser : public AbstractUser
         for ( size_t interval_length = num_to_buy - 1; interval_length <= 64; interval_length++ ) {
             std::cout << "exploring offers on between " << start_time << " and " << start_time+interval_length << std::endl;
 
-            const std::vector<Offer> cheapest_offers = cheapest_offers_in_interval( mkt, start_time, start_time + interval_length, num_to_buy );
+            const std::vector<Offer> cheapest_offers = cheapest_offers_in_interval( mkt, start_time, start_time + interval_length, num_to_buy, true );
 
             if ( cheapest_offers.size() == num_packets_ ) { // TODO change
                 //std::cout << "start_time " << start_time << " interval_length " << interval_length << " start_ " << start_<< std::endl;

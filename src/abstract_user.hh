@@ -16,7 +16,7 @@ class AbstractUser {
         { }
 
         virtual void take_actions( Market& mkt ) = 0;
-        virtual std::vector<Interval> intervals() = 0;
+        virtual std::vector<Interval> intervals() = 0; /* the intervals this user believes it owns */
         virtual ~AbstractUser() = default;
 };
 

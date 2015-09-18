@@ -44,7 +44,10 @@ bool users_take_actions_until_finished( Market &mkt, const size_t time, std::vec
 
 const std::unordered_map<Flow, std::vector<Opportunity>> simulate_market( const std::vector<Link> &links, const std::vector<Flow> &flows, bool verbose )
 {
-    Market mkt = Market( verbose );
+    Market mkt = Market( );
+    if ( verbose ) {
+        mkt.verbose();
+    }
     std::vector<std::unique_ptr<AbstractUser>> users;
     std::unordered_map<size_t, Flow> uid_to_flow;
     size_t time = 0;
@@ -61,7 +64,7 @@ const std::unordered_map<Flow, std::vector<Opportunity>> simulate_market( const 
     do {
         all_flows_started = users_take_actions_until_finished( mkt, time, users, verbose );
         time++;
-    } while ( not all_flows_started );
+    } while ( not all_flows_started ); // TODO could infa loop
 
     if ( verbose ) {
         std::cout << "market transactions:" << std::endl;

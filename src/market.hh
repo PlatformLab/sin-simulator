@@ -21,14 +21,13 @@
 class Market {
     private:
         size_t version_ = 0;
+        bool verbose_ = false;
         std::unordered_set<Offer> offers_ { };
         std::vector<Offer> taken_offers_ { };
         std::vector<Transaction> transactions_ { };
-        const bool verbose_;
 
     public:
-        Market( const bool verbose )
-            : verbose_( verbose )
+        Market()
         { }
 
         bool add_offer( const Offer &offer ); /* returns true if successful */
@@ -39,10 +38,8 @@ class Market {
 
         const std::vector<Transaction> transactions() const { return transactions_; }
 
-        bool empty() const;
-
         size_t version() const { return version_; }
-        size_t verbose() const { return verbose_; }
+        void verbose() { verbose_ = true; }
         void increment_version() { version_++; }
 };
 

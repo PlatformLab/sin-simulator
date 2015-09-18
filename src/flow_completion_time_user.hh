@@ -51,26 +51,27 @@ class FlowCompletionTimeUser : public AbstractUser
         }
     }
 
-    std::vector<Offer> cheapest_offers_in_interval( Market& mkt, size_t start, size_t end, size_t num_to_buy )
+    const std::vector<Offer> cheapest_offers_in_interval( const Market& mkt, const size_t start, const size_t end, const size_t num_to_buy )
     {
-        const std::vector<Offer> interval_offers = mkt.offers_in_interval( start, end );
-        std::vector<Offer> cheapest_offers { };
-        for ( const auto &o : interval_offers ) {
+        std::vector<Offer> toRet { }; // vector that stores priority queue of cheapest offers
+
+        auto cost_compare = [] ( const Offer &a, const Offer &b ) { return a.cost < b.cost; };
+
+        for ( const Offer &o : mkt.offers_in_interval( start, end ) ) {
             assert( o.interval.num_packets == 1 ); // XXX silly
             assert( o.seller_uid != uid_ ); // XXX silly
 
-            auto cost_compare = [] ( const Offer a, const Offer b ) { return a.cost < b.cost; };
-
-            if ( cheapest_offers.size() == num_to_buy and o.cost < cheapest_offers[0].cost ) {
-                std::pop_heap( cheapest_offers.begin(), cheapest_offers.end(), cost_compare );
-                cheapest_offers.back() = o;
-                std::push_heap( cheapest_offers.begin(), cheapest_offers.end(), cost_compare );
-            } else if ( cheapest_offers.size() < num_to_buy ) {
-                cheapest_offers.push_back( o );
-                std::push_heap( cheapest_offers.begin(), cheapest_offers.end(), cost_compare );
+            if ( toRet.size() == num_to_buy and o.cost < toRet[0].cost ) {
+                std::pop_heap( toRet.begin(), toRet.end(), cost_compare );
+                toRet.back() = o;
+                std::push_heap( toRet.begin(), toRet.end(), cost_compare );
+            } else if ( toRet.size() < num_to_buy ) {
+                toRet.push_back( o );
+                std::push_heap( toRet.begin(), toRet.end(), cost_compare );
             }
         }
-        return cheapest_offers;
+
+        return toRet;
     }
 
     void take_actions( Market& mkt ) override
@@ -90,14 +91,14 @@ class FlowCompletionTimeUser : public AbstractUser
         for ( size_t interval_length = num_to_buy - 1; interval_length <= 64; interval_length++ ) {
             std::cout << "exploring offers on between " << start_time << " and " << start_time+interval_length << std::endl;
 
-            std::vector<Offer> cheapest_offers = cheapest_offers_in_interval( mkt, start_time, start_time + interval_length, num_to_buy );
+            const std::vector<Offer> cheapest_offers = cheapest_offers_in_interval( mkt, start_time, start_time + interval_length, num_to_buy );
 
             if ( cheapest_offers.size() == num_packets_ ) { // TODO change
                 //std::cout << "start_time " << start_time << " interval_length " << interval_length << " start_ " << start_<< std::endl;
                 assert( start_time + interval_length >= start_ ); // no underflow
                 const double benefit = -(double) ( start_time + interval_length - start_ ); // TODO change if offers taken fit in shorter interval, previous taken offer had later end time
                 double cost = 0; 
-                for ( auto &o : cheapest_offers ) {
+                for ( const Offer &o : cheapest_offers ) {
                     cost += o.cost;
                 }
                 const double utility = benefit - cost;

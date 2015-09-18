@@ -32,9 +32,9 @@ class Market {
             : verbose_( verbose )
         { }
 
-        bool add_offer( Offer &offer );
+        bool add_offer( Offer &offer ); /* returns true if successful */
         const std::vector<Offer> offers_in_interval( const size_t start, const size_t end ) const;
-        bool buy_offer( size_t uid, const Offer &o ); /* returns if buy successful */
+        bool buy_offer( size_t uid, const Offer &o ); /* returns true if successful */
 
         const std::vector<Offer> taken_offers() const { return taken_offers_; };
 

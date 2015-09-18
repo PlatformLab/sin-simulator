@@ -31,6 +31,7 @@ class FlowCompletionTimeUser : public AbstractUser
 
     std::vector<Interval> intervals() { return intervals_; }
 
+    /* check taken offers against record of offers we posted */
     void check_taken_offers( Market& mkt )
     {
         for ( const Offer &o : mkt.taken_offers() ) {

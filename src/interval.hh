@@ -4,13 +4,11 @@
 #define INTERVAL_HH
 
 struct Interval {
-    size_t owner;
     size_t start;
     size_t end;
-    size_t num_packets;
 
-    bool operator==(const Interval& other) const {
-        return owner == other.owner and start == other.start and end == other.end and num_packets == other.num_packets;
+    bool operator==( const Interval& other ) const {
+        return start == other.start and end == other.end;
     }
 };
 
@@ -18,15 +16,10 @@ namespace std {
     template <>
         struct hash<Interval>
         {
-            std::size_t operator()(const Interval& i) const
+            std::size_t operator()( const Interval& i ) const
             {
-                using std::size_t;
-                using std::hash;
-
-                return ( hash<size_t>()(i.owner) )
-                    ^ ( hash<size_t>()(i.start) + 1 )
-                    ^ ( hash<size_t>()(i.end) + 2 )
-                    ^ ( hash<size_t>()(i.num_packets) + 3 );
+                return ( hash<size_t>()( i.start ) )
+                    ^ ( hash<size_t>()( i.end ) + 1 );
             }
         };
 }

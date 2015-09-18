@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool Market::add_offer( Offer &offer )
+bool Market::add_offer( const Offer &offer )
 {
     offers_.insert( offer ); 
     increment_version();
@@ -16,7 +16,7 @@ const std::vector<Offer> Market::offers_in_interval( const size_t start, const s
 {
     std::vector<Offer> toRet;
     for ( const Offer &o : offers_ ) {
-        if ( start <= o.interval.start and end >= o.interval.end ) {
+        if ( start <= o.opportunity.interval.start and end >= o.opportunity.interval.end ) {
             toRet.push_back( o );
         }
     }
@@ -33,22 +33,10 @@ bool Market::buy_offer( size_t uid, const Offer &o )
         offers_.erase( market_offer );
         increment_version();
 
-        cout << "offer on interval " << interval_to_string( o.interval ) << " taken" << endl;
+        cout << "offer on opportunity " << opportunity_to_string( o.opportunity ) << " taken" << endl;
         return true;
     } else {
-        cout << "offer on interval " << interval_to_string( o.interval ) << " not found" << endl;
+        cout << "offer on opportunity " << opportunity_to_string( o.opportunity ) << " not found" << endl;
         return false;
     }
-}
-
-bool Market::empty() const
-{
-    // return true if all interval start times have passed
-    for ( auto &o : offers_ ) {
-        if ( o.interval.start >= time_ )
-        {
-            return false;
-        }
-    }
-    return true;
 }

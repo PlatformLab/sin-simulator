@@ -19,25 +19,28 @@ tuple<double, double, double> run_single_trial( /*vector<Link> &links,*/ const v
     const size_t propagation_time = 0;
     const vector<Link> links { { 0, 0, slots_needed, propagation_time } };
 
-    const vector<Interval> market_allocation = simulate_market( links, flows, verbosity_level > 0 );
-    const vector<Interval> srtf_allocation = simulate_srtf( links, flows );
-    const vector<Interval> round_robin_allocation = simulate_round_robin( links, flows );
+    const std::unordered_map<Flow, std::vector<Opportunity>> market_allocation = simulate_market( links, flows, verbosity_level > 0 );
+    assert( market_allocation.size() == flows.size() );
+    const std::unordered_map<Flow, std::vector<Opportunity>> srtf_allocation = simulate_srtf( links, flows );
+    assert( srtf_allocation.size() == flows.size() );
+    const std::unordered_map<Flow, std::vector<Opportunity>> round_robin_allocation = simulate_round_robin( links, flows );
+    assert( round_robin_allocation.size() == flows.size() );
 
-    double market_mean_flow_duration = mean_flow_duration( flows, market_allocation );
-    double srtf_mean_flow_duration = mean_flow_duration( flows, srtf_allocation );
-    double round_robin_mean_flow_duration = mean_flow_duration( flows, round_robin_allocation );
+    double market_mean_flow_duration = mean_flow_duration( market_allocation );
+    double srtf_mean_flow_duration = mean_flow_duration( srtf_allocation );
+    double round_robin_mean_flow_duration = mean_flow_duration( round_robin_allocation );
 
     if ( verbosity_level > 0 ) {
         print_flows( flows );
         cout << "market mean flow duration " << market_mean_flow_duration  << " with allocation:" << endl;
-        print_intervals( market_allocation );
+        print_allocation( market_allocation );
 
         cout << "srtf mean flow duration " << srtf_mean_flow_duration << " with allocation:" << endl;
-        print_intervals( srtf_allocation );
+        print_allocation( srtf_allocation );
 
 /*
         cout << "round robin mean flow duration " << round_robin_mean_flow_duration << " with allocation:" << endl;
-        print_intervals( round_robin_allocation );
+        print_allocation( round_robin_allocation );
         */
     }
     

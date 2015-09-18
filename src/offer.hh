@@ -8,12 +8,12 @@
 
 struct Offer {
     size_t seller_uid;
-    Interval interval;
+    Opportunity opportunity;
     double cost;
-    std::pair<bool, Interval> exchange_for_interval; /* if first bool true, this offer's cost includes trading for the following interval */
+    //std::pair<bool, Interval> exchange_for_interval; /* if first bool true, this offer's cost includes trading for the following interval */
 
     bool operator==( const Offer& other ) const {
-        return seller_uid == other.seller_uid and interval == other.interval and cost == other.cost and exchange_for_interval == other.exchange_for_interval;
+        return seller_uid == other.seller_uid and opportunity == other.opportunity and cost == other.cost;// and exchange_for_interval == other.exchange_for_interval;
     }
 };
 
@@ -23,14 +23,9 @@ namespace std {
         {
             std::size_t operator()(const Offer& o ) const
             {
-                using std::size_t;
-                using std::hash;
-
                 return ( hash<size_t>()( o.seller_uid ) )
-                    ^ ( hash<Interval>()( o.interval ) + 1 )
-                    ^ ( hash<double>()( o.cost) + 2 )
-                    ^ ( hash<bool>()( o.exchange_for_interval.first ) + 3 )
-                    ^ ( hash<Interval>()( o.exchange_for_interval.second ) + 4 );
+                    ^ ( hash<Opportunity>()( o.opportunity ) + 1 )
+                    ^ ( hash<double>()( o.cost ) + 2 );
             }
         };
 }

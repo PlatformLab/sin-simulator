@@ -6,9 +6,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <algorithm>
 #include <cassert>
 #include "flow.hh"
-#include "interval.hh"
+#include "opportunity.hh"
 #include "transaction.hh"
 
 
@@ -21,9 +23,9 @@ static std::string uid_to_string( const size_t uid )
     }
 }
 
-static std::string interval_to_string( const Interval &i )
+static std::string opportunity_to_string( const Opportunity &o )
 {
-    return std::string( "[" ) + std::to_string( i.start ) + "," + std::to_string( i.end ) + "] " + std::to_string( i.num_packets ) + " packets owned by " + uid_to_string( i.owner );
+    return std::string( "[" ) + std::to_string( o.interval.start ) + "," + std::to_string( o.interval.end ) + "] " + std::to_string( o.num_packets ) + " packets sent by " + uid_to_string( o.provider_uid );
 }
 
 __attribute__ ((unused)) static void print_transactions( const std::vector<Transaction> &transactions )
@@ -40,11 +42,24 @@ __attribute__ ((unused)) static void print_flows( const std::vector<Flow> &flows
     }
 }
 
-__attribute__ ((unused)) static void print_intervals( const std::vector<Interval> intervals )
+__attribute__ ((unused)) static void print_allocation( const std::unordered_map<Flow, std::vector<Opportunity>> &allocation )
 {
-    for ( auto &i : intervals ) {
-        if ( i.owner != 0 ) { // XXX temp not printing ccast right now
-            std::cout << interval_to_string( i ) << std::endl;
+    std::vector<std::pair<size_t, Opportunity>> toPrint;
+    for ( auto &allocation_pair : allocation ) {
+        size_t uid = allocation_pair.first.uid;
+            for ( const Opportunity &o : allocation_pair.second ) {
+                toPrint.emplace_back( uid, o );
+            }
+    }
+    // sort to print
+    auto compare_interval_ends = [] ( const std::pair<size_t, Opportunity> &a, const std::pair<size_t, Opportunity> &b )
+    { return a.second.interval.end < b.second.interval.end; };
+
+    std::sort( toPrint.begin(), toPrint.end(), compare_interval_ends );
+
+    for ( auto &pair : toPrint ) {
+        if ( pair.first != 0 ) { // XXX temp not printing ccast right now
+            std::cout << uid_to_string( pair.first ) << ": " << opportunity_to_string( pair.second ) << std::endl;
         }
     }
 }

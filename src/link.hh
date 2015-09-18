@@ -4,19 +4,19 @@
 #define LINK_HH
 
 #include <vector>
-#include "interval.hh"
+#include "opportunity.hh"
 
 struct Link {
     const size_t uid;
     const size_t start;
-    const size_t num_intervals;
+    const size_t num_opportunities;
     const size_t propagation_time;
 
-    std::vector<Interval> get_intervals() const
+    std::vector<Opportunity> get_opportunities() const
     {
-        std::vector<Interval> toRet;
-        for ( size_t i = 0; i < num_intervals; i++ ) {
-            toRet.push_back( { uid, i, i+propagation_time, 1 } ); // 1 packet interval
+        std::vector<Opportunity> toRet;
+        for ( size_t i = 0; i < num_opportunities; i++ ) {
+            toRet.push_back( { { i, i+propagation_time }, 1, uid } ); // 1 packet opportunity
         }
         return toRet;
     }

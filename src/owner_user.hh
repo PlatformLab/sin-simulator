@@ -11,21 +11,21 @@
 
 class OwnerUser : public AbstractUser
 {
-    const std::vector<Interval> intervals_to_add_;
+    const std::vector<Opportunity> opportunities_to_add_;
     bool done_ = false;
 
     public:
     OwnerUser( Link link )
         : AbstractUser( link.uid, link.start ),
-        intervals_to_add_( link.get_intervals() )
+        opportunities_to_add_( link.get_opportunities() )
     {
     }
 
-    void take_actions( Market& mkt ) override
+    void take_actions( Market& mkt, const size_t time ) override
     {
         if ( not done_ ) {
-            for ( auto &interval : intervals_to_add_ ) {
-                Offer toAdd = { uid_, interval, 1.0, { false, interval } };
+            for ( const Opportunity &o : opportunities_to_add_ ) {
+                Offer toAdd = { uid_, o, 1.0 };
                 bool result = mkt.add_offer( toAdd );
                 assert( result );
             }
@@ -33,7 +33,7 @@ class OwnerUser : public AbstractUser
         }
     }
 
-    std::vector<Interval> intervals() { return { }; }
+    std::vector<Opportunity> opportunities() { return { }; }
 };
 
 #endif /* OWNER_USER */

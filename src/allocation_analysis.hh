@@ -18,6 +18,7 @@ static bool allocation_valid( const std::unordered_map<Flow, std::vector<Opportu
             num_packets_sent += o.num_packets;
         }
         if ( num_packets_sent != allocation_pair.first.num_packets ) {
+            std::cout << "got num_packets_sent " << num_packets_sent << " while flow " << uid_to_string( allocation_pair.first.uid ) << " was supposed to have " <<  allocation_pair.first.num_packets << std::endl;
             return false;
         }
     }

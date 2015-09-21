@@ -28,28 +28,9 @@ class FlowCompletionTimeUser : public AbstractUser
     {
     }
 
-    std::vector<Opportunity> opportunities() { return opportunities_ ; }
-
-    /* check taken offers against record of offers we posted */
-    void check_taken_offers( Market& mkt )
+    std::vector<Opportunity> opportunities()
     {
-        for ( const Offer &o : mkt.taken_offers() ) {
-            auto search = offers_posted_.find( o );
-            if ( search != offers_posted_.end() ) {
-                // someone took an offer we posted
-
-                /*
-                if ( o.exchange_for_interval.first ) {
-
-                } else {
-                    */
-                    // not a trading offer, we have less packets allocated now
-                    num_opportunities_owned_ -= o.opportunity.num_packets;
-                //}
-
-                offers_posted_.erase( search );
-            }
-        }
+        return opportunities_;
     }
 
     const std::vector<Offer> cheapest_offers_in_interval( const Market& mkt, const size_t start, const size_t end, const size_t num_to_buy, bool recursive )

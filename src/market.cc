@@ -29,7 +29,7 @@ bool Market::buy_offer( size_t uid, const Offer &o )
     if ( market_offer != offers_.end() ) {
         transactions_.push_back( { o.seller_uid, uid, o.cost } );  // to, from, amount
 
-        taken_offers_.push_back( move( *market_offer ) );
+        //taken_offers_.push_back( move( *market_offer ) ); TODO messages
         offers_.erase( market_offer );
         increment_version();
 

@@ -10,7 +10,7 @@ struct Offer {
     size_t seller_uid;
     Opportunity opportunity;
     double cost;
-    //std::pair<bool, Interval> exchange_for_interval; /* if first bool true, this offer's cost includes trading for the following interval */
+    std::vector<std::pair<Opportunity, double>> opportunities_in_exchange; /* TODO comment */
 
     bool operator==( const Offer& other ) const {
         return seller_uid == other.seller_uid and opportunity == other.opportunity and cost == other.cost;// and exchange_for_interval == other.exchange_for_interval;

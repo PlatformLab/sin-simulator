@@ -25,7 +25,7 @@ class OwnerUser : public AbstractUser
     {
         if ( not done_ ) {
             for ( const Opportunity &o : opportunities_to_add_ ) {
-                Offer toAdd = { uid_, o, 1.0 };
+                Offer toAdd = { uid_, o, 1.0, {} };
                 bool result = mkt.add_offer( toAdd );
                 assert( result );
             }

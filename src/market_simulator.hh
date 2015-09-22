@@ -66,11 +66,6 @@ const std::unordered_map<Flow, std::vector<Opportunity>> simulate_market( const 
         time++;
     } while ( not all_flows_started ); // TODO could infa loop
 
-    if ( verbose ) {
-        std::cout << "market transactions:" << std::endl;
-        print_transactions( mkt.transactions() );
-    }
-
     std::unordered_map<Flow, std::vector<Opportunity>> allocation {};
     for ( auto &u : users ) {
         auto search = uid_to_flow.find( u->uid_ );

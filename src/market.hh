@@ -16,7 +16,6 @@
 
 #include "interval.hh"
 #include "offer.hh"
-#include "transaction.hh"
 #include "pending_message.hh"
 
 class Market {
@@ -24,7 +23,6 @@ class Market {
         size_t version_ = 0;
         bool verbose_ = false;
         std::unordered_set<Offer> offers_ { };
-        std::vector<Transaction> transactions_ { };
         std::unordered_map<size_t, std::vector<PendingMessage>> user_messages_ { }; // maps from user id to list of messages to deliver to that user
 
     public:
@@ -33,9 +31,7 @@ class Market {
 
         bool add_offer( const Offer &offer ); /* returns true if successful */
         const std::vector<Offer> offers_in_interval( const size_t start, const size_t end ) const;
-        bool buy_offer( size_t uid, const Offer &o ); /* returns true if successful */
-
-        const std::vector<Transaction> transactions() const { return transactions_; }
+        bool buy_offer( size_t uid, const Offer &o, const Opportunity * exchange_opportunity ); /* returns true if successful */
 
         const std::vector<PendingMessage> get_messages( const size_t & uid )
         { auto search = user_messages_.find( uid );

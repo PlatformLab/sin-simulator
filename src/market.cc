@@ -23,13 +23,13 @@ const std::vector<Offer> Market::offers_in_interval( const size_t start, const s
     return toRet;
 }
 
-bool Market::buy_offer( size_t uid, const Offer &o )
+bool Market::buy_offer( size_t uid, const Offer &o, const Opportunity * exchange_opportunity )
 {
     auto market_offer = offers_.find( o );
     if ( market_offer != offers_.end() ) {
-        transactions_.push_back( { o.seller_uid, uid, o.cost } );  // to, from, amount
+        //Credit to_owner = { };
+        //Debit from_buyer = { }; TODO messages
 
-        //taken_offers_.push_back( move( *market_offer ) ); TODO messages
         offers_.erase( market_offer );
         increment_version();
 

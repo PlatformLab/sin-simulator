@@ -11,14 +11,14 @@ struct Credit
 {
     Offer offer_that_got_taken; /* references ONE opportunity (the one on offer) */
     double money_recieved;
-    std::vector<Opportunity> opportinuties_recieved; /* could be zero */
+    Opportunity opportinuty_recieved; /* could be zero */
 };
 
 struct Debit
 {
     //Bid bid_that_got_taken; /* indicates what we owe: might be all cash OR cash + opportunity */
     double money_owed;
-    std::vector<Opportunity> opportinuties_recieved;
+    Opportunity opportinuty_recieved;
 };
 
 struct PendingMessage {

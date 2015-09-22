@@ -11,8 +11,6 @@
 #include <cassert>
 #include "flow.hh"
 #include "opportunity.hh"
-#include "transaction.hh"
-
 
 static std::string uid_to_string( const size_t uid )
 {
@@ -26,13 +24,6 @@ static std::string uid_to_string( const size_t uid )
 static std::string opportunity_to_string( const Opportunity &o )
 {
     return std::string( "[" ) + std::to_string( o.interval.start ) + "," + std::to_string( o.interval.end ) + "] " + std::to_string( o.num_packets ) + " packets sent by " + uid_to_string( o.provider_uid );
-}
-
-__attribute__ ((unused)) static void print_transactions( const std::vector<Transaction> &transactions )
-{
-    for ( auto &t : transactions ) {
-        std::cout << t.amount << " from " << uid_to_string( t.from ) << " to " << uid_to_string( t.to ) << std::endl;
-    }
 }
 
 __attribute__ ((unused)) static void print_flows( const std::vector<Flow> &flows )

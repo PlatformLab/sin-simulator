@@ -67,54 +67,61 @@ class FlowCompletionTimeUser : public AbstractUser
 
         return toRet;
     }
-    const std::vector<std::pair<Offer, Opportunity *>> best_offers( const size_t start_time, const size_t num_packets_to_buy )
+
+    const std::vector<std::pair<Offer, std::pair<Opportunity, double> *>> cheapest_offers_in_interval( const Market & mkt, const size_t start_time, const size_t end_time, const size_t num_packets_to_buy )
     {
-        std::vector<Offer> best_offers;
+        return {};
+    }
+
+    const std::vector<std::pair<Offer, std::pair<Opportunity, double> *>> best_offers( const Market & mkt, const size_t start_time, const size_t num_packets_to_buy )
+    {
+        std::vector<std::pair<Offer, std::pair<Opportunity, double> *>> best_offers;
         double best_offers_utility = std::numeric_limits<double>::lowest();
 
 
         for ( size_t interval_length = 1; interval_length <= 64; interval_length++ ) {
             std::cout << "exploring offers on between " << start_time << " and " << start_time+interval_length << std::endl;
 
-//            const std::vector<Offer> cheapest_offers = cheapest_offers_in_interval( mkt, start_time, start_time + interval_length, num_packets_to_buy, true );
-//
-//            if ( cheapest_offers.size() == num_packets_ ) { // TODO change
-//                //std::cout << "start_time " << start_time << " interval_length " << interval_length << " start_ " << start_<< std::endl;
-//                assert( start_time + interval_length >= start_ ); // no underflow
-//                const double benefit = -(double) ( start_time + interval_length - start_ ); // TODO change if offers taken fit in shorter interval, previous taken offer had later end time
-//                double cost = 0; 
-//                for ( const Offer &o : cheapest_offers ) {
-//                    cost += o.cost;
-//                }
-//                const double utility = benefit - cost;
-//                if ( utility > best_offers_utility ) {
-//                    //    std::cout << "best seen so far " << utility << ", previous was "<< best_offers_utility<< std::endl;
-//                    best_offers = std::move( cheapest_offers );
-//                    best_offers_utility = utility;
-//                }
-//            } else {
-//                //std::cout << "can't buy enough packets on this interval " << std::endl;
-//            }
-//
-//            /*
-//               if ( -(double) best_interval_length-best_interval_cost > -(double) interval_length ) {
-//            // utility can't improve unless slots were negative cost
-//            break;
-//            }
-//             */
+            const std::vector<std::pair<Offer, std::pair<Opportunity, double> *>> cheapest_offers = cheapest_offers_in_interval( mkt, start_time, start_time + interval_length, num_packets_to_buy );
+
+            if ( not cheapest_offers.empty() ) {
+                assert( start_time + interval_length >= start_ ); // no underflow
+                const double benefit = -(double) ( start_time + interval_length - start_ ); // TODO change if offers taken fit in shorter interval, previous taken offer had later end time
+                double cost = 0; 
+
+                for ( const std::pair<Offer, std::pair<Opportunity, double> *> &o : cheapest_offers ) {
+                    cost += o.first.cost;
+                    cost += o.second ? o.second->second : 0;
+                }
+                const double utility = benefit - cost;
+                if ( utility > best_offers_utility ) {
+                    //    std::cout << "best seen so far " << utility << ", previous was "<< best_offers_utility<< std::endl;
+                    best_offers = std::move( cheapest_offers );
+                    best_offers_utility = utility;
+                }
+            } else {
+                //std::cout << "can't buy enough packets on this interval " << std::endl;
+            }
+
+            /*
+               if ( -(double) best_interval_length-best_interval_cost > -(double) interval_length ) {
+            // utility can't improve unless slots were negative cost
+            break;
+            }
+             */
         }
         return { };
     }
 
-    void take_actions( Market& mkt, const size_t time ) override
+    void take_actions( Market & mkt, const size_t time ) override
     {
         size_t num_packets_to_buy = num_packets_;
         std::cout << uid_to_string( uid_ ) << " trying to buy " << num_packets_to_buy << " packet deliveries" << std::endl;
 
         size_t start_time = std::max( time, start_ );
-        const std::vector<std::pair<Offer, Opportunity *>> offers_to_take = best_offers( start_time, num_packets_ );
+        const std::vector<std::pair<Offer, std::pair<Opportunity, double> *>> offers_to_take = best_offers( mkt, start_time, num_packets_ );
 
-        for ( const std::pair<Offer, Opportunity *> &o : offers_to_take ) {
+        for ( const std::pair<Offer, std::pair<Opportunity, double> *> &o : offers_to_take ) {
             std::cout << "User " << uid_to_string( uid_ ) << " buying offer on interval " << opportunity_to_string( o.first.opportunity ) << " for $" << o.first.cost << std::endl;
             bool success = mkt.buy_offer( uid_, o.first, o.second );
             if ( success ) {

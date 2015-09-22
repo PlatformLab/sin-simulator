@@ -31,7 +31,7 @@ class Market {
 
         bool add_offer( const Offer &offer ); /* returns true if successful */
         const std::vector<Offer> offers_in_interval( const size_t start, const size_t end ) const;
-        bool buy_offer( size_t uid, const Offer &o, const Opportunity * exchange_opportunity ); /* returns true if successful */
+        bool buy_offer( size_t uid, const Offer &o, const std::pair<Opportunity, double> * exchange_opportunity ); /* returns true if successful */
 
         const std::vector<PendingMessage> get_messages( const size_t & uid )
         { auto search = user_messages_.find( uid );

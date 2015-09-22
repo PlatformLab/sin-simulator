@@ -23,7 +23,7 @@ const std::vector<Offer> Market::offers_in_interval( const size_t start, const s
     return toRet;
 }
 
-bool Market::buy_offer( size_t uid, const Offer &o, const Opportunity * exchange_opportunity )
+bool Market::buy_offer( size_t uid, const Offer &o, const std::pair<Opportunity, double> * exchange_opportunity )
 {
     auto market_offer = offers_.find( o );
     if ( market_offer != offers_.end() ) {
